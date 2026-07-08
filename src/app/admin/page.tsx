@@ -64,8 +64,10 @@ async function getDashboardData() {
       },
     });
 
-    // 4. Fetch loyalty members count
-    const totalLoyaltyMembers = await db.loyaltyMember.count();
+    // 4. Users count
+    const totalCustomers = await db.user.count({
+      where: { role: "CUSTOMER" },
+    });
 
     // 5. Fetch 5 recent orders
     const recentOrders = await db.order.findMany({
@@ -113,7 +115,7 @@ async function getDashboardData() {
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
-      
+
       const startOfDay = new Date(d);
       startOfDay.setHours(0, 0, 0, 0);
 
@@ -345,11 +347,10 @@ export default async function AdminDashboardPage() {
                     <td className="py-3.5 font-mono text-[10px] text-[#2d1e18] font-bold">{order.id.slice(0, 8)}...</td>
                     <td className="py-3.5">
                       <span
-                        className={`inline-flex items-center space-x-1 rounded-lg px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
-                          order.source === "WEBSITE"
+                        className={`inline-flex items-center space-x-1 rounded-lg px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${order.source === "WEBSITE"
                             ? "bg-blue-50 text-blue-700 border border-blue-100"
                             : "bg-amber-50 text-amber-700 border border-amber-100"
-                        }`}
+                          }`}
                       >
                         {order.source === "WEBSITE" ? (
                           <>
@@ -367,26 +368,24 @@ export default async function AdminDashboardPage() {
                     <td className="py-3.5 text-[#2d1e18] font-bold font-sans">{formatCurrency(order.total)}</td>
                     <td className="py-3.5">
                       <span
-                        className={`rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
-                          order.status === "DELIVERED"
+                        className={`rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${order.status === "DELIVERED"
                             ? "bg-green-100 text-green-700"
                             : order.status === "CANCELLED"
-                            ? "bg-red-100 text-red-700"
-                            : "bg-amber-100 text-amber-700"
-                        }`}
+                              ? "bg-red-100 text-red-700"
+                              : "bg-amber-100 text-amber-700"
+                          }`}
                       >
                         {order.status}
                       </span>
                     </td>
                     <td className="py-3.5">
                       <span
-                        className={`font-bold text-[10px] uppercase tracking-wider ${
-                          order.paymentStatus === "PAID"
+                        className={`font-bold text-[10px] uppercase tracking-wider ${order.paymentStatus === "PAID"
                             ? "text-emerald-600"
                             : order.paymentStatus === "FAILED"
-                            ? "text-red-500"
-                            : "text-amber-500"
-                        }`}
+                              ? "text-red-500"
+                              : "text-amber-500"
+                          }`}
                       >
                         {order.paymentStatus}
                       </span>

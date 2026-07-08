@@ -23,7 +23,9 @@ export async function GET() {
         id: true,
         name: true,
         email: true,
-        role: true,
+        role: {
+          select: { name: true },
+        },
         loyaltyPoints: true,
         createdAt: true,
       },
@@ -33,7 +35,16 @@ export async function GET() {
       return NextResponse.json({ user: null }, { status: 404 });
     }
 
-    return NextResponse.json({ user });
+    return NextResponse.json({
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role.name,
+        loyaltyPoints: user.loyaltyPoints,
+        createdAt: user.createdAt,
+      },
+    });
   } catch (error) {
     console.error("Error in auth/me route:", error);
     return NextResponse.json({ user: null }, { status: 500 });

@@ -1,66 +1,154 @@
-datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
-}
-
 generator client {
   provider = "prisma-client-js"
 }
 
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  users     User[]
+}
+
 model User {
-  id            String        @id @default(uuid())
-  name          String
-  email         String        @unique
-  password      String
-  role          String        @default("CUSTOMER") // CUSTOMER, STAFF, ADMIN
-  loyaltyPoints Int           @default(0)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  reservations  Reservation[]
-  orders        Order[]
-  reviews       Review[]
+  id                    String                 @id @default(uuid())
+  name                  String
+  email                 String                 @unique
+  password              String
+  roleId                String
+  loyaltyPoints         Int                    @default(0)
+  deletedAt             DateTime?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  employee              Employee?
+  inventoryTransactions InventoryTransaction[]
+  loyaltyTransactions   LoyaltyPoint[]
+  notifications         Notification[]
+  orders                Order[]
+  reservations          Reservation[]
+  reviews               Review[]
+  role                  Role                   @relation(fields: [roleId], references: [id])
+
+  @@index([email])
 }
 
-model Category {
-  id       String    @id @default(uuid())
-  name     String    @unique
-  slug     String    @unique
-  products Product[]
+model MenuCategory {
+  id        String     @id @default(uuid())
+  name      String     @unique
+  slug      String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  menuItems MenuItem[]
 }
 
-model Product {
-  id           String   @id @default(uuid())
+model MenuItem {
+  id           String       @id @default(uuid())
   name         String
   description  String
   price        Float
   image        String
-  rating       Float    @default(5.0)
-  availability Boolean  @default(true)
-  isVeg        Boolean  @default(true)
+  rating       Float        @default(5.0)
+  availability Boolean      @default(true)
+  isVeg        Boolean      @default(true)
   categoryId   String
-  category     Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  deletedAt    DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  category     MenuCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  orderItems   OrderItem[]
+
+  @@index([categoryId])
+}
+
+model Order {
+  id            String         @id @default(uuid())
+  userId        String?
+  items         String
+  total         Float
+  discount      Float          @default(0)
+  paymentStatus String         @default("PENDING")
+  status        String         @default("PENDING")
+  address       String
+  phone         String
+  deletedAt     DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  kitchenOrders KitchenOrder[]
+  user          User?          @relation(fields: [userId], references: [id])
+  orderItems    OrderItem[]
+  payments      Payment[]
+
+  @@index([userId])
+}
+
+model OrderItem {
+  id         String    @id @default(uuid())
+  orderId    String
+  menuItemId String?
+  name       String
+  price      Float
+  quantity   Int
+  image      String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  menuItem   MenuItem? @relation(fields: [menuItemId], references: [id])
+  order      Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([menuItemId])
 }
 
 model Reservation {
   id        String   @id @default(uuid())
   userId    String?
-  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   name      String
   email     String
   phone     String
-  date      String   // Format: YYYY-MM-DD
-  time      String   // Format: HH:MM
+  date      String
+  time      String
   guests    Int
   status    String   @default("PENDING") // PENDING, APPROVED, REJECTED, CANCELLED
-  type      String   @default("TABLE") // TABLE, EVENT
   note      String?
+  tableId   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  table     Table?   @relation(fields: [tableId], references: [id])
+  user      User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([tableId])
 }
 
-model Order {
+model Table {
+  id           String        @id @default(uuid())
+  number       String        @unique
+  capacity     Int
+  status       String        @default("AVAILABLE")
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  reservations Reservation[]
+}
+
+model Payment {
+  id            String   @id @default(uuid())
+  orderId       String
+  amount        Float
+  method        String
+  status        String
+  transactionId String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+}
+
+model Coupon {
   id            String   @id @default(uuid())
   userId        String?
   user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
@@ -69,31 +157,151 @@ model Order {
   discount      Float    @default(0)
   paymentStatus String   @default("PENDING") // PENDING, PAID, FAILED
   status        String   @default("PENDING") // PENDING, PREPARING, READY, DELIVERED, CANCELLED
-  source        String   @default("WEBSITE") // WEBSITE, WALK_IN
   address       String
   phone         String
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  @@index([code])
 }
 
 model Review {
   id        String   @id @default(uuid())
   userId    String?
-  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   name      String
   rating    Int
   comment   String
-  status    String   @default("PENDING") // PENDING, APPROVED, HIDDEN
+  status    String   @default("PENDING")
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
 
-model Coupon {
+model Inventory {
+  id           String                 @id @default(uuid())
+  itemName     String                 @unique
+  quantity     Float
+  unit         String
+  reorderLevel Float
+  supplierId   String?
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+  supplier     Supplier?              @relation(fields: [supplierId], references: [id])
+  transactions InventoryTransaction[]
+
+  @@index([supplierId])
+}
+
+model InventoryTransaction {
+  id          String    @id @default(uuid())
+  inventoryId String
+  type        String
+  quantity    Float
+  reason      String
+  userId      String?
+  createdAt   DateTime  @default(now())
+  inventory   Inventory @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
+  user        User?     @relation(fields: [userId], references: [id])
+
+  @@index([inventoryId])
+  @@index([userId])
+}
+
+model Supplier {
+  id             String      @id @default(uuid())
+  name           String
+  contactName    String?
+  email          String?
+  phone          String?
+  address        String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  inventoryItems Inventory[]
+}
+
+model Employee {
+  id         String       @id @default(uuid())
+  userId     String       @unique
+  position   String
+  salary     Float
+  hireDate   DateTime     @default(now())
+  deletedAt  DateTime?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  attendance Attendance[]
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Attendance {
+  id         String    @id @default(uuid())
+  employeeId String
+  date       String
+  checkIn    DateTime
+  checkOut   DateTime?
+  status     String    @default("PRESENT")
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  employee   Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([employeeId])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String?
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model LoyaltyPoint {
+  id        String   @id @default(uuid())
+  userId    String
+  points    Int
+  type      String
+  reason    String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Offer {
   id            String   @id @default(uuid())
-  code          String   @unique
-  discountType  String   // PERCENTAGE or FIXED
+  title         String
+  description   String
   discountValue Float
+  startDate     DateTime
+  endDate       DateTime
   isActive      Boolean  @default(true)
   createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Branch {
+  id        String   @id @default(uuid())
+  name      String
+  address   String
+  phone     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model KitchenOrder {
+  id        String   @id @default(uuid())
+  orderId   String
+  status    String   @default("PENDING")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
 }
 
 model Setting {

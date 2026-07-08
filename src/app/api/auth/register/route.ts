@@ -26,13 +26,24 @@ export async function POST(request: Request) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Get role ID for CUSTOMER
+    let customerRole = await db.role.findUnique({
+      where: { name: "CUSTOMER" },
+    });
+    
+    if (!customerRole) {
+      customerRole = await db.role.create({
+        data: { name: "CUSTOMER" },
+      });
+    }
+
     // Create user
     await db.user.create({
       data: {
         name,
         email: email.toLowerCase(),
         password: hashedPassword,
-        role: "CUSTOMER", // default role
+        roleId: customerRole.id,
         loyaltyPoints: 0,
       },
     });
