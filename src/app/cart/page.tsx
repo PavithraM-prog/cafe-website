@@ -6,7 +6,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
-import { Trash2, ShoppingBag, Plus, Minus, CreditCard, Tag, ArrowRight, MapPin, Phone } from "lucide-react";
+import { Trash2, ShoppingBag, Plus, Minus, CreditCard, Tag, ArrowRight, MapPin, Phone, Lock, Sparkles, AlertCircle, X, Check } from "lucide-react";
 import Link from "next/link";
 
 export default function CartPage() {
@@ -33,14 +33,24 @@ export default function CartPage() {
   // Address and Phone details
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
-  // Prefill phone and address if user is logged in (mock)
+  // Payment Modal States
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [cardName, setCardName] = useState("");
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardExpiry, setCardExpiry] = useState("");
+  const [cardCvc, setCardCvc] = useState("");
+  
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+
+  // Prefill phone, address, and card name if user is logged in
   useEffect(() => {
     if (user) {
       setPhone("+1 (555) 123-4567");
       setAddress("123 Main Street, Apt 4B, New York, NY 10001");
+      setCardName(user.name);
     }
   }, [user]);
 
@@ -56,12 +66,12 @@ export default function CartPage() {
     }
   };
 
-  const handleCheckout = async (e: React.FormEvent) => {
+  // Triggers the payment modal instead of directly placing the order
+  const handleOpenPayment = (e: React.FormEvent) => {
     e.preventDefault();
     if (cart.length === 0) return;
 
     if (!user) {
-      // Redirect to login first
       router.push("/login?redirect=/cart");
       return;
     }
@@ -71,9 +81,30 @@ export default function CartPage() {
       return;
     }
 
+    setCheckoutError(null);
+    setPaymentError(null);
+    setShowPaymentModal(true);
+  };
+
+  const handleProcessPayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!cardNumber || !cardExpiry || !cardCvc || !cardName) {
+      setPaymentError("Please fill out all payment fields.");
+      return;
+    }
+
     try {
-      setCheckoutLoading(true);
-      setCheckoutError(null);
+      setPaymentProcessing(true);
+      setPaymentError(null);
+
+      // Simulate payment gateway response delay
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      // Test payment logic:
+      // If card number contains "4000", simulate card decline
+      if (cardNumber.replace(/\s/g, "").includes("4000000000000002")) {
+        throw new Error("Your card was declined. Please use the valid test card provided.");
+      }
 
       // Create Order
       const res = await fetch("/api/orders", {
@@ -91,17 +122,46 @@ export default function CartPage() {
 
       const data = await res.json();
       if (res.ok) {
-        alert(`Order placed successfully! You earned ${data.pointsEarned} loyalty points!`);
         clearCart();
-        router.push("/profile");
+        setShowPaymentModal(false);
+        // Redirect directly to the live Order Tracking page
+        router.push(`/orders/${data.order.id}`);
       } else {
-        setCheckoutError(data.error || "Failed to place order");
+        setPaymentError(data.error || "Failed to place order database record.");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setCheckoutError("An error occurred during checkout. Please try again.");
+      setPaymentError(err.message || "Simulated authorization failed. Please try again.");
     } finally {
-      setCheckoutLoading(false);
+      setPaymentProcessing(false);
+    }
+  };
+
+  // Helper to format Card Number
+  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/\D/g, "").substring(0, 16);
+    const matches = val.match(/\d{4,16}/g);
+    const match = (matches && matches[0]) || "";
+    const parts = [];
+
+    for (let i = 0, len = match.length; i < len; i += 4) {
+      parts.push(match.substring(i, i + 4));
+    }
+
+    if (parts.length > 0) {
+      setCardNumber(parts.join(" "));
+    } else {
+      setCardNumber(val);
+    }
+  };
+
+  // Helper to format Expiry
+  const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/\D/g, "").substring(0, 4);
+    if (val.length >= 2) {
+      setCardExpiry(`${val.substring(0, 2)}/${val.substring(2, 4)}`);
+    } else {
+      setCardExpiry(val);
     }
   };
 
@@ -110,7 +170,10 @@ export default function CartPage() {
       <Navbar />
 
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
-        <h1 className="font-serif text-3xl font-bold text-foreground mb-8">Your Cart</h1>
+        <div className="flex items-center space-x-2.5 mb-8">
+          <ShoppingBag className="h-6 w-6 text-primary" />
+          <h1 className="font-serif text-3xl font-bold text-foreground leading-none">Your Cart</h1>
+        </div>
 
         {cart.length === 0 ? (
           <div className="text-center py-20 border border-dashed border-borderColor rounded-2xl bg-secondary/10 space-y-4">
@@ -121,7 +184,7 @@ export default function CartPage() {
             </p>
             <Link
               href="/menu"
-              className="inline-block rounded-full bg-primary hover:bg-primary-hover text-white text-xs font-semibold px-6 py-3 transition-colors"
+              className="inline-block rounded-full bg-primary hover:bg-primary-hover text-white text-xs font-semibold px-6 py-3 transition-colors shadow-sm"
             >
               Browse Menu
             </Link>
@@ -133,7 +196,7 @@ export default function CartPage() {
               {cart.map((item) => (
                 <div
                   key={item.productId}
-                  className="flex items-center space-x-4 border border-borderColor bg-cardBg p-4 rounded-xl shadow-sm"
+                  className="flex items-center space-x-4 border border-borderColor bg-cardBg p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -156,7 +219,7 @@ export default function CartPage() {
                     >
                       <Minus className="h-3 w-3" />
                     </button>
-                    <span className="text-xs font-bold font-sans w-5 text-center">{item.quantity}</span>
+                    <span className="text-xs font-bold font-sans w-5 text-center select-none">{item.quantity}</span>
                     <button
                       onClick={() => updateQuantity(item.productId, item.quantity + 1)}
                       className="text-textMuted hover:text-primary transition-colors focus:outline-none"
@@ -176,35 +239,40 @@ export default function CartPage() {
                 </div>
               ))}
 
-              {/* Delivery Address Forms (Shows only when logged in, or displays Login Warning) */}
+              {/* Delivery Address Forms */}
               <div className="border border-borderColor bg-cardBg p-6 rounded-xl shadow-sm space-y-4">
-                <h3 className="font-serif text-base font-bold text-foreground">Delivery & Checkout details</h3>
+                <div className="flex items-center space-x-2 pb-2 border-b border-borderColor/60">
+                  <MapPin className="h-5 w-5 text-primary" />
+                  <h3 className="font-serif text-base font-bold text-foreground">Delivery Information</h3>
+                </div>
 
                 {user ? (
                   <div className="space-y-4">
                     <div className="space-y-1.5">
                       <label className="flex items-center text-xs font-bold text-textMuted uppercase tracking-wider">
-                        <Phone className="h-3.5 w-3.5 mr-1 text-accent" />
-                        <span>Phone Number</span>
+                        <Phone className="h-3.5 w-3.5 mr-1.5 text-accent" />
+                        <span>Phone Number *</span>
                       </label>
                       <input
                         type="text"
+                        required
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        placeholder="+1 (555) 000-0000"
+                        placeholder="e.g. +1 (555) 123-4567"
                         className="w-full rounded-lg border border-borderColor bg-background px-4 py-2.5 text-sm text-foreground focus:border-primary transition-all"
                       />
                     </div>
 
                     <div className="space-y-1.5">
                       <label className="flex items-center text-xs font-bold text-textMuted uppercase tracking-wider">
-                        <MapPin className="h-3.5 w-3.5 mr-1 text-accent" />
-                        <span>Delivery Address</span>
+                        <MapPin className="h-3.5 w-3.5 mr-1.5 text-accent" />
+                        <span>Delivery Address *</span>
                       </label>
                       <textarea
+                        required
                         value={address}
                         onChange={(e) => setAddress(e.target.value)}
-                        placeholder="Street, City, Zipcode, State"
+                        placeholder="Enter your street address, apartment/suite number, city, state, and zip code"
                         rows={3}
                         className="w-full rounded-lg border border-borderColor bg-background px-4 py-2.5 text-sm text-foreground focus:border-primary transition-all resize-none"
                       />
@@ -213,11 +281,11 @@ export default function CartPage() {
                 ) : (
                   <div className="rounded-lg bg-amber-50 border border-amber-100 p-4 text-center">
                     <p className="text-xs font-medium text-amber-800 mb-3 leading-relaxed">
-                      You need to be logged in to complete your checkout and claim loyalty points.
+                      You need to be logged in to complete your checkout and earn loyalty rewards.
                     </p>
                     <Link
                       href="/login?redirect=/cart"
-                      className="inline-flex items-center space-x-1.5 rounded-full bg-primary hover:bg-primary-hover text-white text-xs font-semibold px-5 py-2 shadow-sm transition-colors"
+                      className="inline-flex items-center space-x-1.5 rounded-full bg-primary hover:bg-primary-hover text-white text-xs font-semibold px-5 py-2.5 shadow-sm transition-colors"
                     >
                       <span>Sign In to Checkout</span>
                       <ArrowRight className="h-3.5 w-3.5" />
@@ -261,11 +329,10 @@ export default function CartPage() {
                   </div>
                 </div>
 
-                {/* Simulated Payment details */}
-                <div className="rounded-lg bg-secondary/50 p-3 flex items-start space-x-2 text-[10px] text-textMuted">
+                <div className="rounded-lg bg-secondary/50 p-3 flex items-start space-x-2 text-[10px] text-textMuted border border-borderColor/40">
                   <CreditCard className="h-4.5 w-4.5 text-primary shrink-0 mt-0.5" />
                   <p className="leading-relaxed">
-                    <strong>Instant Stripe Simulation:</strong> Clicking place order will simulate an immediate secure card validation and mock payment success.
+                    <strong>Test Payment System:</strong> Clicking "Proceed to Payment" will prompt you to enter dummy card details for a live-simulated authorization.
                   </p>
                 </div>
 
@@ -278,18 +345,12 @@ export default function CartPage() {
 
                 {/* Checkout CTA */}
                 <button
-                  onClick={handleCheckout}
-                  disabled={checkoutLoading || cart.length === 0}
+                  onClick={handleOpenPayment}
+                  disabled={cart.length === 0}
                   className="w-full flex items-center justify-center space-x-2 rounded-full bg-primary hover:bg-primary-hover disabled:bg-neutral-200 disabled:text-neutral-400 text-white text-sm font-semibold py-3 shadow-md transition-colors"
                 >
-                  {checkoutLoading ? (
-                    <span>Placing Order...</span>
-                  ) : (
-                    <>
-                      <span>Place Order</span>
-                      <ArrowRight className="h-4 w-4" />
-                    </>
-                  )}
+                  <span>Proceed to Payment</span>
+                  <ArrowRight className="h-4 w-4" />
                 </button>
               </div>
 
@@ -304,7 +365,7 @@ export default function CartPage() {
                     </span>
                     <button
                       onClick={removeCoupon}
-                      className="font-bold underline text-green-800 hover:text-green-950 ml-2"
+                      className="font-bold underline text-green-800 hover:text-green-950 ml-2 focus:outline-none"
                     >
                       Remove
                     </button>
@@ -316,11 +377,11 @@ export default function CartPage() {
                       value={couponCodeInput}
                       onChange={(e) => setCouponCodeInput(e.target.value)}
                       placeholder="e.g. WELCOME20"
-                      className="flex-1 rounded-full border border-borderColor bg-background px-4 py-2 text-xs text-foreground focus:border-primary transition-all uppercase"
+                      className="flex-1 rounded-full border border-borderColor bg-background px-4 py-2 text-xs text-foreground focus:border-primary transition-all uppercase shadow-sm"
                     />
                     <button
                       type="submit"
-                      className="rounded-full bg-secondary hover:bg-borderColor/50 text-foreground text-xs font-semibold px-4 py-2 transition-colors border border-borderColor"
+                      className="rounded-full bg-secondary hover:bg-borderColor/50 text-foreground text-xs font-semibold px-4 py-2 transition-colors border border-borderColor shadow-sm"
                     >
                       Apply
                     </button>
@@ -334,6 +395,152 @@ export default function CartPage() {
           </div>
         )}
       </section>
+
+      {/* Payment Processing Modal Overlay */}
+      {showPaymentModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-[4px] animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md bg-cardBg border border-borderColor p-6 rounded-2xl shadow-2xl space-y-6 animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-borderColor/60">
+              <div className="flex items-center space-x-2 text-primary font-bold">
+                <Lock className="h-4.5 w-4.5 text-accent" />
+                <span className="font-serif">Secure Gateway Payment</span>
+              </div>
+              <button
+                onClick={() => !paymentProcessing && setShowPaymentModal(false)}
+                disabled={paymentProcessing}
+                className="text-textMuted hover:text-foreground hover:bg-secondary p-1 rounded-full transition-colors disabled:opacity-40"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {paymentProcessing ? (
+              /* Simulated processing animation */
+              <div className="flex flex-col items-center justify-center py-10 space-y-4 text-center">
+                <div className="relative flex items-center justify-center">
+                  <div className="h-14 w-14 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+                  <Lock className="absolute h-5 w-5 text-primary animate-pulse" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="font-serif text-lg font-bold text-foreground">Processing Payment</h3>
+                  <p className="text-xs text-textMuted max-w-xs leading-normal">
+                    Authorizing card credentials and securing transaction with Cozy Beans mock processor...
+                  </p>
+                </div>
+              </div>
+            ) : (
+              /* Credit Card Input Form */
+              <form onSubmit={handleProcessPayment} className="space-y-4">
+                {paymentError && (
+                  <div className="p-3 text-xs bg-red-50 border border-red-200 text-red-600 rounded-lg flex items-start space-x-1.5">
+                    <AlertCircle className="h-4 w-4 shrink-0" />
+                    <span>{paymentError}</span>
+                  </div>
+                )}
+
+                {/* Dummy Card Info Helper */}
+                <div className="rounded-xl bg-secondary/60 p-3 border border-borderColor/40 space-y-2">
+                  <span className="text-[10px] font-bold text-primary uppercase tracking-widest block">Available Test Cards</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[10px] text-textMuted">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCardNumber("4242 4242 4242 4242");
+                        setCardExpiry("12/28");
+                        setCardCvc("123");
+                      }}
+                      className="text-left bg-cardBg border border-borderColor p-1.5 rounded hover:border-primary hover:text-foreground transition-all flex items-center justify-between"
+                    >
+                      <span>💳 Success Test</span>
+                      <span className="font-bold text-green-700">4242</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCardNumber("4000 0000 0000 0002");
+                        setCardExpiry("05/29");
+                        setCardCvc("666");
+                      }}
+                      className="text-left bg-cardBg border border-borderColor p-1.5 rounded hover:border-red-400 hover:text-foreground transition-all flex items-center justify-between"
+                    >
+                      <span>💳 Decline Test</span>
+                      <span className="font-bold text-red-700">0002</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-textMuted">Cardholder Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={cardName}
+                    onChange={(e) => setCardName(e.target.value)}
+                    placeholder="e.g. John Doe"
+                    className="w-full rounded-lg border border-borderColor bg-background px-3 py-2 text-sm text-foreground focus:border-primary transition-all"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-textMuted">Card Number</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      required
+                      value={cardNumber}
+                      onChange={handleCardNumberChange}
+                      placeholder="4242 4242 4242 4242"
+                      className="w-full rounded-lg border border-borderColor bg-background pl-10 pr-3 py-2 text-sm text-foreground focus:border-primary transition-all font-mono"
+                    />
+                    <CreditCard className="absolute left-3 top-3 h-4.5 w-4.5 text-textMuted" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-textMuted">Expiration Date</label>
+                    <input
+                      type="text"
+                      required
+                      value={cardExpiry}
+                      onChange={handleExpiryChange}
+                      placeholder="MM/YY"
+                      className="w-full rounded-lg border border-borderColor bg-background px-3 py-2 text-sm text-foreground focus:border-primary transition-all font-mono text-center"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-textMuted">CVC</label>
+                    <input
+                      type="password"
+                      required
+                      value={cardCvc}
+                      onChange={(e) => setCardCvc(e.target.value.replace(/\D/g, "").substring(0, 3))}
+                      placeholder="•••"
+                      className="w-full rounded-lg border border-borderColor bg-background px-3 py-2 text-sm text-foreground focus:border-primary transition-all font-mono text-center"
+                    />
+                  </div>
+                </div>
+
+                {/* Secure info tag */}
+                <div className="flex items-center space-x-1.5 text-[10px] text-textMuted justify-center pt-2">
+                  <Lock className="h-3 w-3 text-green-600" />
+                  <span>Payments are processed locally using secure HTTPS mockup data</span>
+                </div>
+
+                {/* Process Payment CTA */}
+                <button
+                  type="submit"
+                  className="w-full flex items-center justify-center space-x-2 rounded-full bg-primary hover:bg-primary-hover text-white text-sm font-semibold py-3 shadow-md transition-colors pt-4"
+                >
+                  <span>Pay ${total.toFixed(2)}</span>
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

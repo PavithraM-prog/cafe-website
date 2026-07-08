@@ -5,7 +5,9 @@ import { db } from "@/lib/db";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
-import { Coffee, Calendar, MapPin, Phone, Star, ShieldCheck, Gift, Clock, Sparkles } from "lucide-react";
+import { ContactForm } from "@/components/ContactForm";
+import { NewsletterForm } from "@/components/NewsletterForm";
+import { Coffee, Calendar, MapPin, Phone, Star, ShieldCheck, Gift, Clock, Sparkles, Mail, Heart, Smile } from "lucide-react";
 
 async function getLandingData() {
   try {
@@ -62,35 +64,35 @@ export default async function HomePage() {
           <img
             src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&q=80&w=1920"
             alt="Warm cozy cafe ambience"
-            className="h-full w-full object-cover object-center opacity-40 filter blur-[1px]"
+            className="h-full w-full object-cover object-center opacity-45 filter blur-[0.5px]"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-black/20 to-black/60" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-black/20 to-black/70" />
         </div>
 
         <div className="relative z-10 mx-auto max-w-4xl text-center space-y-6">
-          <div className="inline-flex items-center space-x-2 rounded-full border border-amber-400/40 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-amber-300 backdrop-blur-sm bg-amber-950/20">
+          <div className="inline-flex items-center space-x-2 rounded-full border border-amber-400/40 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-amber-300 backdrop-blur-sm bg-amber-950/20 shadow-sm animate-pulse">
             <Sparkles className="h-3.5 w-3.5" />
             <span>Welcome to Cozy Beans Café</span>
           </div>
 
-          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white leading-tight">
+          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white leading-tight drop-shadow-md">
             {settings.hero_title || "Escape into a Cozy Corner of Coffee & Comfort"}
           </h1>
 
-          <p className="mx-auto max-w-2xl text-base sm:text-lg md:text-xl text-neutral-200 font-light leading-relaxed">
+          <p className="mx-auto max-w-2xl text-base sm:text-lg md:text-xl text-neutral-200 font-light leading-relaxed drop-shadow-sm">
             {settings.hero_tagline || "Where every cup tells a story, and every moment feels like home."}
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6">
             <Link
               href="/menu"
-              className="w-full sm:w-auto rounded-full bg-accent hover:bg-accent-hover text-white text-base font-semibold px-8 py-3.5 shadow-lg transition-all text-center hover:scale-105 active:scale-95"
+              className="w-full sm:w-auto rounded-full bg-accent hover:bg-accent-hover text-white text-base font-semibold px-8 py-3.5 shadow-lg transition-all text-center hover:scale-105 active:scale-95 duration-200"
             >
               Order Online
             </Link>
             <Link
               href="/reservations"
-              className="w-full sm:w-auto rounded-full border border-white/80 hover:border-white text-white hover:bg-white/10 text-base font-semibold px-8 py-3.5 transition-all text-center backdrop-blur-sm hover:scale-105 active:scale-95"
+              className="w-full sm:w-auto rounded-full border border-white/80 hover:border-white text-white hover:bg-white/10 text-base font-semibold px-8 py-3.5 transition-all text-center backdrop-blur-sm hover:scale-105 active:scale-95 duration-200"
             >
               Book a Table
             </Link>
@@ -104,7 +106,7 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
             <div className="flex items-center space-x-4">
               <div className="rounded-full bg-white/10 p-3 shrink-0">
-                <Gift className="h-8 w-8 text-amber-300" />
+                <Gift className="h-8 w-8 text-amber-300 animate-bounce" />
               </div>
               <div>
                 <h3 className="font-serif font-bold text-lg">Special Offers</h3>
@@ -113,11 +115,11 @@ export default async function HomePage() {
             </div>
 
             <div className="grid grid-cols-2 gap-3 text-center">
-              <div className="rounded-xl bg-white/15 p-2.5 border border-white/10">
+              <div className="rounded-xl bg-white/15 p-2.5 border border-white/10 hover:bg-white/20 transition-colors">
                 <span className="block text-[10px] font-bold text-amber-300 uppercase tracking-widest">20% Off</span>
                 <span className="font-mono text-sm font-bold tracking-wider">WELCOME20</span>
               </div>
-              <div className="rounded-xl bg-white/15 p-2.5 border border-white/10">
+              <div className="rounded-xl bg-white/15 p-2.5 border border-white/10 hover:bg-white/20 transition-colors">
                 <span className="block text-[10px] font-bold text-amber-300 uppercase tracking-widest">10% Off</span>
                 <span className="font-mono text-sm font-bold tracking-wider">COZY10</span>
               </div>
@@ -126,10 +128,47 @@ export default async function HomePage() {
             <div className="text-center md:text-right">
               <Link
                 href="/menu"
-                className="inline-block rounded-full bg-white text-primary hover:bg-neutral-100 text-sm font-bold px-6 py-2.5 transition-colors shadow-sm"
+                className="inline-block rounded-full bg-white text-primary hover:bg-neutral-100 text-sm font-bold px-6 py-2.5 transition-all shadow-sm hover:scale-105 active:scale-95"
               >
                 Claim Coupon
               </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Grid */}
+      <section className="py-20 bg-secondary/20 border-b border-borderColor/60">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="flex flex-col items-center text-center p-6 space-y-3 bg-cardBg border border-borderColor rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+              <div className="rounded-full bg-primary/10 p-4 text-primary">
+                <Coffee className="h-6 w-6" />
+              </div>
+              <h3 className="font-serif text-lg font-bold text-foreground">Premium Coffee</h3>
+              <p className="text-xs text-textMuted leading-relaxed max-w-xs">
+                Slow-roasted single-origin arabica beans prepared by passionate certified baristas.
+              </p>
+            </div>
+            
+            <div className="flex flex-col items-center text-center p-6 space-y-3 bg-cardBg border border-borderColor rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+              <div className="rounded-full bg-primary/10 p-4 text-primary">
+                <Heart className="h-6 w-6" />
+              </div>
+              <h3 className="font-serif text-lg font-bold text-foreground">Cozy Atmosphere</h3>
+              <p className="text-xs text-textMuted leading-relaxed max-w-xs">
+                Soft lighting, peaceful acoustic music, fast Wi-Fi, and comfortable workspaces.
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center text-center p-6 space-y-3 bg-cardBg border border-borderColor rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+              <div className="rounded-full bg-primary/10 p-4 text-primary">
+                <Smile className="h-6 w-6" />
+              </div>
+              <h3 className="font-serif text-lg font-bold text-foreground">Loyalty Rewards</h3>
+              <p className="text-xs text-textMuted leading-relaxed max-w-xs">
+                Earn points with every purchase and redeem them for free food, drinks, and coupons.
+              </p>
             </div>
           </div>
         </div>
@@ -206,13 +245,13 @@ export default async function HomePage() {
                 <img
                   src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&q=80&w=400"
                   alt="Coffee shop interior"
-                  className="rounded-2xl object-cover h-48 w-full shadow-sm"
+                  className="rounded-2xl object-cover h-48 w-full shadow-sm hover:scale-105 transition-transform duration-500"
                 />
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&q=80&w=400"
                   alt="Espresso extraction"
-                  className="rounded-2xl object-cover h-64 w-full shadow-sm"
+                  className="rounded-2xl object-cover h-64 w-full shadow-sm hover:scale-105 transition-transform duration-500"
                 />
               </div>
               <div className="space-y-4 pt-8">
@@ -220,13 +259,13 @@ export default async function HomePage() {
                 <img
                   src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=400"
                   alt="Pouring latte art"
-                  className="rounded-2xl object-cover h-64 w-full shadow-sm"
+                  className="rounded-2xl object-cover h-64 w-full shadow-sm hover:scale-105 transition-transform duration-500"
                 />
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&q=80&w=400"
                   alt="Fresh snacks"
-                  className="rounded-2xl object-cover h-48 w-full shadow-sm"
+                  className="rounded-2xl object-cover h-48 w-full shadow-sm hover:scale-105 transition-transform duration-500"
                 />
               </div>
             </div>
@@ -249,7 +288,7 @@ export default async function HomePage() {
             {reviews.map((review: any) => (
               <div
                 key={review.id}
-                className="rounded-2xl border border-borderColor bg-cardBg p-6 shadow-sm flex flex-col justify-between"
+                className="rounded-2xl border border-borderColor bg-cardBg p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow"
               >
                 <div className="space-y-4">
                   <div className="flex space-x-1">
@@ -313,7 +352,53 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Newsletter Section */}
+      {/* Interactive Contact & Location Map Section */}
+      <section className="py-24 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch">
+          {/* Info Details */}
+          <div className="space-y-6 flex flex-col justify-between">
+            <div>
+              <span className="text-xs font-bold text-primary uppercase tracking-widest">Connect</span>
+              <h2 className="font-serif text-3xl sm:text-4xl font-bold text-foreground mt-2 mb-4">
+                We'd Love to Hear From You
+              </h2>
+              <p className="text-sm text-textMuted leading-relaxed max-w-md">
+                Have questions about our events, catering, or just want to tell us about your experience? Reach out to us through the form or stop by our cozy location!
+              </p>
+            </div>
+
+            {/* Simulated Map Visual Card */}
+            <div className="relative rounded-2xl border border-borderColor overflow-hidden h-72 group shadow-sm">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=800"
+                alt="Simulated map background"
+                className="h-full w-full object-cover grayscale opacity-90 group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-primary/20 mix-blend-multiply" />
+              
+              {/* Floating Address Overlay */}
+              <div className="absolute bottom-4 left-4 right-4 p-4 rounded-xl glass border border-borderColor text-foreground space-y-1 shadow-md">
+                <span className="text-xs font-bold text-primary uppercase tracking-wider block">Find Us</span>
+                <span className="text-sm font-bold block">{settings.cafe_address || "123 Aroma Lane, CA 90210"}</span>
+                <span className="text-[10px] text-textMuted block">Tap maps icon on your mobile to navigate</span>
+              </div>
+
+              {/* Pin Indicator */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                <MapPin className="h-10 w-10 text-accent animate-bounce fill-amber-300" />
+              </div>
+            </div>
+          </div>
+
+          {/* Interactive Form Component */}
+          <div>
+            <ContactForm />
+          </div>
+        </div>
+      </section>
+
+      {/* Newsletter / Cozy Club Section */}
       <section className="py-24 mx-auto max-w-4xl px-4">
         <div className="rounded-3xl border border-borderColor bg-cardBg p-8 md:p-12 text-center shadow-lg relative overflow-hidden">
           <div className="absolute top-0 right-0 h-40 w-40 rounded-full bg-secondary/60 filter blur-3xl" />
@@ -326,24 +411,7 @@ export default async function HomePage() {
               Subscribe to our weekly newsletter to get exclusive deals, happy hour notifications, and a free cookie coupon code instantly.
             </p>
 
-            <form
-              action="#"
-              method="POST"
-              className="mx-auto max-w-md flex flex-col sm:flex-row items-center gap-3 pt-4"
-            >
-              <input
-                type="email"
-                required
-                placeholder="Enter your email address"
-                className="w-full rounded-full border border-borderColor bg-background px-5 py-3 text-sm text-foreground focus:border-primary transition-all"
-              />
-              <button
-                type="submit"
-                className="w-full sm:w-auto shrink-0 rounded-full bg-primary hover:bg-primary-hover text-white text-sm font-semibold px-6 py-3 transition-colors shadow-sm"
-              >
-                Subscribe
-              </button>
-            </form>
+            <NewsletterForm />
           </div>
         </div>
       </section>

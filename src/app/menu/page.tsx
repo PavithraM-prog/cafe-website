@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
-import { Search, Loader2, Filter, ArrowUpDown } from "lucide-react";
+import { Search, Loader2, ArrowUpDown, Sparkles } from "lucide-react";
 
 interface Product {
   id: string;
@@ -60,7 +60,6 @@ export default function MenuPage() {
     .filter((product) => {
       // Category Filter
       if (selectedCategory !== "all") {
-        // Find category object
         const cat = categories.find((c) => c.slug === selectedCategory);
         if (product.categoryId !== cat?.id) return false;
       }
@@ -92,11 +91,27 @@ export default function MenuPage() {
       <Navbar />
 
       {/* Page Header */}
-      <section className="bg-secondary/40 border-b border-borderColor py-16 text-center transition-all">
-        <div className="mx-auto max-w-xl px-4 space-y-3">
-          <span className="text-xs font-bold text-primary uppercase tracking-widest">Handcrafted Delights</span>
-          <h1 className="font-serif text-3xl sm:text-4xl font-bold text-foreground">Our Cozy Menu</h1>
-          <p className="text-sm text-textMuted leading-relaxed">
+      <section className="relative overflow-hidden bg-black py-20 text-center transition-all">
+        {/* Background Image with Dark Overlay */}
+        <div className="absolute inset-0 z-0">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="https://images.unsplash.com/photo-1498804103079-a6351b050096?auto=format&fit=crop&q=80&w=1200"
+            alt="Warm roasted coffee beans"
+            className="h-full w-full object-cover object-center opacity-35 filter blur-[0.5px]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-black/20 to-black/60" />
+        </div>
+
+        <div className="relative z-10 mx-auto max-w-xl px-4 space-y-3">
+          <span className="inline-flex items-center space-x-1.5 text-xs font-bold text-amber-300 uppercase tracking-widest bg-amber-950/40 border border-amber-400/30 px-3.5 py-1.5 rounded-full backdrop-blur-sm shadow-sm">
+            <Sparkles className="h-3.5 w-3.5 animate-pulse" />
+            <span>Handcrafted Delights</span>
+          </span>
+          <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-white drop-shadow-md">
+            Our Cozy Menu
+          </h1>
+          <p className="text-sm text-neutral-200 leading-relaxed drop-shadow-sm font-light">
             From single-origin espresso extraction to wholesome breakfast combos, explore our curated selection of delicious eats and treats.
           </p>
         </div>
@@ -111,7 +126,7 @@ export default function MenuPage() {
           <div className="flex flex-wrap gap-2 w-full lg:w-auto">
             <button
               onClick={() => setSelectedCategory("all")}
-              className={`rounded-full px-5 py-2 text-xs font-semibold uppercase tracking-wider transition-all ${
+              className={`rounded-full px-5 py-2.5 text-xs font-semibold uppercase tracking-wider transition-all duration-200 ${
                 selectedCategory === "all"
                   ? "bg-primary text-white shadow-sm"
                   : "bg-secondary hover:bg-borderColor/50 text-textMuted"
@@ -123,7 +138,7 @@ export default function MenuPage() {
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.slug)}
-                className={`rounded-full px-5 py-2 text-xs font-semibold uppercase tracking-wider transition-all ${
+                className={`rounded-full px-5 py-2.5 text-xs font-semibold uppercase tracking-wider transition-all duration-200 ${
                   selectedCategory === cat.slug
                     ? "bg-primary text-white shadow-sm"
                     : "bg-secondary hover:bg-borderColor/50 text-textMuted"
@@ -143,13 +158,13 @@ export default function MenuPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search menu..."
-                className="w-full rounded-full border border-borderColor bg-cardBg pl-10 pr-4 py-2 text-xs text-foreground focus:border-primary transition-all"
+                className="w-full rounded-full border border-borderColor bg-cardBg pl-10 pr-4 py-2.5 text-xs text-foreground focus:border-primary transition-all shadow-sm"
               />
-              <Search className="absolute left-3.5 top-2.5 h-4 w-4 text-textMuted" />
+              <Search className="absolute left-3.5 top-3.5 h-4 w-4 text-textMuted" />
             </div>
 
             {/* Veg Switch */}
-            <label className="flex items-center space-x-2.5 cursor-pointer bg-cardBg border border-borderColor px-4 py-2 rounded-full shrink-0">
+            <label className="flex items-center space-x-2.5 cursor-pointer bg-cardBg border border-borderColor px-4 py-2.5 rounded-full shrink-0 shadow-sm hover:border-primary transition-all">
               <input
                 type="checkbox"
                 checked={vegOnly}
@@ -160,12 +175,12 @@ export default function MenuPage() {
             </label>
 
             {/* Sort Dropdown */}
-            <div className="relative shrink-0 flex items-center bg-cardBg border border-borderColor rounded-full px-3 py-1">
+            <div className="relative shrink-0 flex items-center bg-cardBg border border-borderColor rounded-full px-4 py-2 shadow-sm hover:border-primary transition-all">
               <ArrowUpDown className="h-4 w-4 text-textMuted mr-2" />
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="bg-transparent text-xs font-semibold text-textMuted py-1 pr-6 border-none cursor-pointer focus:ring-0"
+                className="bg-transparent text-xs font-semibold text-textMuted py-0.5 pr-6 border-none cursor-pointer focus:ring-0"
               >
                 <option value="default">Sort: Default</option>
                 <option value="price-asc">Price: Low to High</option>
@@ -178,7 +193,7 @@ export default function MenuPage() {
 
         {/* Loading Spinner */}
         {loading && (
-          <div className="flex flex-col items-center justify-center py-24 space-y-3">
+          <div className="flex flex-col items-center justify-center py-24 space-y-3 animate-pulse">
             <Loader2 className="h-10 w-10 text-primary animate-spin" />
             <span className="text-xs font-semibold text-textMuted">Brewing menu options...</span>
           </div>
