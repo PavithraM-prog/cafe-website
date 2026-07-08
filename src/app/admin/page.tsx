@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { DollarSign, ShoppingBag, Calendar, Users, Coffee, ArrowUpRight, Laptop, Store } from "lucide-react";
 import Link from "next/link";
 import SalesChart from "@/components/admin/SalesChart";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 interface TopItem {
   name: string;
@@ -191,11 +192,11 @@ export default async function AdminDashboardPage() {
   const cards = [
     {
       title: "Today's Revenue",
-      value: `$${stats.todayRevenue.toFixed(2)}`,
+      value: formatCurrency(stats.todayRevenue),
       desc: (
         <span className="flex items-center space-x-2 mt-1">
-          <span className="text-xs text-[#705e55]">💻 ${stats.websiteRevenueToday.toFixed(0)}</span>
-          <span className="text-xs text-[#705e55]">🏪 ${stats.walkInRevenueToday.toFixed(0)}</span>
+          <span className="text-xs text-[#705e55]">💻 {formatCurrency(stats.websiteRevenueToday)}</span>
+          <span className="text-xs text-[#705e55]">🏪 {formatCurrency(stats.walkInRevenueToday)}</span>
         </span>
       ),
       icon: DollarSign,
@@ -292,7 +293,7 @@ export default async function AdminDashboardPage() {
                     </div>
                     <div className="min-w-0">
                       <span className="block text-xs font-bold text-[#2d1e18] truncate leading-tight">{item.name}</span>
-                      <span className="block text-[10px] text-[#705e55] font-medium mt-0.5">${item.price.toFixed(2)}</span>
+                      <span className="block text-[10px] text-[#705e55] font-medium mt-0.5">{formatCurrency(item.price)}</span>
                     </div>
                   </div>
                   <div className="text-right shrink-0">
@@ -363,7 +364,7 @@ export default async function AdminDashboardPage() {
                         )}
                       </span>
                     </td>
-                    <td className="py-3.5 text-[#2d1e18] font-bold font-sans">${order.total.toFixed(2)}</td>
+                    <td className="py-3.5 text-[#2d1e18] font-bold font-sans">{formatCurrency(order.total)}</td>
                     <td className="py-3.5">
                       <span
                         className={`rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${

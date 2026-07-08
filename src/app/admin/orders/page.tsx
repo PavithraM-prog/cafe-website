@@ -20,6 +20,7 @@ import {
   Check,
   Coffee
 } from "lucide-react";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 interface Order {
   id: string;
@@ -386,7 +387,7 @@ export default function AdminOrdersPage() {
                               {item.name} <span className="text-[#705e55] font-semibold text-[10px] ml-1">x{item.quantity}</span>
                             </span>
                             <span className="font-bold text-[#705e55] font-sans">
-                              ${(item.price * item.quantity).toFixed(2)}
+                              {formatCurrency(item.price * item.quantity)}
                             </span>
                           </div>
                         ))}
@@ -411,7 +412,7 @@ export default function AdminOrdersPage() {
                     <div className="border-t border-[#e8dfd7] p-5 bg-[#faf8f5]/40 flex flex-col space-y-4">
                       <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider">
                         <span className="text-[#705e55]">Total Bill</span>
-                        <span className="text-sm text-amber-700 font-sans font-extrabold">${order.total.toFixed(2)}</span>
+                        <span className="text-sm text-amber-700 font-sans font-extrabold">{formatCurrency(order.total)}</span>
                       </div>
 
                       {/* State updates for orders queue */}
@@ -525,7 +526,7 @@ export default function AdminOrdersPage() {
                             {prod.name}
                           </span>
                           <span className="block text-[10px] font-extrabold text-[#8c6239] mt-1">
-                            ${prod.price.toFixed(2)}
+                            {formatCurrency(prod.price)}
                           </span>
                         </div>
                       </div>
@@ -547,7 +548,7 @@ export default function AdminOrdersPage() {
                           <div className="min-w-0">
                             <span className="block font-bold text-[#2d1e18] truncate">{item.product.name}</span>
                             <span className="block text-[9px] text-[#705e55] font-medium">
-                              ${item.product.price.toFixed(2)} x {item.quantity}
+                              {formatCurrency(item.product.price)} x {item.quantity}
                             </span>
                           </div>
                           <div className="flex items-center space-x-1.5 shrink-0 bg-white border border-[#e8dfd7] rounded-lg p-0.5">
@@ -608,7 +609,7 @@ export default function AdminOrdersPage() {
                 <div className="space-y-4 pt-3 border-t border-[#e8dfd7]">
                   <div className="flex justify-between items-center text-xs font-bold">
                     <span className="text-[#705e55]">Total Amount</span>
-                    <span className="text-base text-amber-700 font-sans font-extrabold">${cartTotal.toFixed(2)}</span>
+                    <span className="text-base text-amber-700 font-sans font-extrabold">{formatCurrency(cartTotal)}</span>
                   </div>
 
                   <button

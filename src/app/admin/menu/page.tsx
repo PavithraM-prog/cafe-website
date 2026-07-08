@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Plus, Edit2, Trash2, Check, X, Loader2, Sparkles, Star } from "lucide-react";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 interface Product {
   id: string;
@@ -246,7 +247,7 @@ export default function AdminMenuPage() {
 
                       {/* Price */}
                       <td className="px-6 py-4 font-bold font-sans text-neutral-800">
-                        ${product.price.toFixed(2)}
+                        {formatCurrency(product.price)}
                       </td>
 
                       {/* Dietary */}
@@ -341,7 +342,7 @@ export default function AdminMenuPage() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-neutral-500">Price ($) *</label>
+                  <label className="text-xs font-semibold text-neutral-500">Price (₹) *</label>
                   <input
                     type="number"
                     step="0.01"

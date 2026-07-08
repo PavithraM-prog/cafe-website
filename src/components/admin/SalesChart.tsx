@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 interface ChartDataPoint {
   date: string;
@@ -79,7 +80,7 @@ export default function SalesChart({ data }: SalesChartProps) {
                 : "text-[#705e55] hover:text-[#2d1e18]"
             }`}
           >
-            Revenue ($)
+            Revenue (₹)
           </button>
           <button
             onClick={() => setActiveTab("orders")}
@@ -131,7 +132,7 @@ export default function SalesChart({ data }: SalesChartProps) {
                 className="text-[9px] font-bold font-sans fill-[#705e55] text-right"
                 style={{ textAnchor: "end" }}
               >
-                {activeTab === "revenue" ? `$${gl.value.toFixed(0)}` : gl.value.toFixed(0)}
+                {activeTab === "revenue" ? `₹${gl.value.toFixed(0)}` : gl.value.toFixed(0)}
               </text>
             </g>
           ))}
@@ -278,15 +279,15 @@ export default function SalesChart({ data }: SalesChartProps) {
             </div>
             <div className="flex justify-between">
               <span className="text-[#a49187]">Total Sales:</span>
-              <span className="font-bold">${data[hoveredIndex].revenue.toFixed(2)}</span>
+              <span className="font-bold">{formatCurrency(data[hoveredIndex].revenue)}</span>
             </div>
             <div className="flex justify-between items-center text-[9px] pl-1.5 border-l-2 border-[#8c6239]">
               <span className="text-[#a49187]">💻 Website:</span>
-              <span className="font-bold text-[#faf8f5]">${data[hoveredIndex].websiteRevenue.toFixed(2)}</span>
+              <span className="font-bold text-[#faf8f5]">{formatCurrency(data[hoveredIndex].websiteRevenue)}</span>
             </div>
             <div className="flex justify-between items-center text-[9px] pl-1.5 border-l-2 border-[#d97706]">
               <span className="text-[#a49187]">🏪 Walk-in:</span>
-              <span className="font-bold text-[#faf8f5]">${data[hoveredIndex].walkInRevenue.toFixed(2)}</span>
+              <span className="font-bold text-[#faf8f5]">{formatCurrency(data[hoveredIndex].walkInRevenue)}</span>
             </div>
             <div className="flex justify-between pt-1 border-t border-[#2c1e15]">
               <span className="text-[#a49187]">Total Orders:</span>
