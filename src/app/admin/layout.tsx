@@ -6,10 +6,10 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import {
   LayoutDashboard,
-  Utensils,
   ClipboardList,
   Calendar,
-  Star,
+  Users,
+  UserCheck,
   Settings,
   ArrowLeft,
   LogOut,
@@ -26,12 +26,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const menuItems = [
-    { name: "Overview", href: "/admin", icon: LayoutDashboard },
-    { name: "Menu Manager", href: "/admin/menu", icon: Utensils },
-    { name: "Live Orders", href: "/admin/orders", icon: ClipboardList },
+    { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+    { name: "Orders queue", href: "/admin/orders", icon: ClipboardList },
     { name: "Reservations", href: "/admin/reservations", icon: Calendar },
-    { name: "Reviews Mod", href: "/admin/reviews", icon: Star },
-    { name: "Promos & Settings", href: "/admin/content", icon: Settings },
+    { name: "Loyalty Members", href: "/admin/loyalty", icon: Users },
+    { name: "Staff Management", href: "/admin/staff", icon: UserCheck },
+    { name: "Profile & Settings", href: "/admin/settings", icon: Settings },
   ];
 
   const handleLogout = async () => {
@@ -45,11 +45,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex flex-col md:flex-row text-neutral-800 font-sans antialiased">
+    <div className="min-h-screen bg-[#faf8f5] flex flex-col md:flex-row text-[#2d1e18] font-sans antialiased">
       {/* Mobile Header Bar */}
-      <div className="flex md:hidden items-center justify-between bg-neutral-900 text-white px-4 py-4 shrink-0 shadow-md">
+      <div className="flex md:hidden items-center justify-between bg-[#1d140e] text-white px-4 py-4 shrink-0 shadow-md">
         <Link href="/" className="flex items-center space-x-2 text-white font-bold text-lg">
-          <Coffee className="h-5 w-5 text-amber-400" />
+          <Coffee className="h-5 w-5 text-amber-500" />
           <span className="font-serif">Cozy Beans Admin</span>
         </Link>
         <button
@@ -62,7 +62,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Sidebar navigation */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-neutral-900 text-neutral-200 transform transition-transform duration-300 ease-in-out md:relative md:transform-none shrink-0 flex flex-col justify-between ${
+        className={`fixed inset-y-0 left-0 z-40 w-64 bg-[#1d140e] text-[#f2ede4] transform transition-transform duration-300 ease-in-out md:relative md:transform-none shrink-0 flex flex-col justify-between ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >
@@ -70,12 +70,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {/* Logo & Close Button (Mobile Only) */}
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center space-x-2 text-white font-bold text-xl">
-              <Coffee className="h-6 w-6 text-amber-400" />
-              <span className="font-serif">Cozy Admin</span>
+              <Coffee className="h-6 w-6 text-amber-500" />
+              <span className="font-serif tracking-wide">Cozy Admin</span>
             </Link>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="p-1 text-neutral-400 hover:text-white focus:outline-none md:hidden"
+              className="p-1 text-[#a49187] hover:text-[#f4eae1] focus:outline-none md:hidden"
             >
               <X className="h-5 w-5" />
             </button>
@@ -90,10 +90,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   key={item.name}
                   href={item.href}
                   onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center space-x-3 rounded-lg px-4 py-3 text-sm font-medium transition-all ${
+                  className={`flex items-center space-x-3 rounded-xl px-4 py-3 text-xs font-semibold uppercase tracking-wider transition-all ${
                     isActive(item.href)
-                      ? "bg-amber-600 text-white shadow-sm"
-                      : "text-neutral-400 hover:bg-neutral-800 hover:text-neutral-100"
+                      ? "bg-[#8c6239] text-[#faf8f5] shadow-md border-l-4 border-amber-500"
+                      : "text-[#a49187] hover:bg-[#2c1e15] hover:text-[#f4eae1]"
                   }`}
                 >
                   <Icon className="h-4.5 w-4.5" />
@@ -105,11 +105,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
 
         {/* Sidebar Footer Operations */}
-        <div className="p-4 border-t border-neutral-800 space-y-2">
+        <div className="p-4 border-t border-[#2c1e15] space-y-2">
           {/* Back to Public Site link */}
           <Link
             href="/"
-            className="flex items-center space-x-3 rounded-lg px-4 py-2.5 text-xs font-semibold text-neutral-400 hover:bg-neutral-800 hover:text-neutral-100 transition-all"
+            className="flex items-center space-x-3 rounded-lg px-4 py-2.5 text-xs font-semibold text-[#a49187] hover:bg-[#2c1e15] hover:text-[#f4eae1] transition-all"
           >
             <ArrowLeft className="h-4 w-4" />
             <span>Go to Public Site</span>
@@ -118,7 +118,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {/* Logout Button */}
           <button
             onClick={handleLogout}
-            className="flex w-full items-center space-x-3 rounded-lg px-4 py-2.5 text-xs font-semibold text-red-400 hover:bg-neutral-800 hover:text-red-300 transition-all text-left"
+            className="flex w-full items-center space-x-3 rounded-lg px-4 py-2.5 text-xs font-semibold text-red-400 hover:bg-[#2c1e15] hover:text-red-300 transition-all text-left"
           >
             <LogOut className="h-4 w-4" />
             <span>Logout Account</span>
@@ -127,17 +127,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Main Panel Content Area */}
-      <main className="flex-1 flex flex-col min-w-0">
+      <main className="flex-1 flex flex-col min-w-0 bg-[#faf8f5]">
         {/* Top Desktop bar */}
-        <header className="hidden md:flex h-16 items-center justify-between bg-white border-b border-neutral-200 px-8 shrink-0">
-          <span className="font-serif text-lg font-bold text-neutral-700">Management Workspace</span>
+        <header className="hidden md:flex h-16 items-center justify-between bg-white border-b border-[#e8dfd7] px-8 shrink-0">
+          <span className="font-serif text-lg font-bold text-[#2d1e18]">Management Workspace</span>
           <div className="flex items-center space-x-3">
-            <div className="h-8 w-8 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-xs shrink-0">
-              <User className="h-4 w-4 text-amber-700" />
+            <div className="h-8 w-8 rounded-full bg-[#f2ede4] text-[#8c6239] flex items-center justify-center font-bold text-xs shrink-0 border border-[#e8dfd7]">
+              <User className="h-4 w-4 text-[#8c6239]" />
             </div>
             <div className="text-left leading-tight">
-              <span className="block text-xs font-bold text-neutral-800">{user?.name || "Admin"}</span>
-              <span className="block text-[10px] text-neutral-500 font-medium uppercase tracking-widest">{user?.role}</span>
+              <span className="block text-xs font-bold text-[#2d1e18]">{user?.name || "Admin"}</span>
+              <span className="block text-[9px] text-[#8c6239] font-bold uppercase tracking-widest">{user?.role || "ADMIN"}</span>
             </div>
           </div>
         </header>

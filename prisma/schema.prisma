@@ -54,6 +54,7 @@ model Reservation {
   time      String   // Format: HH:MM
   guests    Int
   status    String   @default("PENDING") // PENDING, APPROVED, REJECTED, CANCELLED
+  type      String   @default("TABLE") // TABLE, EVENT
   note      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -68,6 +69,7 @@ model Order {
   discount      Float    @default(0)
   paymentStatus String   @default("PENDING") // PENDING, PAID, FAILED
   status        String   @default("PENDING") // PENDING, PREPARING, READY, DELIVERED, CANCELLED
+  source        String   @default("WEBSITE") // WEBSITE, WALK_IN
   address       String
   phone         String
   createdAt     DateTime @default(now())
@@ -97,4 +99,34 @@ model Coupon {
 model Setting {
   id    String @id
   value String
+}
+
+model LoyaltyMember {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  points    Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Staff {
+  id             String          @id @default(uuid())
+  name           String
+  email          String          @unique
+  role           String          // BARISTA, CHEF, MANAGER, SERVER
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  attendanceLogs AttendanceLog[]
+}
+
+model AttendanceLog {
+  id         String    @id @default(uuid())
+  staffId    String
+  staff      Staff     @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  date       String    // Format: YYYY-MM-DD
+  loginTime  DateTime  @default(now())
+  logoutTime DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 }

@@ -20,11 +20,13 @@ export async function GET(request: Request) {
 
     const { searchParams } = new URL(request.url);
     const filterStatus = searchParams.get("status");
+    const filterType = searchParams.get("type"); // TABLE, EVENT, ALL
 
     // Admin/Staff can see everything
     if (user.role === "ADMIN" || user.role === "STAFF") {
       const where: any = {};
-      if (filterStatus) where.status = filterStatus;
+      if (filterStatus && filterStatus !== "ALL") where.status = filterStatus;
+      if (filterType && filterType !== "ALL") where.type = filterType;
       
       const reservations = await db.reservation.findMany({
         where,

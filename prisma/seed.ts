@@ -7,6 +7,9 @@ async function main() {
   console.log("Seeding database...");
 
   // 1. Clear existing data to avoid key duplicates
+  await prisma.attendanceLog.deleteMany({});
+  await prisma.staff.deleteMany({});
+  await prisma.loyaltyMember.deleteMany({});
   await prisma.setting.deleteMany({});
   await prisma.coupon.deleteMany({});
   await prisma.review.deleteMany({});
@@ -16,7 +19,7 @@ async function main() {
   await prisma.category.deleteMany({});
   await prisma.user.deleteMany({});
 
-  // 2. Create Users
+  // 2. Create Users (Admin & Customer)
   const adminPasswordHash = bcrypt.hashSync("adminpassword", 10);
   const customerPasswordHash = bcrypt.hashSync("password123", 10);
 
@@ -61,8 +64,7 @@ async function main() {
   console.log("Categories created successfully!");
 
   // 4. Create Products
-  const products = [
-    // Coffee
+  const productsData = [
     {
       name: "Classic Espresso",
       description: "Rich, intense, and aromatic double shot of our house espresso blend.",
@@ -103,7 +105,6 @@ async function main() {
       isVeg: true,
       categoryId: coffeeCat.id,
     },
-    // Beverages
     {
       name: "Matcha Latte",
       description: "Pure Japanese matcha green tea whisked with creamy steamed milk.",
@@ -124,7 +125,6 @@ async function main() {
       isVeg: true,
       categoryId: beverageCat.id,
     },
-    // Snacks
     {
       name: "Avocado Sourdough Toast",
       description: "Freshly mashed avocado on toasted sourdough, topped with cherry tomatoes, feta, and seeds.",
@@ -155,7 +155,6 @@ async function main() {
       isVeg: false,
       categoryId: snackCat.id,
     },
-    // Desserts
     {
       name: "Fudge Chocolate Brownie",
       description: "Decadent, rich chocolate brownie served warm with chocolate chips inside.",
@@ -176,7 +175,6 @@ async function main() {
       isVeg: true,
       categoryId: dessertCat.id,
     },
-    // Breakfast
     {
       name: "Blueberry Pancake Stack",
       description: "Three fluffy pancakes loaded with fresh blueberries, served with butter and maple syrup.",
@@ -199,8 +197,10 @@ async function main() {
     },
   ];
 
-  for (const item of products) {
-    await prisma.product.create({ data: item });
+  const products: any[] = [];
+  for (const item of productsData) {
+    const p = await prisma.product.create({ data: item });
+    products.push(p);
   }
   console.log("Menu items seeded successfully!");
 
@@ -257,7 +257,244 @@ async function main() {
     },
   });
 
-  console.log("Seeding complete!");
+  console.log("Reviews seeded!");
+
+  // 8. Create Loyalty Members
+  const loyaltyMembers = [
+    { name: "John Doe", email: "john@gmail.com", points: 120 },
+    { name: "Jane Smith", email: "jane.smith@yahoo.com", points: 340 },
+    { name: "Robert Johnson", email: "robert.j@outlook.com", points: 75 },
+    { name: "Emily Davis", email: "emily.davis@gmail.com", points: 890 },
+    { name: "Michael Wilson", email: "mwilson@gmail.com", points: 215 },
+  ];
+
+  for (const lm of loyaltyMembers) {
+    await prisma.loyaltyMember.create({ data: lm });
+  }
+  console.log("Loyalty members seeded!");
+
+  // 9. Create Staff members
+  const staffMembers = [
+    { name: "Alice Cooper", email: "alice@cozybeans.com", role: "BARISTA" },
+    { name: "Bob Marley", email: "bob@cozybeans.com", role: "CHEF" },
+    { name: "Charlie Chaplin", email: "charlie@cozybeans.com", role: "SERVER" },
+    { name: "Diana Ross", email: "diana@cozybeans.com", role: "MANAGER" },
+  ];
+
+  const staffList: any[] = [];
+  for (const sm of staffMembers) {
+    const s = await prisma.staff.create({ data: sm });
+    staffListList: staffList.push(s);
+  }
+  console.log("Staff members seeded!");
+
+  // 10. Create Attendance Logs for the past 5 days (excluding today)
+  const today = new Date();
+  for (let i = 1; i <= 5; i++) {
+    const logDate = new Date();
+    logDate.setDate(today.getDate() - i);
+    const dateStr = logDate.toISOString().split("T")[0]; // YYYY-MM-DD
+
+    for (const staff of staffList) {
+      // Different hours based on role
+      let inHour = 8;
+      let outHour = 16;
+      if (staff.role === "BARISTA") { inHour = 7; outHour = 15; }
+      else if (staff.role === "SERVER") { inHour = 10; outHour = 18; }
+      else if (staff.role === "MANAGER") { inHour = 7; outHour = 17; }
+
+      const login = new Date(logDate);
+      login.setHours(inHour, Math.floor(Math.random() * 15), 0, 0);
+
+      const logout = new Date(logDate);
+      logout.setHours(outHour, Math.floor(Math.random() * 15), 0, 0);
+
+      await prisma.attendanceLog.create({
+        data: {
+          staffId: staff.id,
+          date: dateStr,
+          loginTime: login,
+          logoutTime: logout,
+        },
+      });
+    }
+  }
+
+  // Today's active attendance logs (logged in, not logged out yet for some)
+  const todayStr = today.toISOString().split("T")[0];
+  for (const staff of staffList) {
+    let inHour = 8;
+    if (staff.role === "BARISTA") inHour = 7;
+    else if (staff.role === "SERVER") inHour = 10;
+    else if (staff.role === "MANAGER") inHour = 7;
+
+    const login = new Date();
+    login.setHours(inHour, Math.floor(Math.random() * 10), 0, 0);
+
+    // BARISTA and CHEF logged out, SERVER and MANAGER still logged in
+    const shouldLogout = staff.role === "BARISTA" || staff.role === "CHEF";
+    let logoutTime = null;
+    if (shouldLogout) {
+      logoutTime = new Date();
+      logoutTime.setHours(inHour + 8, Math.floor(Math.random() * 20), 0, 0);
+    }
+
+    await prisma.attendanceLog.create({
+      data: {
+        staffId: staff.id,
+        date: todayStr,
+        loginTime: login,
+        logoutTime,
+      },
+    });
+  }
+  console.log("Attendance logs seeded!");
+
+  // 11. Create Reservations (Table and Event bookings)
+  const reservationsData = [
+    // Table bookings
+    {
+      name: "Arthur Pendragon",
+      email: "arthur@camelot.com",
+      phone: "+1 (555) 001-1234",
+      date: todayStr,
+      time: "18:30",
+      guests: 4,
+      status: "APPROVED",
+      type: "TABLE",
+      note: "Window seat if possible, celebrating an anniversary.",
+    },
+    {
+      name: "Ginevra Weasley",
+      email: "ginny@hogwarts.edu",
+      phone: "+1 (555) 002-5678",
+      date: todayStr,
+      time: "19:00",
+      guests: 2,
+      status: "PENDING",
+      type: "TABLE",
+      note: "Gluten-free menu options wanted.",
+    },
+    {
+      name: "Tony Stark",
+      email: "tony@starkindustries.com",
+      phone: "+1 (555) 999-3000",
+      date: todayStr,
+      time: "12:00",
+      guests: 6,
+      status: "PENDING",
+      type: "TABLE",
+      note: "Need space for security detail.",
+    },
+    // Future bookings
+    {
+      name: "Bruce Banner",
+      email: "hulk@avengers.org",
+      phone: "+1 (555) 123-4567",
+      date: new Date(today.getTime() + 86400000).toISOString().split("T")[0], // Tomorrow
+      time: "17:30",
+      guests: 1,
+      status: "APPROVED",
+      type: "TABLE",
+      note: "Quiet table, low light.",
+    },
+    // Event bookings
+    {
+      name: "Peter Parker",
+      email: "peter.parker@dailybugle.com",
+      phone: "+1 (555) 444-5555",
+      date: new Date(today.getTime() + 86400000 * 2).toISOString().split("T")[0], // In 2 days
+      time: "15:00",
+      guests: 15,
+      status: "PENDING",
+      type: "EVENT",
+      note: "Birthday party celebration. Bringing a cake.",
+    },
+    {
+      name: "Clark Kent",
+      email: "clark.kent@dailyplanet.com",
+      phone: "+1 (555) 777-8888",
+      date: new Date(today.getTime() + 86400000 * 5).toISOString().split("T")[0], // In 5 days
+      time: "10:00",
+      guests: 25,
+      status: "APPROVED",
+      type: "EVENT",
+      note: "Press team breakfast workshop.",
+    },
+  ];
+
+  for (const resv of reservationsData) {
+    await prisma.reservation.create({ data: resv });
+  }
+  console.log("Reservations (Tables/Events) seeded!");
+
+  // 12. Create Orders for the last 7 days (to populate sales trend line chart)
+  // Let's create orders with random items from our products
+  const getRandItems = (count: number) => {
+    const orderItems: any[] = [];
+    let total = 0;
+    for (let i = 0; i < count; i++) {
+      const prod = products[Math.floor(Math.random() * products.length)];
+      const qty = Math.floor(Math.random() * 2) + 1;
+      orderItems.push({
+        productId: prod.id,
+        name: prod.name,
+        price: prod.price,
+        quantity: qty,
+        image: prod.image,
+      });
+      total += prod.price * qty;
+    }
+    return { itemsJson: JSON.stringify(orderItems), total };
+  };
+
+  // Past 7 days sales
+  for (let i = 6; i >= 0; i--) {
+    const orderDate = new Date();
+    orderDate.setDate(today.getDate() - i);
+    const dateStr = orderDate.toISOString().split("T")[0];
+
+    // Determine number of orders for this day (Today gets more orders)
+    const ordersCount = i === 0 ? 18 : Math.floor(Math.random() * 8) + 6;
+
+    for (let j = 0; j < ordersCount; j++) {
+      const source = Math.random() > 0.4 ? "WEBSITE" : "WALK_IN";
+      const { itemsJson, total } = getRandItems(Math.floor(Math.random() * 3) + 1);
+
+      // Distribute orders across the day
+      const orderTime = new Date(orderDate);
+      orderTime.setHours(7 + Math.floor(Math.random() * 12), Math.floor(Math.random() * 60), 0, 0);
+
+      // Today's orders have varying statuses, older ones are DELIVERED
+      let status = "DELIVERED";
+      if (i === 0) {
+        const roll = Math.random();
+        if (roll < 0.2) status = "PENDING";
+        else if (roll < 0.4) status = "PREPARING";
+        else if (roll < 0.6) status = "READY";
+        else if (roll < 0.95) status = "DELIVERED";
+        else status = "CANCELLED";
+      }
+
+      await prisma.order.create({
+        data: {
+          items: itemsJson,
+          total,
+          discount: 0,
+          paymentStatus: status === "CANCELLED" ? "FAILED" : "PAID",
+          status,
+          source,
+          address: source === "WEBSITE" ? `${Math.floor(Math.random()*900)+100} Cozy St` : "Walk-in Customer",
+          phone: source === "WEBSITE" ? `+1 (555) 019-${Math.floor(Math.random()*9000)+1000}` : "N/A",
+          createdAt: orderTime,
+          updatedAt: orderTime,
+        },
+      });
+    }
+  }
+
+  console.log("Sales orders for 7-day trend seeded!");
+  console.log("Seeding complete successfully!");
 }
 
 main()
