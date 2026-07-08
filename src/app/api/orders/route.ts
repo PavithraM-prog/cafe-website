@@ -20,11 +20,49 @@ export async function GET(request: Request) {
 
     const { searchParams } = new URL(request.url);
     const filterStatus = searchParams.get("status");
+    const filterSource = searchParams.get("source");
+    const filterDate = searchParams.get("date"); // today, week, or YYYY-MM-DD
 
-    // Admin/Staff sees all orders
+    // Admin/Staff sees all orders with filters
     if (user.role === "ADMIN" || user.role === "STAFF") {
       const where: any = {};
-      if (filterStatus) where.status = filterStatus;
+
+      // Status filter
+      if (filterStatus) {
+        if (filterStatus === "ACTIVE") {
+          where.status = { in: ["PENDING", "PREPARING", "READY"] };
+        } else {
+          where.status = filterStatus;
+        }
+      }
+
+      // Source filter
+      if (filterSource && filterSource !== "ALL") {
+        where.source = filterSource;
+      }
+
+      // Date filter
+      if (filterDate) {
+        const start = new Date();
+        if (filterDate === "today") {
+          start.setHours(0, 0, 0, 0);
+          where.createdAt = { gte: start };
+        } else if (filterDate === "week") {
+          start.setDate(start.getDate() - 7);
+          start.setHours(0, 0, 0, 0);
+          where.createdAt = { gte: start };
+        } else {
+          // Specific date (YYYY-MM-DD)
+          const targetDate = new Date(filterDate);
+          if (!isNaN(targetDate.getTime())) {
+            const startOfDay = new Date(targetDate);
+            startOfDay.setHours(0, 0, 0, 0);
+            const endOfDay = new Date(targetDate);
+            endOfDay.setHours(23, 59, 59, 999);
+            where.createdAt = { gte: startOfDay, lte: endOfDay };
+          }
+        }
+      }
 
       const orders = await db.order.findMany({
         where,
@@ -50,89 +88,46 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const user = await getAuthUser();
-    if (!user) {
+    // Allow admin/staff to record walk-in orders even if customer is not logged in
+    const body = await request.json();
+    const { items, total, discount, address, phone, source, loyaltyEmail } = body;
+
+    const isWalkIn = source === "WALK_IN";
+
+    // If customer order, they must be logged in
+    if (!isWalkIn && !user) {
       return NextResponse.json({ error: "Please log in to place an order" }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { items, total, discount, address, phone, couponCode } = body;
-
-    if (!items || !total || !address || !phone) {
+    if (!items || !total) {
       return NextResponse.json({ error: "Missing required order information" }, { status: 400 });
     }
 
-    // 1. Calculate loyalty points to award
+    // 1. Calculate loyalty points to award: 1 point for every $1 spent
     const pointsEarned = Math.floor(parseFloat(total));
 
-    // 2. Create Order and all related records inside a transaction
-    const { newOrder } = await db.$transaction(async (tx) => {
-      const order = await tx.order.create({
-        data: {
-          userId: user.id,
-          items: JSON.stringify(items), // JSON array of items as string for backwards compatibility
-          total: parseFloat(total),
-          discount: discount ? parseFloat(discount) : 0,
-          address,
-          phone,
-          paymentStatus: "PAID",
-          status: "PENDING",
+    // 2. Create the order in db
+    const newOrder = await db.order.create({
+      data: {
+        userId: user.id,
+        items: JSON.stringify(items), // JSON array of items as string for SQLite
+        total: parseFloat(total),
+        discount: discount ? parseFloat(discount) : 0,
+        address,
+        phone,
+        paymentStatus: "PAID", // Simulation of instant payment success
+        status: "PENDING",
+      },
+    });
+
+    // 3. Update user loyalty points
+    await db.user.update({
+      where: { id: user.id },
+      data: {
+        loyaltyPoints: {
+          increment: pointsEarned,
         },
-      });
-
-      // Insert into OrderItem table
-      const orderItemData = items.map((item: any) => ({
-        orderId: order.id,
-        menuItemId: item.productId || null,
-        name: item.name,
-        price: parseFloat(item.price),
-        quantity: parseInt(item.quantity),
-        image: item.image,
-      }));
-
-      await tx.orderItem.createMany({
-        data: orderItemData,
-      });
-
-      // Record simulated payment
-      await tx.payment.create({
-        data: {
-          orderId: order.id,
-          amount: parseFloat(total),
-          method: "CARD",
-          status: "COMPLETED",
-          transactionId: `TXN-${Math.random().toString(36).substring(2, 11).toUpperCase()}`,
-        },
-      });
-
-      // Record kitchen order queue status
-      await tx.kitchenOrder.create({
-        data: {
-          orderId: order.id,
-          status: "PENDING",
-        },
-      });
-
-      // Update user loyalty points
-      await tx.user.update({
-        where: { id: user.id },
-        data: {
-          loyaltyPoints: {
-            increment: pointsEarned,
-          },
-        },
-      });
-
-      // Write loyalty points transaction record
-      await tx.loyaltyPoint.create({
-        data: {
-          userId: user.id,
-          points: pointsEarned,
-          type: "EARNED",
-          reason: `Earned from Order #${order.id.slice(0, 8)}`,
-        },
-      });
-
-      return { newOrder: order };
+      },
     });
 
     // 4. If a coupon was used, we could invalidate it if single-use, but here we keep it simple

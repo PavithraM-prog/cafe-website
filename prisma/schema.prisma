@@ -112,7 +112,7 @@ model Reservation {
   date      String
   time      String
   guests    Int
-  status    String   @default("PENDING")
+  status    String   @default("PENDING") // PENDING, APPROVED, REJECTED, CANCELLED
   note      String?
   tableId   String?
   createdAt DateTime @default(now())
@@ -150,10 +150,15 @@ model Payment {
 
 model Coupon {
   id            String   @id @default(uuid())
-  code          String   @unique
-  discountType  String
-  discountValue Float
-  isActive      Boolean  @default(true)
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items         String   // Array of items: { productId: string, name: string, price: number, quantity: number, image: string }
+  total         Float
+  discount      Float    @default(0)
+  paymentStatus String   @default("PENDING") // PENDING, PAID, FAILED
+  status        String   @default("PENDING") // PENDING, PREPARING, READY, DELIVERED, CANCELLED
+  address       String
+  phone         String
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -302,4 +307,34 @@ model KitchenOrder {
 model Setting {
   id    String @id
   value String
+}
+
+model LoyaltyMember {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  points    Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Staff {
+  id             String          @id @default(uuid())
+  name           String
+  email          String          @unique
+  role           String          // BARISTA, CHEF, MANAGER, SERVER
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  attendanceLogs AttendanceLog[]
+}
+
+model AttendanceLog {
+  id         String    @id @default(uuid())
+  staffId    String
+  staff      Staff     @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  date       String    // Format: YYYY-MM-DD
+  loginTime  DateTime  @default(now())
+  logoutTime DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 }

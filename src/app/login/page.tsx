@@ -44,11 +44,13 @@ function LoginForm() {
   };
 
   return (
-    <div className="mx-auto max-w-md w-full border border-borderColor bg-cardBg p-6 sm:p-8 rounded-2xl shadow-md space-y-6">
+    <div className="mx-auto max-w-md w-full border border-borderColor/40 bg-cardBg p-8 sm:p-10 rounded-3xl shadow-xl space-y-6 animate-fade-in-up">
       <div className="text-center space-y-2">
-        <Coffee className="mx-auto h-10 w-10 text-accent" />
-        <h2 className="font-serif text-2xl font-bold text-foreground">Welcome Back</h2>
-        <p className="text-xs text-textMuted leading-relaxed">
+        <div className="inline-flex items-center justify-center p-3.5 bg-white border border-borderColor/40 rounded-2xl shadow-sm mb-2 text-accent">
+          <Coffee className="h-8 w-8" />
+        </div>
+        <h2 className="font-serif text-3xl font-bold text-foreground">Welcome Back</h2>
+        <p className="text-xs text-textMuted leading-relaxed font-light">
           Log in to check orders, table bookings, and loyalty points.
         </p>
       </div>
@@ -56,7 +58,7 @@ function LoginForm() {
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Email */}
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-textMuted uppercase tracking-wider block">
+          <label className="text-[10px] font-bold uppercase tracking-wider text-textMuted block">
             Email Address
           </label>
           <div className="relative">
@@ -66,7 +68,7 @@ function LoginForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="e.g. customer@gmail.com"
-              className="w-full rounded-lg border border-borderColor bg-background pl-10 pr-4 py-2.5 text-sm text-foreground focus:border-primary transition-all"
+              className="w-full rounded-xl border border-borderColor bg-[#FFF8E7]/10 focus:bg-white pl-10 pr-4 py-2.5 text-xs text-foreground focus:border-accent transition-all font-semibold focus:ring-1 focus:ring-accent"
             />
             <Mail className="absolute left-3.5 top-3.5 h-4 w-4 text-textMuted" />
           </div>
@@ -75,12 +77,12 @@ function LoginForm() {
         {/* Password */}
         <div className="space-y-1.5">
           <div className="flex justify-between items-center">
-            <label className="text-xs font-semibold text-textMuted uppercase tracking-wider block">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-textMuted block">
               Password
             </label>
             <Link
               href="/forgot-password"
-              className="text-[10px] font-bold text-primary hover:underline"
+              className="text-[10px] font-bold text-primary hover:underline uppercase tracking-wider"
             >
               Forgot Password?
             </Link>
@@ -92,7 +94,7 @@ function LoginForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full rounded-lg border border-borderColor bg-background pl-10 pr-4 py-2.5 text-sm text-foreground focus:border-primary transition-all"
+              className="w-full rounded-xl border border-borderColor bg-[#FFF8E7]/10 focus:bg-white pl-10 pr-4 py-2.5 text-xs text-foreground focus:border-accent transition-all font-semibold focus:ring-1 focus:ring-accent"
             />
             <Lock className="absolute left-3.5 top-3.5 h-4 w-4 text-textMuted" />
           </div>
@@ -100,25 +102,25 @@ function LoginForm() {
 
         {/* Error notification */}
         {error && (
-          <div className="text-xs text-red-700 bg-red-50 border border-red-200 p-2.5 rounded-lg font-semibold text-center">
-            {error}
+          <div className="text-xs text-red-700 bg-red-50 border border-red-200 p-3.5 rounded-xl font-semibold text-center leading-relaxed">
+            ⚠️ {error}
           </div>
         )}
 
         <button
           type="submit"
           disabled={localLoading}
-          className="w-full flex items-center justify-center space-x-2 rounded-full bg-primary hover:bg-primary-hover disabled:bg-neutral-200 text-white text-sm font-semibold py-3 shadow-md transition-colors"
+          className="w-full flex items-center justify-center space-x-2 rounded-full bg-accent hover:bg-accent-hover text-white text-xs font-bold uppercase tracking-widest py-3.5 shadow-lg transition-all duration-300 hover:scale-[1.005] active:scale-95 disabled:opacity-50"
         >
           {localLoading ? (
             <>
-              <Loader2 className="h-4.5 w-4.5 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin text-white" />
               <span>Verifying...</span>
             </>
           ) : (
             <>
               <span>Sign In</span>
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4 text-white" />
             </>
           )}
         </button>
@@ -131,9 +133,9 @@ function LoginForm() {
         </Link>
       </div>
 
-      <div className="border-t border-borderColor/60 pt-4 text-center">
-        <p className="text-[10px] text-textMuted bg-secondary/50 rounded p-2 italic leading-relaxed">
-          <strong>Demo credentials:</strong> Admin: <code>admin@cozybeans.com</code> (password: <code>adminpassword</code>) | Customer: <code>john@gmail.com</code> (password: <code>password123</code>)
+      <div className="border-t border-borderColor/40 pt-4 text-center">
+        <p className="text-[10px] text-textMuted bg-[#FFF8E7] rounded-2xl border border-borderColor/40 p-3.5 italic leading-relaxed font-light">
+          <strong>Demo credentials:</strong> Admin: <code className="font-bold">admin@cozybeans.com</code> (password: <code className="font-bold">adminpassword</code>) <br/> Customer: <code className="font-bold">john@gmail.com</code> (password: <code className="font-bold">password123</code>)
         </p>
       </div>
     </div>

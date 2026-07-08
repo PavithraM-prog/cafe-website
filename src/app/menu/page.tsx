@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
-import { Search, Loader2, Filter, ArrowUpDown } from "lucide-react";
+import { Search, Loader2, ArrowUpDown, Sparkles } from "lucide-react";
 
 interface Product {
   id: string;
@@ -60,7 +60,6 @@ export default function MenuPage() {
     .filter((product) => {
       // Category Filter
       if (selectedCategory !== "all") {
-        // Find category object
         const cat = categories.find((c) => c.slug === selectedCategory);
         if (product.categoryId !== cat?.id) return false;
       }
@@ -92,29 +91,45 @@ export default function MenuPage() {
       <Navbar />
 
       {/* Page Header */}
-      <section className="bg-secondary/40 border-b border-borderColor py-16 text-center transition-all">
-        <div className="mx-auto max-w-xl px-4 space-y-3">
-          <span className="text-xs font-bold text-primary uppercase tracking-widest">Handcrafted Delights</span>
-          <h1 className="font-serif text-3xl sm:text-4xl font-bold text-foreground">Our Cozy Menu</h1>
-          <p className="text-sm text-textMuted leading-relaxed">
+      <section className="relative overflow-hidden bg-[#1C100E] py-28 text-center transition-all duration-300">
+        {/* Background Image with Dark Overlay */}
+        <div className="absolute inset-0 z-0">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="https://images.unsplash.com/photo-1498804103079-a6351b050096?auto=format&fit=crop&q=80&w=1200"
+            alt="Warm roasted coffee beans"
+            className="h-full w-full object-cover object-center opacity-30 scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#1C100E]/70 via-[#1C100E]/30 to-background" />
+        </div>
+
+        <div className="relative z-10 mx-auto max-w-2xl px-4 space-y-4 animate-fade-in-up">
+          <span className="inline-flex items-center space-x-1.5 text-[10px] font-bold text-amber-300 uppercase tracking-widest bg-[#1C100E]/40 border border-amber-400/20 px-4 py-2 rounded-full backdrop-blur-md shadow-md">
+            <Sparkles className="h-3.5 w-3.5 text-[#D9A441]" />
+            <span>Handcrafted Delights</span>
+          </span>
+          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold text-white leading-tight drop-shadow-md">
+            Our Cozy Menu
+          </h1>
+          <p className="text-sm text-[#FFF8E7]/90 leading-relaxed drop-shadow-sm font-light max-w-md mx-auto">
             From single-origin espresso extraction to wholesome breakfast combos, explore our curated selection of delicious eats and treats.
           </p>
         </div>
       </section>
 
       {/* Menu Catalog Section */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-24 animate-fade-in-up">
         {/* Filters and Search Bar */}
-        <div className="flex flex-col lg:flex-row gap-6 justify-between items-center mb-10 pb-8 border-b border-borderColor">
+        <div className="flex flex-col lg:flex-row gap-6 justify-between items-center mb-12 pb-8 border-b border-borderColor/40">
           
           {/* Category Pills */}
           <div className="flex flex-wrap gap-2 w-full lg:w-auto">
             <button
               onClick={() => setSelectedCategory("all")}
-              className={`rounded-full px-5 py-2 text-xs font-semibold uppercase tracking-wider transition-all ${
+              className={`rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-300 border shadow-sm ${
                 selectedCategory === "all"
-                  ? "bg-primary text-white shadow-sm"
-                  : "bg-secondary hover:bg-borderColor/50 text-textMuted"
+                  ? "bg-primary text-white border-primary shadow-md hover:scale-[1.01]"
+                  : "bg-white hover:bg-secondary/40 text-textMuted border-borderColor/60 hover:text-primary"
               }`}
             >
               All Items
@@ -123,10 +138,10 @@ export default function MenuPage() {
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.slug)}
-                className={`rounded-full px-5 py-2 text-xs font-semibold uppercase tracking-wider transition-all ${
+                className={`rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-300 border shadow-sm ${
                   selectedCategory === cat.slug
-                    ? "bg-primary text-white shadow-sm"
-                    : "bg-secondary hover:bg-borderColor/50 text-textMuted"
+                    ? "bg-primary text-white border-primary shadow-md hover:scale-[1.01]"
+                    : "bg-white hover:bg-secondary/40 text-textMuted border-borderColor/60 hover:text-primary"
                 }`}
               >
                 {cat.name}
@@ -143,29 +158,29 @@ export default function MenuPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search menu..."
-                className="w-full rounded-full border border-borderColor bg-cardBg pl-10 pr-4 py-2 text-xs text-foreground focus:border-primary transition-all"
+                className="w-full rounded-full border border-borderColor bg-cardBg pl-10 pr-4 py-3 text-xs text-foreground focus:border-accent transition-all shadow-sm focus:ring-1 focus:ring-accent font-semibold"
               />
-              <Search className="absolute left-3.5 top-2.5 h-4 w-4 text-textMuted" />
+              <Search className="absolute left-3.5 top-3.5 h-4 w-4 text-textMuted" />
             </div>
 
             {/* Veg Switch */}
-            <label className="flex items-center space-x-2.5 cursor-pointer bg-cardBg border border-borderColor px-4 py-2 rounded-full shrink-0">
+            <label className="flex items-center space-x-2.5 cursor-pointer bg-cardBg border border-borderColor px-4 py-3 rounded-full shrink-0 shadow-sm hover:border-accent transition-all duration-200">
               <input
                 type="checkbox"
                 checked={vegOnly}
                 onChange={(e) => setVegOnly(e.target.checked)}
-                className="rounded border-borderColor text-primary focus:ring-primary h-4 w-4 cursor-pointer"
+                className="rounded border-borderColor text-primary focus:ring-accent h-4 w-4 cursor-pointer"
               />
-              <span className="text-xs font-semibold text-textMuted select-none">Veg Only</span>
+              <span className="text-xs font-bold text-textMuted select-none uppercase tracking-wider">Veg Only</span>
             </label>
 
             {/* Sort Dropdown */}
-            <div className="relative shrink-0 flex items-center bg-cardBg border border-borderColor rounded-full px-3 py-1">
+            <div className="relative shrink-0 flex items-center bg-cardBg border border-borderColor rounded-full px-4 py-3 shadow-sm hover:border-accent transition-all duration-200">
               <ArrowUpDown className="h-4 w-4 text-textMuted mr-2" />
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="bg-transparent text-xs font-semibold text-textMuted py-1 pr-6 border-none cursor-pointer focus:ring-0"
+                className="bg-transparent text-xs font-bold text-textMuted py-0.5 pr-6 border-none cursor-pointer focus:ring-0 uppercase tracking-wider"
               >
                 <option value="default">Sort: Default</option>
                 <option value="price-asc">Price: Low to High</option>
@@ -178,15 +193,15 @@ export default function MenuPage() {
 
         {/* Loading Spinner */}
         {loading && (
-          <div className="flex flex-col items-center justify-center py-24 space-y-3">
+          <div className="flex flex-col items-center justify-center py-24 space-y-4">
             <Loader2 className="h-10 w-10 text-primary animate-spin" />
-            <span className="text-xs font-semibold text-textMuted">Brewing menu options...</span>
+            <span className="text-xs font-bold text-textMuted uppercase tracking-wider">Brewing menu options...</span>
           </div>
         )}
 
         {/* Error State */}
         {error && (
-          <div className="text-center text-red-600 font-semibold py-12">
+          <div className="text-center text-red-600 font-bold py-12 text-sm uppercase tracking-wider">
             Failed to load menu: {error}
           </div>
         )}
@@ -201,9 +216,9 @@ export default function MenuPage() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-20 space-y-2 border border-dashed border-borderColor rounded-2xl bg-secondary/10">
-                <p className="font-serif text-lg font-bold text-foreground">No Items Found</p>
-                <p className="text-xs text-textMuted max-w-xs mx-auto">
+              <div className="text-center py-24 space-y-3 border border-dashed border-borderColor/60 rounded-3xl bg-[#FFF8E7]/10">
+                <p className="font-serif text-xl font-bold text-foreground">No Items Found</p>
+                <p className="text-xs text-textMuted max-w-xs mx-auto font-light leading-relaxed">
                   We couldn't find any menu items matching your specific filters. Try searching for something else!
                 </p>
               </div>
