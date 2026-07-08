@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: cafe_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: cafe_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d cafe_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - cafe_network
+
+volumes:
+  postgres_data:
+    name: cafe_postgres_data
+
+networks:
+  cafe_network:
+    name: cafe_network

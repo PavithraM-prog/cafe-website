@@ -61,31 +61,78 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing required order information" }, { status: 400 });
     }
 
-    // 1. Calculate loyalty points to award: 1 point for every $1 spent
+    // 1. Calculate loyalty points to award
     const pointsEarned = Math.floor(parseFloat(total));
 
-    // 2. Create the order in db
-    const newOrder = await db.order.create({
-      data: {
-        userId: user.id,
-        items: JSON.stringify(items), // JSON array of items as string for SQLite
-        total: parseFloat(total),
-        discount: discount ? parseFloat(discount) : 0,
-        address,
-        phone,
-        paymentStatus: "PAID", // Simulation of instant payment success
-        status: "PENDING",
-      },
-    });
-
-    // 3. Update user loyalty points
-    await db.user.update({
-      where: { id: user.id },
-      data: {
-        loyaltyPoints: {
-          increment: pointsEarned,
+    // 2. Create Order and all related records inside a transaction
+    const { newOrder } = await db.$transaction(async (tx) => {
+      const order = await tx.order.create({
+        data: {
+          userId: user.id,
+          items: JSON.stringify(items), // JSON array of items as string for backwards compatibility
+          total: parseFloat(total),
+          discount: discount ? parseFloat(discount) : 0,
+          address,
+          phone,
+          paymentStatus: "PAID",
+          status: "PENDING",
         },
-      },
+      });
+
+      // Insert into OrderItem table
+      const orderItemData = items.map((item: any) => ({
+        orderId: order.id,
+        menuItemId: item.productId || null,
+        name: item.name,
+        price: parseFloat(item.price),
+        quantity: parseInt(item.quantity),
+        image: item.image,
+      }));
+
+      await tx.orderItem.createMany({
+        data: orderItemData,
+      });
+
+      // Record simulated payment
+      await tx.payment.create({
+        data: {
+          orderId: order.id,
+          amount: parseFloat(total),
+          method: "CARD",
+          status: "COMPLETED",
+          transactionId: `TXN-${Math.random().toString(36).substring(2, 11).toUpperCase()}`,
+        },
+      });
+
+      // Record kitchen order queue status
+      await tx.kitchenOrder.create({
+        data: {
+          orderId: order.id,
+          status: "PENDING",
+        },
+      });
+
+      // Update user loyalty points
+      await tx.user.update({
+        where: { id: user.id },
+        data: {
+          loyaltyPoints: {
+            increment: pointsEarned,
+          },
+        },
+      });
+
+      // Write loyalty points transaction record
+      await tx.loyaltyPoint.create({
+        data: {
+          userId: user.id,
+          points: pointsEarned,
+          type: "EARNED",
+          reason: `Earned from Order #${order.id.slice(0, 8)}`,
+        },
+      });
+
+      return { newOrder: order };
     });
 
     // 4. If a coupon was used, we could invalidate it if single-use, but here we keep it simple

@@ -14,6 +14,7 @@ export async function POST(request: Request) {
     // Find user
     const user = await db.user.findUnique({
       where: { email: email.toLowerCase() },
+      include: { role: true },
     });
 
     if (!user) {
@@ -30,7 +31,7 @@ export async function POST(request: Request) {
     const token = signToken({
       id: user.id,
       email: user.email,
-      role: user.role,
+      role: user.role.name,
     });
 
     const response = NextResponse.json({
@@ -39,7 +40,7 @@ export async function POST(request: Request) {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role,
+        role: user.role.name,
         loyaltyPoints: user.loyaltyPoints,
       },
     });

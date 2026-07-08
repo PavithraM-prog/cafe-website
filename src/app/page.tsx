@@ -17,7 +17,7 @@ async function getLandingData() {
     }, {});
 
     // 2. Fetch featured products (take first 4)
-    const products = await db.product.findMany({
+    const products = await db.menuItem.findMany({
       take: 4,
       orderBy: { rating: "desc" },
     });

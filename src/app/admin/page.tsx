@@ -31,7 +31,11 @@ async function getStats() {
 
     // 4. Users count
     const totalCustomers = await db.user.count({
-      where: { role: "CUSTOMER" },
+      where: {
+        role: {
+          name: "CUSTOMER",
+        },
+      },
     });
 
     // 5. Fetch 5 recent orders
