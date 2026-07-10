@@ -103,34 +103,70 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing required order information" }, { status: 400 });
     }
 
-    // 1. Calculate loyalty points to award: 1 point for every $1 spent
+    // 1. Calculate loyalty points to award: 1 point for every ₹1 spent
     const pointsEarned = Math.floor(parseFloat(total));
 
     // 2. Create the order in db
     const newOrder = await db.order.create({
       data: {
-        userId: user.id,
-        items: JSON.stringify(items), // JSON array of items as string for SQLite
+        userId: (!isWalkIn && user) ? user.id : null,
+        items: typeof items === "string" ? items : JSON.stringify(items), // Support both raw JSON and stringified items
         total: parseFloat(total),
         discount: discount ? parseFloat(discount) : 0,
-        address,
-        phone,
+        address: address || (isWalkIn ? "Walk-in Customer" : ""),
+        phone: phone || (isWalkIn ? "N/A" : ""),
         paymentStatus: "PAID", // Simulation of instant payment success
-        status: "PENDING",
+        status: isWalkIn ? "DELIVERED" : "PENDING", // Walk-in is served immediately, so default to DELIVERED
+        source: source || "WEBSITE",
       },
     });
 
-    // 3. Update user loyalty points
-    await db.user.update({
-      where: { id: user.id },
-      data: {
-        loyaltyPoints: {
-          increment: pointsEarned,
+    // 3. Update customer loyalty points (if website order)
+    if (!isWalkIn && user && user.role === "CUSTOMER") {
+      await db.user.update({
+        where: { id: user.id },
+        data: {
+          loyaltyPoints: {
+            increment: pointsEarned,
+          },
         },
-      },
-    });
+      });
+      
+      // Also update LoyaltyMember model if exists for this customer's email
+      try {
+        await db.loyaltyMember.update({
+          where: { email: user.email },
+          data: {
+            points: {
+              increment: pointsEarned,
+            },
+          },
+        });
+      } catch (e) {
+        // Safe to ignore if they are not in the LoyaltyMember directory yet
+      }
+    }
 
-    // 4. If a coupon was used, we could invalidate it if single-use, but here we keep it simple
+    // 4. Update walk-in loyalty member points if email provided
+    if (isWalkIn && loyaltyEmail) {
+      try {
+        const lm = await db.loyaltyMember.findUnique({
+          where: { email: loyaltyEmail.toLowerCase() },
+        });
+        if (lm) {
+          await db.loyaltyMember.update({
+            where: { id: lm.id },
+            data: {
+              points: {
+                increment: pointsEarned,
+              },
+            },
+          });
+        }
+      } catch (e) {
+        console.error("Error updating walk-in loyalty member points:", e);
+      }
+    }
 
     return NextResponse.json({
       message: "Order placed successfully!",
