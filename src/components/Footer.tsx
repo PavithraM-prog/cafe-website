@@ -48,10 +48,16 @@ export const Footer: React.FC = () => {
                 <Link href="/menu" className="text-textMuted hover:text-primary transition-colors">Our Menu</Link>
               </li>
               <li>
-                <Link href="/reservations" className="text-textMuted hover:text-primary transition-colors">Book a Table</Link>
+                <Link href="/table-booking" className="text-textMuted hover:text-primary transition-colors">Book a Table</Link>
               </li>
               <li>
-                <Link href="/login" className="text-textMuted hover:text-primary transition-colors">My Account</Link>
+                <Link href="/event-booking" className="text-textMuted hover:text-primary transition-colors">Event Booking</Link>
+              </li>
+              <li>
+                <Link href="/about" className="text-textMuted hover:text-primary transition-colors">About Us</Link>
+              </li>
+              <li>
+                <Link href="/contact" className="text-textMuted hover:text-primary transition-colors">Contact</Link>
               </li>
             </ul>
           </div>

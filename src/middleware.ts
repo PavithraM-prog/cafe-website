@@ -44,7 +44,7 @@ export function middleware(request: NextRequest) {
   }
 
   // Protect Customer Pages
-  if (pathname.startsWith("/profile") || pathname.startsWith("/reservations") || pathname.startsWith("/checkout")) {
+  if (pathname.startsWith("/profile") || pathname.startsWith("/reservations") || pathname.startsWith("/checkout") || pathname.startsWith("/my-bookings")) {
     if (!decoded) {
       const url = new URL("/login", request.url);
       url.searchParams.set("redirect", pathname);
@@ -71,6 +71,7 @@ export const config = {
     "/profile/:path*",
     "/reservations/:path*",
     "/checkout/:path*",
+    "/my-bookings/:path*",
     "/login",
     "/register",
   ],

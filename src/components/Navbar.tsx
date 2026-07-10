@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
-import { ShoppingCart, Menu as MenuIcon, X, Coffee, User, LogOut, LayoutDashboard } from "lucide-react";
+import { ShoppingCart, Menu as MenuIcon, X, Coffee, User, LogOut, LayoutDashboard, CalendarCheck } from "lucide-react";
 
 export const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
@@ -18,7 +18,10 @@ export const Navbar: React.FC = () => {
   const navLinks = [
     { name: "Home", href: "/" },
     { name: "Menu", href: "/menu" },
-    { name: "Book Table", href: "/reservations" },
+    { name: "Table Booking", href: "/table-booking" },
+    { name: "Event Booking", href: "/event-booking" },
+    { name: "About", href: "/about" },
+    { name: "Contact", href: "/contact" },
   ];
 
   const handleLogout = async () => {
@@ -83,6 +86,14 @@ export const Navbar: React.FC = () => {
                     <span>Dashboard</span>
                   </Link>
                 )}
+
+                <Link
+                  href="/my-bookings"
+                  className="flex items-center space-x-1 text-sm font-medium text-textMuted hover:text-primary transition-colors"
+                >
+                  <CalendarCheck className="h-4 w-4" />
+                  <span>My Bookings</span>
+                </Link>
 
                 <Link
                   href="/profile"
@@ -176,6 +187,14 @@ export const Navbar: React.FC = () => {
                     <span>Admin Dashboard</span>
                   </Link>
                 )}
+                <Link
+                  href="/my-bookings"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center space-x-2 text-base font-medium text-textMuted px-2 py-1.5 rounded-md hover:bg-secondary"
+                >
+                  <CalendarCheck className="h-5 w-5" />
+                  <span>My Bookings</span>
+                </Link>
                 <Link
                   href="/profile"
                   onClick={() => setMobileMenuOpen(false)}
