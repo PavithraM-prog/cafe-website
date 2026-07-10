@@ -305,7 +305,7 @@ export default function EventBookingPage() {
                             {pkg.name}
                           </h3>
                           <span className="text-xl font-bold text-primary font-sans">
-                            ${pkg.price}
+                            ₹{pkg.price}
                           </span>
                         </div>
                       </div>
@@ -556,7 +556,7 @@ export default function EventBookingPage() {
                       </span>
                     </div>
                     <span className="text-lg font-bold text-primary font-sans">
-                      $
+                      ₹
                       {eventPackages.find((p) => p.name === selectedPackage)?.price || 0}
                     </span>
                   </div>

@@ -292,7 +292,7 @@ export default function ContactPage() {
                   },
                   {
                     q: "Do you cater for events?",
-                    a: "Absolutely! Check out our Event Booking page for packages starting at $299.",
+                    a: "Absolutely! Check out our Event Booking page for packages starting at ₹299.",
                   },
                 ].map((faq, i) => (
                   <div key={i} className="space-y-1">

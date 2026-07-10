@@ -141,7 +141,7 @@ export default function ProfilePage() {
             <div className="space-y-0.5">
               <span className="text-[10px] font-bold text-amber-200 uppercase tracking-widest block">Loyalty Points</span>
               <span className="text-2xl font-extrabold font-sans leading-none">{user?.loyaltyPoints || 0} pts</span>
-              <span className="text-[9px] text-white/80 block">Earn 1 point for every $1 spent!</span>
+              <span className="text-[9px] text-white/80 block">Earn 1 point for every ₹1 spent!</span>
             </div>
           </div>
         </div>
@@ -211,7 +211,7 @@ export default function ProfilePage() {
                                 </div>
                               </div>
                               <span className="text-xs font-bold text-primary font-sans shrink-0">
-                                ${(item.price * item.quantity).toFixed(2)}
+                                ₹{(item.price * item.quantity).toFixed(2)}
                               </span>
                             </div>
                           ))}
@@ -233,10 +233,10 @@ export default function ProfilePage() {
                         <div className="flex justify-end pt-3 border-t border-borderColor/40 text-xs font-medium">
                           <div className="text-right space-y-1">
                             {order.discount > 0 && (
-                              <p className="text-green-600">Discount: -${order.discount.toFixed(2)}</p>
+                              <p className="text-green-600">Discount: -₹{order.discount.toFixed(2)}</p>
                             )}
                             <p className="text-sm font-bold text-foreground">
-                              Paid Total: <span className="text-primary font-sans">${order.total.toFixed(2)}</span>
+                              Paid Total: <span className="text-primary font-sans">₹{order.total.toFixed(2)}</span>
                             </p>
                           </div>
                         </div>

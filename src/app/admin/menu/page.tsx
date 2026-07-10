@@ -246,7 +246,7 @@ export default function AdminMenuPage() {
 
                       {/* Price */}
                       <td className="px-6 py-4 font-bold font-sans text-neutral-800">
-                        ${product.price.toFixed(2)}
+                        ₹{product.price.toFixed(2)}
                       </td>
 
                       {/* Dietary */}
@@ -341,14 +341,14 @@ export default function AdminMenuPage() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-neutral-500">Price ($) *</label>
+                  <label className="text-xs font-semibold text-neutral-500">Price (₹) *</label>
                   <input
                     type="number"
                     step="0.01"
                     required
                     value={price}
                     onChange={(e) => setPrice(e.target.value)}
-                    placeholder="e.g. 4.95"
+                    placeholder="e.g. 150"
                     className="w-full rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-2 text-sm text-neutral-700 focus:border-amber-500 focus:bg-white transition-all font-sans"
                   />
                 </div>

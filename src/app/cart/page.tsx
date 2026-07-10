@@ -145,7 +145,7 @@ export default function CartPage() {
                   {/* Name and Price */}
                   <div className="flex-1 min-w-0">
                     <h3 className="font-serif text-sm font-bold text-foreground truncate">{item.name}</h3>
-                    <span className="text-sm font-bold text-primary font-sans">${item.price.toFixed(2)}</span>
+                    <span className="text-sm font-bold text-primary font-sans">₹{item.price.toFixed(2)}</span>
                   </div>
 
                   {/* Quantity Controls */}
@@ -238,7 +238,7 @@ export default function CartPage() {
                 <div className="space-y-2 text-xs leading-normal">
                   <div className="flex justify-between text-textMuted font-medium">
                     <span>Subtotal</span>
-                    <span className="font-sans font-semibold">${subtotal.toFixed(2)}</span>
+                    <span className="font-sans font-semibold">₹{subtotal.toFixed(2)}</span>
                   </div>
 
                   {coupon && (
@@ -247,7 +247,7 @@ export default function CartPage() {
                         <Tag className="h-3 w-3 mr-1" />
                         Discount ({coupon.code})
                       </span>
-                      <span className="font-sans font-semibold">-${discountAmount.toFixed(2)}</span>
+                      <span className="font-sans font-semibold">-₹{discountAmount.toFixed(2)}</span>
                     </div>
                   )}
 
@@ -256,7 +256,7 @@ export default function CartPage() {
                   <div className="flex justify-between text-foreground text-sm font-bold">
                     <span>Total</span>
                     <span className="font-sans text-primary text-base font-extrabold">
-                      ${total.toFixed(2)}
+                      ₹{total.toFixed(2)}
                     </span>
                   </div>
                 </div>

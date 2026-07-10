@@ -98,7 +98,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <div className="flex items-center justify-between mt-auto pt-3 border-t border-borderColor/60">
           <div className="flex flex-col">
             <span className="text-[10px] font-semibold text-textMuted uppercase tracking-wider">Price</span>
-            <span className="text-lg font-bold text-primary font-sans">${product.price.toFixed(2)}</span>
+            <span className="text-lg font-bold text-primary font-sans">₹{product.price}</span>
           </div>
 
           <button

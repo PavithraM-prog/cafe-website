@@ -79,7 +79,7 @@ export const eventPackages: EventPackage[] = [
     id: "pkg-basic",
     name: "Basic Package",
     tier: "basic",
-    price: 299,
+    price: 4999,
     features: [
       "Standard Decoration",
       "Standard Food Menu",
@@ -92,7 +92,7 @@ export const eventPackages: EventPackage[] = [
     id: "pkg-premium",
     name: "Premium Package",
     tier: "premium",
-    price: 599,
+    price: 9999,
     popular: true,
     features: [
       "Premium Decoration",
@@ -108,7 +108,7 @@ export const eventPackages: EventPackage[] = [
     id: "pkg-luxury",
     name: "Luxury Package",
     tier: "luxury",
-    price: 999,
+    price: 19999,
     features: [
       "Premium Decoration",
       "Live Music Performance",

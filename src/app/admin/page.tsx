@@ -77,7 +77,7 @@ export default async function AdminDashboardPage() {
   const cards = [
     {
       title: "Total Revenue",
-      value: `$${stats.totalSales.toFixed(2)}`,
+      value: `₹${stats.totalSales.toFixed(2)}`,
       desc: "Gross sales from orders",
       icon: DollarSign,
       color: "text-green-600 bg-green-50 border-green-100",
@@ -168,7 +168,7 @@ export default async function AdminDashboardPage() {
                   {stats.recentOrders.map((order) => (
                     <tr key={order.id} className="text-neutral-600">
                       <td className="py-3.5 font-mono">{order.id.slice(0, 8)}...</td>
-                      <td className="py-3.5 text-neutral-800 font-bold font-sans">${order.total.toFixed(2)}</td>
+                      <td className="py-3.5 text-neutral-800 font-bold font-sans">₹{order.total.toFixed(2)}</td>
                       <td className="py-3.5">
                         <span
                           className={`rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${

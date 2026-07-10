@@ -160,7 +160,7 @@ export default function AdminOrdersPage() {
                               {item.name} <strong className="text-neutral-400 font-normal">x{item.quantity}</strong>
                             </span>
                             <span className="font-bold text-neutral-800 font-sans">
-                              ${(item.price * item.quantity).toFixed(2)}
+                              ₹{(item.price * item.quantity).toFixed(2)}
                             </span>
                           </div>
                         ))}
@@ -183,7 +183,7 @@ export default function AdminOrdersPage() {
                     <div className="border-t border-neutral-200 p-5 bg-neutral-50/50 flex flex-col space-y-4">
                       <div className="flex justify-between items-center text-xs font-bold">
                         <span className="text-neutral-500">Order Total</span>
-                        <span className="text-sm text-amber-700 font-sans">${order.total.toFixed(2)}</span>
+                        <span className="text-sm text-amber-700 font-sans">₹{order.total.toFixed(2)}</span>
                       </div>
 
                       {/* Transition button triggers */}

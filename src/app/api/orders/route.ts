@@ -61,7 +61,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing required order information" }, { status: 400 });
     }
 
-    // 1. Calculate loyalty points to award: 1 point for every $1 spent
+    // 1. Calculate loyalty points to award: 1 point for every ₹1 spent
     const pointsEarned = Math.floor(parseFloat(total));
 
     // 2. Create the order in db

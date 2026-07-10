@@ -326,7 +326,7 @@ export default function AdminContentPage() {
                   className="w-full rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-2 text-sm text-neutral-700 focus:border-amber-500 focus:bg-white transition-all cursor-pointer"
                 >
                   <option value="PERCENTAGE">Percentage (%)</option>
-                  <option value="FIXED">Fixed Amount ($)</option>
+                  <option value="FIXED">Fixed Amount (₹)</option>
                 </select>
               </div>
 
@@ -362,7 +362,7 @@ export default function AdminContentPage() {
                         <span className="block text-[10px] text-neutral-500 font-semibold font-sans">
                           {coupon.discountType === "PERCENTAGE"
                             ? `${coupon.discountValue}% discount`
-                            : `$${coupon.discountValue.toFixed(2)} flat discount`}
+                            : `₹${coupon.discountValue.toFixed(2)} flat discount`}
                         </span>
                       </div>
 
