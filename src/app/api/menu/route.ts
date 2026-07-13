@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
+import { logger } from "@/lib/logger";
 
 // Helper to verify if requester is ADMIN or STAFF
 async function checkAdminAuth() {
@@ -51,7 +52,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ categories, products });
   } catch (error) {
-    console.error("Error fetching menu:", error);
+    logger.error("Error fetching menu", error);
     return NextResponse.json({ error: "Failed to fetch menu items" }, { status: 500 });
   }
 }
@@ -89,7 +90,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ message: "Product created successfully", product: newProduct }, { status: 201 });
   } catch (error) {
-    console.error("Error creating product:", error);
+    logger.error("Error creating product", error);
     return NextResponse.json({ error: "Server error during product creation" }, { status: 500 });
   }
 }

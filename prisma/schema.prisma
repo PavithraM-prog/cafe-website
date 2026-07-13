@@ -56,6 +56,7 @@ model MenuItem {
   availability Boolean      @default(true)
   isVeg        Boolean      @default(true)
   categoryId   String
+  availablePieces Int        @default(10)
   deletedAt    DateTime?
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
@@ -73,12 +74,12 @@ model Order {
   discount      Float          @default(0)
   paymentStatus String         @default("PENDING")
   status        String         @default("PENDING")
-  source        String         @default("WEBSITE") // WEBSITE, WALK_IN
   address       String
   phone         String
   deletedAt     DateTime?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
+  source        String         @default("WEBSITE")
   kitchenOrders KitchenOrder[]
   user          User?          @relation(fields: [userId], references: [id])
   orderItems    OrderItem[]
@@ -113,7 +114,7 @@ model Reservation {
   date      String
   time      String
   guests    Int
-  status    String   @default("PENDING") // PENDING, APPROVED, REJECTED, CANCELLED
+  status    String   @default("PENDING")
   note      String?
   tableId   String?
   createdAt DateTime @default(now())
@@ -318,7 +319,7 @@ model Staff {
   id             String          @id @default(uuid())
   name           String
   email          String          @unique
-  role           String          // BARISTA, CHEF, MANAGER, SERVER
+  role           String
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   attendanceLogs AttendanceLog[]
@@ -327,10 +328,10 @@ model Staff {
 model AttendanceLog {
   id         String    @id @default(uuid())
   staffId    String
-  staff      Staff     @relation(fields: [staffId], references: [id], onDelete: Cascade)
-  date       String    // Format: YYYY-MM-DD
+  date       String
   loginTime  DateTime  @default(now())
   logoutTime DateTime?
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
+  staff      Staff     @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }

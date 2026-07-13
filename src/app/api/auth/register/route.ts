@@ -1,10 +1,16 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import bcrypt from "bcryptjs";
+import { logger } from "@/lib/logger";
 
 export async function POST(request: Request) {
+  let email: string | undefined;
+  let name: string | undefined;
   try {
-    const { name, email, password } = await request.json();
+    const body = await request.json();
+    email = body.email;
+    name = body.name;
+    const { password } = body;
 
     if (!name || !email || !password) {
       return NextResponse.json({ error: "Please enter all required fields" }, { status: 400 });
@@ -50,7 +56,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ message: "Registration successful!" }, { status: 201 });
   } catch (error: any) {
-    console.error("Registration error:", error);
+    logger.error("Registration error", error, { email, name });
     return NextResponse.json({ error: "Server error during registration" }, { status: 500 });
   }
 }

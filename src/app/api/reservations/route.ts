@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
+import { logger } from "@/lib/logger";
 
 async function getAuthUser() {
   const cookieStore = await cookies();
@@ -45,7 +46,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ reservations });
   } catch (error) {
-    console.error("Error fetching reservations:", error);
+    logger.error("Error fetching reservations", error);
     return NextResponse.json({ error: "Failed to load reservations" }, { status: 500 });
   }
 }
@@ -78,13 +79,15 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ message: "Table reservation requested successfully", reservation }, { status: 201 });
   } catch (error) {
-    console.error("Error creating reservation:", error);
+    logger.error("Error creating reservation", error);
     return NextResponse.json({ error: "Server error during reservation creation" }, { status: 500 });
   }
 }
 
 // PUT /api/reservations - Update reservation status (Admin Only)
 export async function PUT(request: Request) {
+  let id: string | undefined;
+  let status: string | undefined;
   try {
     const user = await getAuthUser();
     if (!user || (user.role !== "ADMIN" && user.role !== "STAFF")) {
@@ -92,7 +95,8 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    const { id, status } = body; // status: APPROVED, REJECTED, CANCELLED, COMPLETED
+    id = body.id;
+    status = body.status;
 
     if (!id || !status) {
       return NextResponse.json({ error: "Missing reservation ID or status" }, { status: 400 });
@@ -105,7 +109,7 @@ export async function PUT(request: Request) {
 
     return NextResponse.json({ message: `Reservation status updated to ${status}`, reservation: updated });
   } catch (error) {
-    console.error("Error updating reservation:", error);
+    logger.error("Error updating reservation", error, { id, status });
     return NextResponse.json({ error: "Server error during reservation update" }, { status: 500 });
   }
 }
