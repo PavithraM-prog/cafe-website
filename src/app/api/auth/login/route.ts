@@ -2,10 +2,14 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { signToken } from "@/lib/jwt";
+import { logger } from "@/lib/logger";
 
 export async function POST(request: Request) {
+  let email: string | undefined;
   try {
-    const { email, password } = await request.json();
+    const body = await request.json();
+    email = body.email;
+    const { password } = body;
 
     if (!email || !password) {
       return NextResponse.json({ error: "Please enter email and password" }, { status: 400 });
@@ -58,7 +62,7 @@ export async function POST(request: Request) {
 
     return response;
   } catch (error: any) {
-    console.error("Login error:", error);
+    logger.error("Login error", error, { email });
     return NextResponse.json({ error: "Server error during login" }, { status: 500 });
   }
 }

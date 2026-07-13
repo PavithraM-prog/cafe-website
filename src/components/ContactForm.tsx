@@ -24,7 +24,7 @@ export const ContactForm: React.FC = () => {
       setError(null);
       
       // Simulate API submission call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 100));
       
       setSuccess(true);
       setName("");

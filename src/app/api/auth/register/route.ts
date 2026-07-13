@@ -1,14 +1,11 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import bcrypt from "bcryptjs";
+import { logger } from "@/lib/logger";
 
 export async function POST(request: Request) {
-  console.log("[Registration API] Received registration request.");
   try {
-    const body = await request.json();
-    const { name, email, password } = body;
-
-    console.log(`[Registration API] Validating inputs for name: "${name}", email: "${email?.toLowerCase()}"`);
+    const { name, email, password } = await request.json();
 
     if (!name || !email || !password) {
       console.warn("[Registration API] Missing required fields.");
@@ -42,7 +39,7 @@ export async function POST(request: Request) {
     let customerRole = await db.role.findUnique({
       where: { name: "CUSTOMER" },
     });
-    
+
     if (!customerRole) {
       console.log("[Registration API] CUSTOMER role not found. Creating it...");
       try {
@@ -80,7 +77,7 @@ export async function POST(request: Request) {
     console.log(`[Registration API] Registration successful. User created with ID: ${newUser.id}`);
     return NextResponse.json({ message: "Registration successful!" }, { status: 201 });
   } catch (error: any) {
-    console.error("[Registration API] CRITICAL ERROR during registration:", error);
-    return NextResponse.json({ error: "Server error during registration", details: error.message }, { status: 500 });
+    console.error("Registration error:", error);
+    return NextResponse.json({ error: "Server error during registration" }, { status: 500 });
   }
 }

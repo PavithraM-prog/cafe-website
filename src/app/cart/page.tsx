@@ -71,9 +71,30 @@ export default function CartPage() {
       return;
     }
 
+    setCheckoutError(null);
+    setPaymentError(null);
+    setShowPaymentModal(true);
+  };
+
+  const handleProcessPayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!cardNumber || !cardExpiry || !cardCvc || !cardName) {
+      setPaymentError("Please fill out all payment fields.");
+      return;
+    }
+
     try {
-      setCheckoutLoading(true);
-      setCheckoutError(null);
+      setPaymentProcessing(true);
+      setPaymentError(null);
+
+      // Simulate payment gateway response delay
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      // Test payment logic:
+      // If card number contains "4000", simulate card decline
+      if (cardNumber.replace(/\s/g, "").includes("4000000000000002")) {
+        throw new Error("Your card was declined. Please use the valid test card provided.");
+      }
 
       // Create Order
       const res = await fetch("/api/orders", {
@@ -93,7 +114,9 @@ export default function CartPage() {
       if (res.ok) {
         alert(`Order placed successfully! You earned ${data.pointsEarned} loyalty points!`);
         clearCart();
-        router.push("/profile");
+        setShowPaymentModal(false);
+        // Redirect directly to the live Order Tracking page
+        router.push(`/orders/${data.order.id}`);
       } else {
         setCheckoutError(data.error || "Failed to place order");
       }

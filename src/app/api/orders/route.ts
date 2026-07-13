@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
+import { logger } from "@/lib/logger";
 
 async function getAuthUser() {
   const cookieStore = await cookies();
@@ -79,7 +80,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ orders });
   } catch (error) {
-    console.error("Error fetching orders:", error);
+    logger.error("Error fetching orders", error);
     return NextResponse.json({ error: "Failed to fetch orders" }, { status: 500 });
   }
 }
@@ -109,28 +110,27 @@ export async function POST(request: Request) {
     // 2. Create the order in db
     const newOrder = await db.order.create({
       data: {
-        userId: user?.id || null,
+        userId: user.id,
         items: JSON.stringify(items), // JSON array of items as string for SQLite
         total: parseFloat(total),
         discount: discount ? parseFloat(discount) : 0,
-        address,
-        phone,
+        address: address || (isWalkIn ? "Walk-in Customer" : ""),
+        phone: phone || (isWalkIn ? "N/A" : ""),
         paymentStatus: "PAID", // Simulation of instant payment success
-        status: "PENDING",
+        status: isWalkIn ? "DELIVERED" : "PENDING", // Walk-in is served immediately, so default to DELIVERED
+        source: source || "WEBSITE",
       },
     });
 
     // 3. Update user loyalty points
-    if (user) {
-      await db.user.update({
-        where: { id: user.id },
-        data: {
-          loyaltyPoints: {
-            increment: pointsEarned,
-          },
+    await db.user.update({
+      where: { id: user.id },
+      data: {
+        loyaltyPoints: {
+          increment: pointsEarned,
         },
-      });
-    }
+      },
+    });
 
     // 4. If a coupon was used, we could invalidate it if single-use, but here we keep it simple
 
@@ -140,13 +140,15 @@ export async function POST(request: Request) {
       pointsEarned,
     }, { status: 201 });
   } catch (error) {
-    console.error("Error creating order:", error);
+    logger.error("Error creating order", error);
     return NextResponse.json({ error: "Server error during checkout" }, { status: 500 });
   }
 }
 
 // PUT /api/orders - Update order status (Admin/Staff only)
 export async function PUT(request: Request) {
+  let id: string | undefined;
+  let status: string | undefined;
   try {
     const user = await getAuthUser();
     if (!user || (user.role !== "ADMIN" && user.role !== "STAFF")) {
@@ -154,7 +156,8 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    const { id, status } = body; // status: PENDING, PREPARING, READY, DELIVERED, CANCELLED
+    id = body.id;
+    status = body.status;
 
     if (!id || !status) {
       return NextResponse.json({ error: "Missing order ID or status" }, { status: 400 });
@@ -167,7 +170,7 @@ export async function PUT(request: Request) {
 
     return NextResponse.json({ message: `Order status updated to ${status}`, order: updatedOrder });
   } catch (error) {
-    console.error("Error updating order status:", error);
+    logger.error("Error updating order status", error, { id, status });
     return NextResponse.json({ error: "Server error updating order status" }, { status: 500 });
   }
 }

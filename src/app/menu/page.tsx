@@ -16,6 +16,7 @@ interface Product {
   availability: boolean;
   isVeg: boolean;
   categoryId: string;
+  availablePieces: number;
 }
 
 interface Category {
@@ -58,6 +59,11 @@ export default function MenuPage() {
   // Filter and Sort Logic
   const filteredProducts = products
     .filter((product) => {
+      // Hide sold out items
+      if (!product.availability || product.availablePieces <= 0) {
+        return false;
+      }
+
       // Category Filter
       if (selectedCategory !== "all") {
         const cat = categories.find((c) => c.slug === selectedCategory);

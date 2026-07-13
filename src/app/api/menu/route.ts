@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
+import { logger } from "@/lib/logger";
 
 // Helper to verify if requester is ADMIN or STAFF
 async function checkAdminAuth() {
@@ -51,7 +52,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ categories, products });
   } catch (error) {
-    console.error("Error fetching menu:", error);
+    logger.error("Error fetching menu", error);
     return NextResponse.json({ error: "Failed to fetch menu items" }, { status: 500 });
   }
 }
@@ -64,12 +65,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized access" }, { status: 403 });
     }
 
-    const { name, description, price, image, rating, availability, isVeg, categoryId } =
+    const { name, description, price, image, rating, availability, isVeg, categoryId, availablePieces } =
       await request.json();
 
     if (!name || !price || !categoryId) {
       return NextResponse.json({ error: "Missing required product fields" }, { status: 400 });
     }
+
+    const pieces = availablePieces !== undefined ? parseInt(availablePieces) : 10;
+    const isAvailable = availability !== undefined ? availability : (pieces > 0);
 
     const newProduct = await db.menuItem.create({
       data: {
@@ -78,9 +82,10 @@ export async function POST(request: Request) {
         price: parseFloat(price),
         image: image || "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&q=80&w=600",
         rating: rating ? parseFloat(rating) : 5.0,
-        availability: availability !== undefined ? availability : true,
+        availability: isAvailable,
         isVeg: isVeg !== undefined ? isVeg : true,
         categoryId,
+        availablePieces: pieces,
       },
       include: {
         category: true,
@@ -89,7 +94,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ message: "Product created successfully", product: newProduct }, { status: 201 });
   } catch (error) {
-    console.error("Error creating product:", error);
+    logger.error("Error creating product", error);
     return NextResponse.json({ error: "Server error during product creation" }, { status: 500 });
   }
 }
