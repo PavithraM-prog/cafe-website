@@ -16,7 +16,7 @@ export const NewsletterForm: React.FC = () => {
       setLoading(true);
       
       // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+      await new Promise((resolve) => setTimeout(resolve, 100));
       
       setSubscribed(true);
       setEmail("");

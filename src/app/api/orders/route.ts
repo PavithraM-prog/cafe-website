@@ -122,6 +122,33 @@ export async function POST(request: Request) {
       },
     });
 
+    // Decrement stock for ordered items
+    try {
+      const parsedItems = typeof items === "string" ? JSON.parse(items) : items;
+      if (Array.isArray(parsedItems)) {
+        for (const item of parsedItems) {
+          const itemId = item.productId || item.id;
+          if (itemId) {
+            const menuItem = await db.menuItem.findUnique({
+              where: { id: itemId },
+            });
+            if (menuItem) {
+              const newCount = Math.max(0, menuItem.availablePieces - (item.quantity || 1));
+              await db.menuItem.update({
+                where: { id: itemId },
+                data: {
+                  availablePieces: newCount,
+                  availability: newCount > 0 ? menuItem.availability : false,
+                },
+              });
+            }
+          }
+        }
+      }
+    } catch (e) {
+      logger.error("Error updating availablePieces during order checkout", e);
+    }
+
     // 3. Update customer loyalty points (if website order)
     if (!isWalkIn && user && user.role === "CUSTOMER") {
       await db.user.update({

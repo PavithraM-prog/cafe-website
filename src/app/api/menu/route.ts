@@ -65,12 +65,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized access" }, { status: 403 });
     }
 
-    const { name, description, price, image, rating, availability, isVeg, categoryId } =
+    const { name, description, price, image, rating, availability, isVeg, categoryId, availablePieces } =
       await request.json();
 
     if (!name || !price || !categoryId) {
       return NextResponse.json({ error: "Missing required product fields" }, { status: 400 });
     }
+
+    const pieces = availablePieces !== undefined ? parseInt(availablePieces) : 10;
+    const isAvailable = availability !== undefined ? availability : (pieces > 0);
 
     const newProduct = await db.menuItem.create({
       data: {
@@ -79,9 +82,10 @@ export async function POST(request: Request) {
         price: parseFloat(price),
         image: image || "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&q=80&w=600",
         rating: rating ? parseFloat(rating) : 5.0,
-        availability: availability !== undefined ? availability : true,
+        availability: isAvailable,
         isVeg: isVeg !== undefined ? isVeg : true,
         categoryId,
+        availablePieces: pieces,
       },
       include: {
         category: true,

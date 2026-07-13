@@ -18,8 +18,14 @@ async function getLandingData() {
       return acc;
     }, {});
 
-    // 2. Fetch featured products (take first 4)
+    // 2. Fetch featured products (take first 4) that are available in stock
     const products = await db.menuItem.findMany({
+      where: {
+        availability: true,
+        availablePieces: {
+          gt: 0,
+        },
+      },
       take: 4,
       orderBy: { rating: "desc" },
     });

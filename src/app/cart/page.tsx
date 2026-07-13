@@ -98,8 +98,8 @@ export default function CartPage() {
       setPaymentProcessing(true);
       setPaymentError(null);
 
-      // Simulate payment gateway response delay
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Simulate brief payment gateway response delay
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Test payment logic:
       // If card number contains "4000", simulate card decline
@@ -125,8 +125,8 @@ export default function CartPage() {
       if (res.ok) {
         clearCart();
         setShowPaymentModal(false);
-        // Redirect directly to the live Order Tracking page
-        router.push(`/orders/${data.order.id}`);
+        // Redirect directly to the User Profile & Orders dashboard page
+        router.push("/profile");
       } else {
         setPaymentError(data.error || "Failed to place order database record.");
       }

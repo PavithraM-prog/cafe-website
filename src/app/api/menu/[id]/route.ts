@@ -22,7 +22,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
     const { id } = await params;
     const body = await request.json();
-    const { name, description, price, image, rating, availability, isVeg, categoryId } = body;
+    const { name, description, price, image, rating, availability, isVeg, categoryId, availablePieces } = body;
 
     // Verify product exists
     const existingProduct = await db.menuItem.findUnique({
@@ -33,6 +33,28 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
+    const pieces = availablePieces !== undefined ? parseInt(availablePieces) : undefined;
+    let finalAvailability = availability;
+    let finalPieces = pieces;
+
+    // Sync stock and availability
+    if (pieces !== undefined) {
+      if (pieces <= 0) {
+        finalAvailability = false;
+        finalPieces = 0;
+      } else if (availability === undefined && !existingProduct.availability) {
+        finalAvailability = true;
+      }
+    }
+
+    if (availability !== undefined) {
+      if (!availability) {
+        finalPieces = 0;
+      } else if (availability && (pieces !== undefined ? pieces <= 0 : existingProduct.availablePieces <= 0)) {
+        finalPieces = 10;
+      }
+    }
+
     const updatedProduct = await db.menuItem.update({
       where: { id },
       data: {
@@ -41,9 +63,10 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         price: price !== undefined ? parseFloat(price) : existingProduct.price,
         image: image !== undefined ? image : existingProduct.image,
         rating: rating !== undefined ? parseFloat(rating) : existingProduct.rating,
-        availability: availability !== undefined ? availability : existingProduct.availability,
+        availability: finalAvailability !== undefined ? finalAvailability : existingProduct.availability,
         isVeg: isVeg !== undefined ? isVeg : existingProduct.isVeg,
         categoryId: categoryId !== undefined ? categoryId : existingProduct.categoryId,
+        availablePieces: finalPieces !== undefined ? finalPieces : existingProduct.availablePieces,
       },
     });
 

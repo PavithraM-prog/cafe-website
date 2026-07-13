@@ -15,6 +15,7 @@ interface Product {
   isVeg: boolean;
   categoryId: string;
   category?: { name: string };
+  availablePieces: number;
 }
 
 interface Category {
@@ -40,6 +41,7 @@ export default function AdminMenuPage() {
   const [isVeg, setIsVeg] = useState(true);
   const [availability, setAvailability] = useState(true);
   const [categoryId, setCategoryId] = useState("");
+  const [availablePieces, setAvailablePieces] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
   const [formLoading, setFormLoading] = useState(false);
 
@@ -74,6 +76,7 @@ export default function AdminMenuPage() {
     setImage("");
     setIsVeg(true);
     setAvailability(true);
+    setAvailablePieces("10");
     if (categories.length > 0) setCategoryId(categories[0].id);
     setFormError(null);
     setModalOpen(true);
@@ -88,6 +91,7 @@ export default function AdminMenuPage() {
     setIsVeg(product.isVeg);
     setAvailability(product.availability);
     setCategoryId(product.categoryId);
+    setAvailablePieces(product.availablePieces.toString());
     setFormError(null);
     setModalOpen(true);
   };
@@ -111,6 +115,7 @@ export default function AdminMenuPage() {
         isVeg,
         availability,
         categoryId,
+        availablePieces: parseInt(availablePieces) || 0,
       };
 
       const url = editingProduct ? `/api/menu/${editingProduct.id}` : "/api/menu";
@@ -211,6 +216,7 @@ export default function AdminMenuPage() {
                   <th className="px-6 py-4">Item Details</th>
                   <th className="px-6 py-4">Category</th>
                   <th className="px-6 py-4">Price</th>
+                  <th className="px-6 py-4">Available Stock</th>
                   <th className="px-6 py-4">Diet</th>
                   <th className="px-6 py-4">Status</th>
                   <th className="px-6 py-4 text-right">Actions</th>
@@ -248,6 +254,11 @@ export default function AdminMenuPage() {
                       {/* Price */}
                       <td className="px-6 py-4 font-bold font-sans text-neutral-800">
                         {formatCurrency(product.price)}
+                      </td>
+
+                      {/* Available Pieces */}
+                      <td className="px-6 py-4 font-bold font-sans text-neutral-800">
+                        {product.availablePieces} pcs
                       </td>
 
                       {/* Dietary */}
@@ -328,8 +339,8 @@ export default function AdminMenuPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              {/* Product name & price */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Product name, price & available stock */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-neutral-500">Product Name *</label>
                   <input
@@ -350,6 +361,17 @@ export default function AdminMenuPage() {
                     value={price}
                     onChange={(e) => setPrice(e.target.value)}
                     placeholder="e.g. 4.95"
+                    className="w-full rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-2 text-sm text-neutral-700 focus:border-amber-500 focus:bg-white transition-all font-sans"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-neutral-500">Available Pieces *</label>
+                  <input
+                    type="number"
+                    required
+                    value={availablePieces}
+                    onChange={(e) => setAvailablePieces(e.target.value)}
+                    placeholder="e.g. 10"
                     className="w-full rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-2 text-sm text-neutral-700 focus:border-amber-500 focus:bg-white transition-all font-sans"
                   />
                 </div>

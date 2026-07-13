@@ -45,7 +45,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   return (
-    <div className="min-h-screen bg-[#faf8f5] flex flex-col md:flex-row text-[#2d1e18] font-sans antialiased">
+    <div className="min-h-screen md:h-screen md:overflow-hidden bg-[#faf8f5] flex flex-col md:flex-row text-[#2d1e18] font-sans antialiased">
       {/* Mobile Header Bar */}
       <div className="flex md:hidden items-center justify-between bg-[#1d140e] text-white px-4 py-4 shrink-0 shadow-md">
         <Link href="/" className="flex items-center space-x-2 text-white font-bold text-lg">
