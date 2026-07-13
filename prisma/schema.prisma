@@ -1,10 +1,10 @@
-datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
-}
-
 generator client {
   provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -12,12 +12,12 @@ model User {
   name          String
   email         String        @unique
   password      String
-  role          String        @default("CUSTOMER") // CUSTOMER, STAFF, ADMIN
+  role          String        @default("CUSTOMER")
   loyaltyPoints Int           @default(0)
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
-  reservations  Reservation[]
   orders        Order[]
+  reservations  Reservation[]
   reviews       Review[]
 }
 
@@ -38,57 +38,57 @@ model Product {
   availability Boolean  @default(true)
   isVeg        Boolean  @default(true)
   categoryId   String
-  category     Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  category     Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 }
 
 model Reservation {
   id        String   @id @default(uuid())
   userId    String?
-  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   name      String
   email     String
   phone     String
-  date      String   // Format: YYYY-MM-DD
-  time      String   // Format: HH:MM
+  date      String
+  time      String
   guests    Int
-  status    String   @default("PENDING") // PENDING, APPROVED, REJECTED, CANCELLED
+  status    String   @default("PENDING")
   note      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  user      User?    @relation(fields: [userId], references: [id])
 }
 
 model Order {
   id            String   @id @default(uuid())
   userId        String?
-  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  items         String   // Array of items: { productId: string, name: string, price: number, quantity: number, image: string }
+  items         String
   total         Float
   discount      Float    @default(0)
-  paymentStatus String   @default("PENDING") // PENDING, PAID, FAILED
-  status        String   @default("PENDING") // PENDING, PREPARING, READY, DELIVERED, CANCELLED
+  paymentStatus String   @default("PENDING")
+  status        String   @default("PENDING")
   address       String
   phone         String
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  user          User?    @relation(fields: [userId], references: [id])
 }
 
 model Review {
   id        String   @id @default(uuid())
   userId    String?
-  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   name      String
   rating    Int
   comment   String
-  status    String   @default("PENDING") // PENDING, APPROVED, HIDDEN
+  status    String   @default("PENDING")
   createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id])
 }
 
 model Coupon {
   id            String   @id @default(uuid())
   code          String   @unique
-  discountType  String   // PERCENTAGE or FIXED
+  discountType  String
   discountValue Float
   isActive      Boolean  @default(true)
   createdAt     DateTime @default(now())
