@@ -4,59 +4,80 @@ import bcrypt from "bcryptjs";
 import { logger } from "@/lib/logger";
 
 export async function POST(request: Request) {
-  let email: string | undefined;
-  let name: string | undefined;
   try {
-    const body = await request.json();
-    email = body.email;
-    name = body.name;
-    const { password } = body;
+    const { name, email, password } = await request.json();
 
     if (!name || !email || !password) {
+      console.warn("[Registration API] Missing required fields.");
       return NextResponse.json({ error: "Please enter all required fields" }, { status: 400 });
     }
 
     if (password.length < 6) {
+      console.warn("[Registration API] Password too short.");
       return NextResponse.json({ error: "Password must be at least 6 characters long" }, { status: 400 });
     }
 
+    const lowercaseEmail = email.toLowerCase();
+
     // Check if user already exists
+    console.log(`[Registration API] Checking if user exists with email: ${lowercaseEmail}`);
     const existingUser = await db.user.findUnique({
-      where: { email: email.toLowerCase() },
+      where: { email: lowercaseEmail },
     });
 
     if (existingUser) {
+      console.warn(`[Registration API] User already exists with email: ${lowercaseEmail}`);
       return NextResponse.json({ error: "An account with this email already exists" }, { status: 400 });
     }
 
     // Hash password
+    console.log("[Registration API] Hashing user password...");
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Get role ID for CUSTOMER
+    console.log("[Registration API] Querying CUSTOMER role...");
     let customerRole = await db.role.findUnique({
       where: { name: "CUSTOMER" },
     });
-    
+
     if (!customerRole) {
-      customerRole = await db.role.create({
-        data: { name: "CUSTOMER" },
-      });
+      console.log("[Registration API] CUSTOMER role not found. Creating it...");
+      try {
+        customerRole = await db.role.create({
+          data: { name: "CUSTOMER" },
+        });
+        console.log(`[Registration API] CUSTOMER role created with ID: ${customerRole.id}`);
+      } catch (roleErr: any) {
+        console.warn("[Registration API] Concurrency issue during role creation, attempting re-query:", roleErr.message);
+        customerRole = await db.role.findUnique({
+          where: { name: "CUSTOMER" },
+        });
+      }
+    } else {
+      console.log(`[Registration API] CUSTOMER role found with ID: ${customerRole.id}`);
+    }
+
+    if (!customerRole) {
+      console.error("[Registration API] Failed to resolve CUSTOMER role.");
+      throw new Error("Unable to resolve CUSTOMER role for new user.");
     }
 
     // Create user
-    await db.user.create({
+    console.log(`[Registration API] Creating user record for: ${lowercaseEmail}`);
+    const newUser = await db.user.create({
       data: {
         name,
-        email: email.toLowerCase(),
+        email: lowercaseEmail,
         password: hashedPassword,
         roleId: customerRole.id,
         loyaltyPoints: 0,
       },
     });
 
+    console.log(`[Registration API] Registration successful. User created with ID: ${newUser.id}`);
     return NextResponse.json({ message: "Registration successful!" }, { status: 201 });
   } catch (error: any) {
-    logger.error("Registration error", error, { email, name });
+    console.error("Registration error:", error);
     return NextResponse.json({ error: "Server error during registration" }, { status: 500 });
   }
 }
