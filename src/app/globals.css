@@ -3,40 +3,40 @@
 @tailwind utilities;
 
 :root {
-  --background: #faf8f5; /* Soft warm cream */
-  --foreground: #2d1e18; /* Dark coffee brown */
+  --background: #F5EFE6; /* Soft warm beige background */
+  --foreground: #4A2C2A; /* Deep coffee brown */
   
-  --primary: #8c6239; /* Rich brown */
-  --primary-hover: #734f2d;
+  --primary: #4A2C2A; /* Deep coffee brown */
+  --primary-hover: #371e1d;
   
-  --secondary: #f2ede4; /* Light warm cream-beige */
+  --secondary: #FFF8E7; /* Lux Cream background */
   
-  --accent: #d97706; /* Cozy amber */
-  --accent-hover: #b45309;
+  --accent: #D9A441; /* Warm caramel gold */
+  --accent-hover: #C59134;
   
   --card-bg: #ffffff;
-  --border: #e8dfd7;
-  --text-muted: #705e55;
+  --border: #E6DDD0;
+  --text-muted: #7A635B;
   
   --font-outfit: 'Outfit', sans-serif;
   --font-playfair: 'Playfair Display', serif;
 }
 
 .dark {
-  --background: #100a06; /* Dark espresso black-brown */
-  --foreground: #f4eae1; /* Light milk cream */
+  --background: #140d0c; /* Very dark espresso */
+  --foreground: #F6ECE2; /* Smooth cream milk */
   
-  --primary: #c29d78; /* Creamy light brown */
-  --primary-hover: #b08968;
+  --primary: #D9A441; /* Caramel gold primary for dark */
+  --primary-hover: #C59134;
   
-  --secondary: #1d140e; /* Espresso dark card/accent */
+  --secondary: #1F1210; /* Dark coffee secondary background */
   
-  --accent: #fbbf24; /* Golden amber */
-  --accent-hover: #f59e0b;
+  --accent: #D9A441;
+  --accent-hover: #C59134;
   
-  --card-bg: #150f0b;
-  --border: #2c1e15;
-  --text-muted: #a49187;
+  --card-bg: #1B100E;
+  --border: #2D1B18;
+  --text-muted: #B39D97;
 }
 
 body {
@@ -52,15 +52,45 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Glassmorphism utility */
 .glass {
-  background: rgba(250, 248, 245, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(245, 239, 230, 0.75); /* Translucent soft beige */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 30px rgba(74, 44, 42, 0.03);
 }
 
 .dark .glass {
-  background: rgba(21, 15, 11, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(27, 16, 14, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Scroll Animation Utilities */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animation-delay-100 {
+  animation-delay: 100ms;
+}
+
+.animation-delay-200 {
+  animation-delay: 200ms;
+}
+
+.animation-delay-300 {
+  animation-delay: 300ms;
 }
 
 /* Form input custom styling */

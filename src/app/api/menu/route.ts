@@ -21,7 +21,7 @@ export async function GET(request: Request) {
     const search = searchParams.get("search");
 
     // Fetch all categories
-    const categories = await db.category.findMany({
+    const categories = await db.menuCategory.findMany({
       orderBy: { name: "asc" },
     });
 
@@ -39,7 +39,7 @@ export async function GET(request: Request) {
       ];
     }
 
-    const products = await db.product.findMany({
+    const products = await db.menuItem.findMany({
       where: whereClause,
       include: {
         category: {
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing required product fields" }, { status: 400 });
     }
 
-    const newProduct = await db.product.create({
+    const newProduct = await db.menuItem.create({
       data: {
         name,
         description: description || "",

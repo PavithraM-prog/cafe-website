@@ -47,19 +47,21 @@ function RegisterForm() {
   };
 
   return (
-    <div className="mx-auto max-w-md w-full border border-borderColor bg-cardBg p-6 sm:p-8 rounded-2xl shadow-md space-y-6">
+    <div className="mx-auto max-w-md w-full border border-borderColor/40 bg-cardBg p-8 sm:p-10 rounded-3xl shadow-xl space-y-6 animate-fade-in-up">
       <div className="text-center space-y-2">
-        <Coffee className="mx-auto h-10 w-10 text-accent" />
-        <h2 className="font-serif text-2xl font-bold text-foreground">Create Account</h2>
-        <p className="text-xs text-textMuted leading-relaxed">
+        <div className="inline-flex items-center justify-center p-3.5 bg-white border border-borderColor/40 rounded-2xl shadow-sm mb-2 text-accent">
+          <Coffee className="h-8 w-8" />
+        </div>
+        <h2 className="font-serif text-3xl font-bold text-foreground">Create Account</h2>
+        <p className="text-xs text-textMuted leading-relaxed font-light">
           Sign up to enjoy loyalty rewards and manage reservations.
         </p>
       </div>
 
       {success ? (
-        <div className="rounded-xl bg-green-50 border border-green-200 p-6 text-center space-y-3">
-          <h3 className="font-bold text-green-700">Registration Successful!</h3>
-          <p className="text-xs text-green-600 leading-normal">
+        <div className="rounded-2xl bg-green-50 border border-green-200/60 p-6 text-center space-y-3 font-semibold">
+          <h3 className="text-green-700 font-bold">Registration Successful!</h3>
+          <p className="text-xs text-green-600 leading-relaxed font-medium">
             Your account has been created. Redirecting to the Login page...
           </p>
           <Loader2 className="mx-auto h-5 w-5 animate-spin text-green-600" />
@@ -68,7 +70,7 @@ function RegisterForm() {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-textMuted uppercase tracking-wider block">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-textMuted block">
               Full Name
             </label>
             <div className="relative">
@@ -78,7 +80,7 @@ function RegisterForm() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="John Doe"
-                className="w-full rounded-lg border border-borderColor bg-background pl-10 pr-4 py-2.5 text-sm text-foreground focus:border-primary transition-all"
+                className="w-full rounded-xl border border-borderColor bg-[#FFF8E7]/10 focus:bg-white pl-10 pr-4 py-2.5 text-xs text-foreground focus:border-accent transition-all font-semibold focus:ring-1 focus:ring-accent"
               />
               <User className="absolute left-3.5 top-3.5 h-4 w-4 text-textMuted" />
             </div>
@@ -86,7 +88,7 @@ function RegisterForm() {
 
           {/* Email */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-textMuted uppercase tracking-wider block">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-textMuted block">
               Email Address
             </label>
             <div className="relative">
@@ -96,7 +98,7 @@ function RegisterForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="e.g. john@gmail.com"
-                className="w-full rounded-lg border border-borderColor bg-background pl-10 pr-4 py-2.5 text-sm text-foreground focus:border-primary transition-all"
+                className="w-full rounded-xl border border-borderColor bg-[#FFF8E7]/10 focus:bg-white pl-10 pr-4 py-2.5 text-xs text-foreground focus:border-accent transition-all font-semibold focus:ring-1 focus:ring-accent"
               />
               <Mail className="absolute left-3.5 top-3.5 h-4 w-4 text-textMuted" />
             </div>
@@ -104,7 +106,7 @@ function RegisterForm() {
 
           {/* Password */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-textMuted uppercase tracking-wider block">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-textMuted block">
               Password
             </label>
             <div className="relative">
@@ -114,7 +116,7 @@ function RegisterForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="At least 6 characters"
-                className="w-full rounded-lg border border-borderColor bg-background pl-10 pr-4 py-2.5 text-sm text-foreground focus:border-primary transition-all"
+                className="w-full rounded-xl border border-borderColor bg-[#FFF8E7]/10 focus:bg-white pl-10 pr-4 py-2.5 text-xs text-foreground focus:border-accent transition-all font-semibold focus:ring-1 focus:ring-accent"
               />
               <Lock className="absolute left-3.5 top-3.5 h-4 w-4 text-textMuted" />
             </div>
@@ -122,25 +124,25 @@ function RegisterForm() {
 
           {/* Error notifications */}
           {error && (
-            <div className="text-xs text-red-700 bg-red-50 border border-red-200 p-2.5 rounded-lg font-semibold text-center">
-              {error}
+            <div className="text-xs text-red-700 bg-red-50 border border-red-200 p-3.5 rounded-xl font-semibold text-center leading-relaxed">
+              ⚠️ {error}
             </div>
           )}
 
           <button
             type="submit"
             disabled={localLoading}
-            className="w-full flex items-center justify-center space-x-2 rounded-full bg-primary hover:bg-primary-hover disabled:bg-neutral-200 text-white text-sm font-semibold py-3 shadow-md transition-colors"
+            className="w-full flex items-center justify-center space-x-2 rounded-full bg-accent hover:bg-accent-hover text-white text-xs font-bold uppercase tracking-widest py-3.5 shadow-lg transition-all duration-300 hover:scale-[1.005] active:scale-95 disabled:opacity-50"
           >
             {localLoading ? (
               <>
-                <Loader2 className="h-4.5 w-4.5 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin text-white" />
                 <span>Registering...</span>
               </>
             ) : (
               <>
                 <span>Register Account</span>
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4 text-white" />
               </>
             )}
           </button>

@@ -25,7 +25,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const { name, description, price, image, rating, availability, isVeg, categoryId } = body;
 
     // Verify product exists
-    const existingProduct = await db.product.findUnique({
+    const existingProduct = await db.menuItem.findUnique({
       where: { id },
     });
 
@@ -33,7 +33,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
-    const updatedProduct = await db.product.update({
+    const updatedProduct = await db.menuItem.update({
       where: { id },
       data: {
         name: name !== undefined ? name : existingProduct.name,
@@ -65,7 +65,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     const { id } = await params;
 
     // Verify product exists
-    const existingProduct = await db.product.findUnique({
+    const existingProduct = await db.menuItem.findUnique({
       where: { id },
     });
 
@@ -73,7 +73,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
-    await db.product.delete({
+    await db.menuItem.delete({
       where: { id },
     });
 

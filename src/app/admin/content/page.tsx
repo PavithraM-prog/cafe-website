@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Settings, Tag, Plus, Trash2, Check, Loader2, Sparkles } from "lucide-react";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 interface Coupon {
   id: string;
@@ -362,7 +363,7 @@ export default function AdminContentPage() {
                         <span className="block text-[10px] text-neutral-500 font-semibold font-sans">
                           {coupon.discountType === "PERCENTAGE"
                             ? `${coupon.discountValue}% discount`
-                            : `₹${coupon.discountValue.toFixed(2)} flat discount`}
+                            : `${formatCurrency(coupon.discountValue)} flat discount`}
                         </span>
                       </div>
 

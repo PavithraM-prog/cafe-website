@@ -20,11 +20,49 @@ export async function GET(request: Request) {
 
     const { searchParams } = new URL(request.url);
     const filterStatus = searchParams.get("status");
+    const filterSource = searchParams.get("source");
+    const filterDate = searchParams.get("date"); // today, week, or YYYY-MM-DD
 
-    // Admin/Staff sees all orders
+    // Admin/Staff sees all orders with filters
     if (user.role === "ADMIN" || user.role === "STAFF") {
       const where: any = {};
-      if (filterStatus) where.status = filterStatus;
+
+      // Status filter
+      if (filterStatus) {
+        if (filterStatus === "ACTIVE") {
+          where.status = { in: ["PENDING", "PREPARING", "READY"] };
+        } else {
+          where.status = filterStatus;
+        }
+      }
+
+      // Source filter
+      if (filterSource && filterSource !== "ALL") {
+        where.source = filterSource;
+      }
+
+      // Date filter
+      if (filterDate) {
+        const start = new Date();
+        if (filterDate === "today") {
+          start.setHours(0, 0, 0, 0);
+          where.createdAt = { gte: start };
+        } else if (filterDate === "week") {
+          start.setDate(start.getDate() - 7);
+          start.setHours(0, 0, 0, 0);
+          where.createdAt = { gte: start };
+        } else {
+          // Specific date (YYYY-MM-DD)
+          const targetDate = new Date(filterDate);
+          if (!isNaN(targetDate.getTime())) {
+            const startOfDay = new Date(targetDate);
+            startOfDay.setHours(0, 0, 0, 0);
+            const endOfDay = new Date(targetDate);
+            endOfDay.setHours(23, 59, 59, 999);
+            where.createdAt = { gte: startOfDay, lte: endOfDay };
+          }
+        }
+      }
 
       const orders = await db.order.findMany({
         where,
@@ -50,14 +88,18 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const user = await getAuthUser();
-    if (!user) {
+    // Allow admin/staff to record walk-in orders even if customer is not logged in
+    const body = await request.json();
+    const { items, total, discount, address, phone, source, loyaltyEmail } = body;
+
+    const isWalkIn = source === "WALK_IN";
+
+    // If customer order, they must be logged in
+    if (!isWalkIn && !user) {
       return NextResponse.json({ error: "Please log in to place an order" }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { items, total, discount, address, phone, couponCode } = body;
-
-    if (!items || !total || !address || !phone) {
+    if (!items || !total) {
       return NextResponse.json({ error: "Missing required order information" }, { status: 400 });
     }
 
@@ -67,7 +109,7 @@ export async function POST(request: Request) {
     // 2. Create the order in db
     const newOrder = await db.order.create({
       data: {
-        userId: user.id,
+        userId: user?.id || null,
         items: JSON.stringify(items), // JSON array of items as string for SQLite
         total: parseFloat(total),
         discount: discount ? parseFloat(discount) : 0,
@@ -79,14 +121,16 @@ export async function POST(request: Request) {
     });
 
     // 3. Update user loyalty points
-    await db.user.update({
-      where: { id: user.id },
-      data: {
-        loyaltyPoints: {
-          increment: pointsEarned,
+    if (user) {
+      await db.user.update({
+        where: { id: user.id },
+        data: {
+          loyaltyPoints: {
+            increment: pointsEarned,
+          },
         },
-      },
-    });
+      });
+    }
 
     // 4. If a coupon was used, we could invalidate it if single-use, but here we keep it simple
 

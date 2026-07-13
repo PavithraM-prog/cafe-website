@@ -35,14 +35,14 @@ export const Navbar: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-borderColor glass transition-all">
+    <header className="sticky top-0 z-50 w-full border-b border-borderColor/40 glass shadow-sm transition-all duration-300">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
           {/* Logo */}
           <div className="flex">
-            <Link href="/" className="flex items-center space-x-2 text-primary font-bold text-2xl">
+            <Link href="/" className="flex items-center space-x-2 text-primary font-bold text-2xl hover:scale-[1.02] transition-transform duration-200">
               <Coffee className="h-7 w-7 text-accent" />
-              <span className="font-serif">Cozy Beans</span>
+              <span className="font-serif tracking-tight">Cozy Beans</span>
             </Link>
           </div>
 
@@ -52,11 +52,16 @@ export const Navbar: React.FC = () => {
               <Link
                 key={link.name}
                 href={link.href}
-                className={`text-sm font-medium transition-colors hover:text-primary ${
-                  isActive(link.href) ? "text-primary border-b-2 border-primary py-1" : "text-textMuted"
+                className={`group text-xs font-bold uppercase tracking-widest transition-colors relative py-2 ${
+                  isActive(link.href) ? "text-primary" : "text-textMuted hover:text-primary"
                 }`}
               >
-                {link.name}
+                <span>{link.name}</span>
+                <span
+                  className={`absolute bottom-0 left-0 w-full h-[2.5px] bg-accent rounded-full transition-transform duration-300 transform origin-left ${
+                    isActive(link.href) ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+                  }`}
+                />
               </Link>
             ))}
           </nav>
