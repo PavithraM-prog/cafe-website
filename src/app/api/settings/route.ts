@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
+import { logger, logError } from "@/lib/logger";
 
 async function checkAdminAuth() {
   const cookieStore = await cookies();
@@ -14,6 +15,7 @@ async function checkAdminAuth() {
 
 // GET /api/settings - Fetch all settings as key-value pairs
 export async function GET() {
+  logger.info({ method: "GET", url: "/api/settings" }, "GET /api/settings - Request received");
   try {
     const settingsList = await db.setting.findMany();
     
@@ -23,15 +25,17 @@ export async function GET() {
       return acc;
     }, {});
 
+    logger.info({ method: "GET", url: "/api/settings" }, "GET /api/settings - Request completed successfully");
     return NextResponse.json({ settings });
   } catch (error) {
-    console.error("Error fetching settings:", error);
+    logError(error, { method: "GET", url: "/api/settings" });
     return NextResponse.json({ error: "Failed to load settings" }, { status: 500 });
   }
 }
 
 // PUT /api/settings - Bulk update settings (Admin Only)
 export async function PUT(request: Request) {
+  logger.info({ method: "PUT", url: "/api/settings" }, "PUT /api/settings - Request received");
   try {
     const adminUser = await checkAdminAuth();
     if (!adminUser) {
@@ -50,9 +54,10 @@ export async function PUT(request: Request) {
 
     await db.$transaction(updates);
 
+    logger.info({ method: "PUT", url: "/api/settings" }, "PUT /api/settings - Request completed successfully");
     return NextResponse.json({ message: "Settings updated successfully!" });
   } catch (error) {
-    console.error("Error updating settings:", error);
+    logError(error, { method: "PUT", url: "/api/settings" });
     return NextResponse.json({ error: "Server error updating settings" }, { status: 500 });
   }
 }

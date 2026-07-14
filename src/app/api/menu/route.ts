@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
-import { logger } from "@/lib/logger";
+import { logger, logError } from "@/lib/logger";
 
 // Helper to verify if requester is ADMIN or STAFF
 async function checkAdminAuth() {
@@ -16,6 +16,7 @@ async function checkAdminAuth() {
 
 // GET /api/menu - Get all products and categories, optionally filtered
 export async function GET(request: Request) {
+  logger.info({ method: "GET", url: "/api/menu" }, "GET /api/menu - Request received");
   try {
     const { searchParams } = new URL(request.url);
     const categorySlug = searchParams.get("category");
@@ -50,30 +51,29 @@ export async function GET(request: Request) {
       orderBy: { name: "asc" },
     });
 
+    logger.info({ method: "GET", url: "/api/menu" }, "GET /api/menu - Request completed successfully");
     return NextResponse.json({ categories, products });
   } catch (error) {
-    logger.error("Error fetching menu", error);
+    logError(error, { method: "GET", url: "/api/menu" });
     return NextResponse.json({ error: "Failed to fetch menu items" }, { status: 500 });
   }
 }
 
 // POST /api/menu - Create a new product (Admin Only)
 export async function POST(request: Request) {
+  logger.info({ method: "POST", url: "/api/menu" }, "POST /api/menu - Request received");
   try {
     const adminUser = await checkAdminAuth();
     if (!adminUser) {
       return NextResponse.json({ error: "Unauthorized access" }, { status: 403 });
     }
 
-    const { name, description, price, image, rating, availability, isVeg, categoryId, availablePieces } =
+    const { name, description, price, image, rating, availability, isVeg, categoryId } =
       await request.json();
 
     if (!name || !price || !categoryId) {
       return NextResponse.json({ error: "Missing required product fields" }, { status: 400 });
     }
-
-    const pieces = availablePieces !== undefined ? parseInt(availablePieces) : 10;
-    const isAvailable = availability !== undefined ? availability : (pieces > 0);
 
     const newProduct = await db.menuItem.create({
       data: {
@@ -82,19 +82,19 @@ export async function POST(request: Request) {
         price: parseFloat(price),
         image: image || "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&q=80&w=600",
         rating: rating ? parseFloat(rating) : 5.0,
-        availability: isAvailable,
+        availability: availability !== undefined ? availability : true,
         isVeg: isVeg !== undefined ? isVeg : true,
         categoryId,
-        availablePieces: pieces,
       },
       include: {
         category: true,
       },
     });
 
+    logger.info({ method: "POST", url: "/api/menu" }, "POST /api/menu - Request completed successfully");
     return NextResponse.json({ message: "Product created successfully", product: newProduct }, { status: 201 });
   } catch (error) {
-    logger.error("Error creating product", error);
+    logError(error, { method: "POST", url: "/api/menu" });
     return NextResponse.json({ error: "Server error during product creation" }, { status: 500 });
   }
 }

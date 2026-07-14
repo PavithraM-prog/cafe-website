@@ -61,7 +61,7 @@ export default function AdminLoyaltyPage() {
     fetchMembers();
   }, [fetchMembers]);
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleRegister = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!memberName || !memberEmail) return;
 
@@ -89,9 +89,9 @@ export default function AdminLoyaltyPage() {
     } catch (e) {
       console.error(e);
     }
-  };
+  }, [memberName, memberEmail, memberPoints, fetchMembers]);
 
-  const handleEdit = async (e: React.FormEvent) => {
+  const handleEdit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedMember || !memberName || !memberEmail) return;
 
@@ -120,9 +120,9 @@ export default function AdminLoyaltyPage() {
     } catch (e) {
       console.error(e);
     }
-  };
+  }, [selectedMember, memberName, memberEmail, memberPoints, fetchMembers]);
 
-  const handleAdjustPoints = async (amount: number) => {
+  const handleAdjustPoints = useCallback(async (amount: number) => {
     if (!selectedMember) return;
     const finalPoints = Math.max(0, selectedMember.points + amount);
 
@@ -149,9 +149,9 @@ export default function AdminLoyaltyPage() {
     } catch (e) {
       console.error(e);
     }
-  };
+  }, [selectedMember, fetchMembers]);
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
     if (!confirm("Are you sure you want to delete this loyalty card user?")) return;
 
     try {
@@ -167,7 +167,7 @@ export default function AdminLoyaltyPage() {
     } catch (e) {
       console.error(e);
     }
-  };
+  }, [fetchMembers]);
 
   const openEditModal = (member: LoyaltyMember) => {
     setSelectedMember(member);

@@ -64,7 +64,11 @@ async function getDashboardData() {
       },
     });
 
-    // 4. Fetch loyalty members count
+    // 4. Users count
+    const totalCustomers = await db.user.count({
+      where: { role: { name: "CUSTOMER" } },
+    });
+
     const totalLoyaltyMembers = await db.loyaltyMember.count();
 
     // 5. Fetch 5 recent orders

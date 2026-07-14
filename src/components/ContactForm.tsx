@@ -22,10 +22,10 @@ export const ContactForm: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Simulate API submission call
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       setSuccess(true);
       setName("");
       setEmail("");
@@ -61,7 +61,7 @@ export const ContactForm: React.FC = () => {
       <h3 className="font-serif text-xl font-bold text-foreground mb-4 pb-2 border-b border-borderColor/60">
         Drop Us a Line
       </h3>
-      
+
       {error && (
         <div className="p-3 text-xs bg-red-50 border border-red-200 text-red-600 rounded-lg">
           {error}
@@ -76,11 +76,11 @@ export const ContactForm: React.FC = () => {
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="John Doe"
+            placeholder="Your name"
             className="w-full rounded-lg border border-borderColor bg-background px-4 py-2.5 text-sm text-foreground focus:border-primary transition-all"
           />
         </div>
-        
+
         <div className="space-y-1.5">
           <label className="text-xs font-semibold text-textMuted">Email Address *</label>
           <input
@@ -88,7 +88,7 @@ export const ContactForm: React.FC = () => {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="john@gmail.com"
+            placeholder="abc@gmail.com"
             className="w-full rounded-lg border border-borderColor bg-background px-4 py-2.5 text-sm text-foreground focus:border-primary transition-all"
           />
         </div>

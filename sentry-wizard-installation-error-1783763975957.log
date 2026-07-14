@@ -1,0 +1,62 @@
+npm warn ERESOLVE overriding peer dependency
+npm warn While resolving: @sentry/react@10.65.0
+npm warn Found: react@19.0.0-rc-65a56d0e-20241020
+npm warn node_modules/react
+npm warn   peer react@"^18.2.0 || 19.0.0-rc-65a56d0e-20241020" from next@15.0.0
+npm warn   node_modules/next
+npm warn     next@"15.0.0" from the root project
+npm warn     1 more (@sentry/nextjs)
+npm warn   3 more (react-dom, styled-jsx, the root project)
+npm warn
+npm warn Could not resolve dependency:
+npm warn peer react@"^16.14.0 || 17.x || 18.x || 19.x" from @sentry/react@10.65.0
+npm warn node_modules/@sentry/react
+npm warn   @sentry/react@"10.65.0" from @sentry/nextjs@10.65.0
+npm warn   node_modules/@sentry/nextjs
+npm warn
+npm warn Conflicting peer dependency: react@19.2.7
+npm warn node_modules/react
+npm warn   peer react@"^16.14.0 || 17.x || 18.x || 19.x" from @sentry/react@10.65.0
+npm warn   node_modules/@sentry/react
+npm warn     @sentry/react@"10.65.0" from @sentry/nextjs@10.65.0
+npm warn     node_modules/@sentry/nextjs
+npm error code ERESOLVE
+npm error ERESOLVE could not resolve
+npm error
+npm error While resolving: framer-motion@12.42.2
+npm error Found: react@19.0.0-rc-65a56d0e-20241020
+npm error node_modules/react
+npm error   peer react@"^18.2.0 || 19.0.0-rc-65a56d0e-20241020" from next@15.0.0
+npm error   node_modules/next
+npm error     next@"15.0.0" from the root project
+npm error     peer next@"^13.2.0 || ^14.0 || ^15.0.0-rc.0 || ^16.0.0-0" from @sentry/nextjs@10.65.0
+npm error     node_modules/@sentry/nextjs
+npm error       @sentry/nextjs@"10" from the root project
+npm error   peer react@"19.0.0-rc-65a56d0e-20241020" from react-dom@19.0.0-rc-65a56d0e-20241020
+npm error   node_modules/react-dom
+npm error     peer react-dom@"^18.2.0 || 19.0.0-rc-65a56d0e-20241020" from next@15.0.0
+npm error     node_modules/next
+npm error       next@"15.0.0" from the root project
+npm error       1 more (@sentry/nextjs)
+npm error     react-dom@"19.0.0-rc-65a56d0e-20241020" from the root project
+npm error   2 more (styled-jsx, the root project)
+npm error
+npm error Could not resolve dependency:
+npm error peerOptional react@"^18.0.0 || ^19.0.0" from framer-motion@12.42.2
+npm error node_modules/framer-motion
+npm error   framer-motion@"^12.42.2" from the root project
+npm error
+npm error Conflicting peer dependency: react@19.2.7
+npm error node_modules/react
+npm error   peerOptional react@"^18.0.0 || ^19.0.0" from framer-motion@12.42.2
+npm error   node_modules/framer-motion
+npm error     framer-motion@"^12.42.2" from the root project
+npm error
+npm error Fix the upstream dependency conflict, or retry
+npm error this command with --force or --legacy-peer-deps
+npm error to accept an incorrect (and potentially broken) dependency resolution.
+npm error
+npm error
+npm error For a full report see:
+npm error C:\Users\vineela modugula\AppData\Local\npm-cache\_logs\2026-07-11T09_59_14_612Z-eresolve-report.txt
+npm error A complete log of this run can be found in: C:\Users\vineela modugula\AppData\Local\npm-cache\_logs\2026-07-11T09_59_14_612Z-debug-0.log

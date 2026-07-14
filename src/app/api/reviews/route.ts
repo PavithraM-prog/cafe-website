@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
+import { logger, logError } from "@/lib/logger";
 
 async function getAuthUser() {
   const cookieStore = await cookies();
@@ -12,6 +13,7 @@ async function getAuthUser() {
 
 // GET /api/reviews - Get reviews (Approved only for customer/public, or all for admin)
 export async function GET(request: Request) {
+  logger.info({ method: "GET", url: "/api/reviews" }, "GET /api/reviews - Request received");
   try {
     const user = await getAuthUser();
     
@@ -20,6 +22,7 @@ export async function GET(request: Request) {
       const reviews = await db.review.findMany({
         orderBy: { createdAt: "desc" },
       });
+      logger.info({ method: "GET", url: "/api/reviews" }, "GET /api/reviews (admin) - Request completed successfully");
       return NextResponse.json({ reviews });
     }
 
@@ -30,15 +33,17 @@ export async function GET(request: Request) {
       take: 6, // Show top 6 reviews
     });
 
+    logger.info({ method: "GET", url: "/api/reviews" }, "GET /api/reviews - Request completed successfully");
     return NextResponse.json({ reviews });
   } catch (error) {
-    console.error("Error fetching reviews:", error);
+    logError(error, { method: "GET", url: "/api/reviews" });
     return NextResponse.json({ error: "Failed to fetch reviews" }, { status: 500 });
   }
 }
 
 // POST /api/reviews - Submit a review (Pending admin moderation)
 export async function POST(request: Request) {
+  logger.info({ method: "POST", url: "/api/reviews" }, "POST /api/reviews - Request received");
   try {
     const user = await getAuthUser();
     if (!user) {
@@ -61,18 +66,20 @@ export async function POST(request: Request) {
       },
     });
 
+    logger.info({ method: "POST", url: "/api/reviews" }, "POST /api/reviews - Request completed successfully");
     return NextResponse.json({
       message: "Review submitted! It will appear after admin approval.",
       review: newReview,
     }, { status: 201 });
   } catch (error) {
-    console.error("Error posting review:", error);
+    logError(error, { method: "POST", url: "/api/reviews" });
     return NextResponse.json({ error: "Server error during review submission" }, { status: 500 });
   }
 }
 
 // PUT /api/reviews - Moderate review status (Admin only)
 export async function PUT(request: Request) {
+  logger.info({ method: "PUT", url: "/api/reviews" }, "PUT /api/reviews - Request received");
   try {
     const user = await getAuthUser();
     if (!user || (user.role !== "ADMIN" && user.role !== "STAFF")) {
@@ -90,9 +97,10 @@ export async function PUT(request: Request) {
       data: { status },
     });
 
+    logger.info({ method: "PUT", url: "/api/reviews" }, "PUT /api/reviews - Request completed successfully");
     return NextResponse.json({ message: `Review is now ${status}`, review: updatedReview });
   } catch (error) {
-    console.error("Error moderating review:", error);
+    logError(error, { method: "PUT", url: "/api/reviews" });
     return NextResponse.json({ error: "Server error during moderation" }, { status: 500 });
   }
 }

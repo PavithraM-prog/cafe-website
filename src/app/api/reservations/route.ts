@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
-import { logger } from "@/lib/logger";
+import { logger, logError } from "@/lib/logger";
 
 async function getAuthUser() {
   const cookieStore = await cookies();
@@ -13,6 +13,7 @@ async function getAuthUser() {
 
 // GET /api/reservations - Fetch reservations (customer's own, or all if admin)
 export async function GET(request: Request) {
+  logger.info({ method: "GET", url: "/api/reservations" }, "GET /api/reservations - Request received");
   try {
     const user = await getAuthUser();
     if (!user) {
@@ -33,6 +34,7 @@ export async function GET(request: Request) {
         where,
         orderBy: { date: "asc" },
       });
+      logger.info({ method: "GET", url: "/api/reservations" }, "GET /api/reservations (admin) - Request completed successfully");
       return NextResponse.json({ reservations });
     }
 
@@ -44,15 +46,17 @@ export async function GET(request: Request) {
       orderBy: { date: "desc" },
     });
 
+    logger.info({ method: "GET", url: "/api/reservations" }, "GET /api/reservations - Request completed successfully");
     return NextResponse.json({ reservations });
   } catch (error) {
-    logger.error("Error fetching reservations", error);
+    logError(error, { method: "GET", url: "/api/reservations" });
     return NextResponse.json({ error: "Failed to load reservations" }, { status: 500 });
   }
 }
 
 // POST /api/reservations - Create a table reservation booking
 export async function POST(request: Request) {
+  logger.info({ method: "POST", url: "/api/reservations" }, "POST /api/reservations - Request received");
   try {
     const user = await getAuthUser(); // Optional, user can book as guest, but associate if logged in
     
@@ -77,17 +81,17 @@ export async function POST(request: Request) {
       },
     });
 
+    logger.info({ method: "POST", url: "/api/reservations" }, "POST /api/reservations - Request completed successfully");
     return NextResponse.json({ message: "Table reservation requested successfully", reservation }, { status: 201 });
   } catch (error) {
-    logger.error("Error creating reservation", error);
+    logError(error, { method: "POST", url: "/api/reservations" });
     return NextResponse.json({ error: "Server error during reservation creation" }, { status: 500 });
   }
 }
 
 // PUT /api/reservations - Update reservation status (Admin Only)
 export async function PUT(request: Request) {
-  let id: string | undefined;
-  let status: string | undefined;
+  logger.info({ method: "PUT", url: "/api/reservations" }, "PUT /api/reservations - Request received");
   try {
     const user = await getAuthUser();
     if (!user || (user.role !== "ADMIN" && user.role !== "STAFF")) {
@@ -95,8 +99,7 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    id = body.id;
-    status = body.status;
+    const { id, status } = body; // status: APPROVED, REJECTED, CANCELLED, COMPLETED
 
     if (!id || !status) {
       return NextResponse.json({ error: "Missing reservation ID or status" }, { status: 400 });
@@ -107,9 +110,10 @@ export async function PUT(request: Request) {
       data: { status },
     });
 
+    logger.info({ method: "PUT", url: "/api/reservations" }, "PUT /api/reservations - Request completed successfully");
     return NextResponse.json({ message: `Reservation status updated to ${status}`, reservation: updated });
   } catch (error) {
-    logger.error("Error updating reservation", error, { id, status });
+    logError(error, { method: "PUT", url: "/api/reservations" });
     return NextResponse.json({ error: "Server error during reservation update" }, { status: 500 });
   }
 }

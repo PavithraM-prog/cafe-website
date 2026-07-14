@@ -34,6 +34,7 @@ interface Reservation {
 export default function AdminReservationsPage() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [updatingReservations, setUpdatingReservations] = useState<Record<string, boolean>>({});
   
   // Filters
   const [typeFilter, setTypeFilter] = useState("ALL"); // ALL, TABLE, EVENT
@@ -63,7 +64,8 @@ export default function AdminReservationsPage() {
     fetchReservations();
   }, [fetchReservations]);
 
-  const handleUpdateStatus = async (id: string, newStatus: string) => {
+  const handleUpdateStatus = useCallback(async (id: string, newStatus: string) => {
+    setUpdatingReservations((prev) => ({ ...prev, [id]: true }));
     try {
       const res = await fetch("/api/reservations", {
         method: "PUT",
@@ -84,8 +86,10 @@ export default function AdminReservationsPage() {
       }
     } catch (e) {
       console.error(e);
+    } finally {
+      setUpdatingReservations((prev) => ({ ...prev, [id]: false }));
     }
-  };
+  }, [statusFilter, fetchReservations]);
 
   const getStatusColor = (status: string) => {
     if (status === "APPROVED") return "bg-emerald-50 text-emerald-700 border-emerald-100";
@@ -270,16 +274,26 @@ export default function AdminReservationsPage() {
                     <div className="grid grid-cols-2 gap-3 pt-4 border-t border-[#f2ede4] mt-4">
                       <button
                         onClick={() => handleUpdateStatus(booking.id, "REJECTED")}
-                        className="w-full flex items-center justify-center space-x-1.5 border border-red-200 hover:bg-red-50 text-red-600 rounded-full text-[10px] font-bold py-2.5 transition-all shadow-sm"
+                        disabled={updatingReservations[booking.id]}
+                        className="w-full flex items-center justify-center space-x-1.5 border border-red-200 hover:bg-red-50 text-red-600 rounded-full text-[10px] font-bold py-2.5 transition-all shadow-sm disabled:opacity-50"
                       >
-                        <X className="h-3.5 w-3.5" />
+                        {updatingReservations[booking.id] ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <X className="h-3.5 w-3.5" />
+                        )}
                         <span>Reject Booking</span>
                       </button>
                       <button
                         onClick={() => handleUpdateStatus(booking.id, "APPROVED")}
-                        className="w-full flex items-center justify-center space-x-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-[10px] font-bold py-2.5 shadow-md transition-all"
+                        disabled={updatingReservations[booking.id]}
+                        className="w-full flex items-center justify-center space-x-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-[10px] font-bold py-2.5 shadow-md transition-all disabled:opacity-50"
                       >
-                        <Check className="h-3.5 w-3.5" />
+                        {updatingReservations[booking.id] ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Check className="h-3.5 w-3.5" />
+                        )}
                         <span>Approve Booking</span>
                       </button>
                     </div>

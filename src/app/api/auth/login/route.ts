@@ -2,14 +2,12 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { signToken } from "@/lib/jwt";
-import { logger } from "@/lib/logger";
+import { logger, logError } from "@/lib/logger";
 
 export async function POST(request: Request) {
-  let email: string | undefined;
+  logger.info({ method: "POST", url: "/api/auth/login" }, "POST /api/auth/login - Request received");
   try {
-    const body = await request.json();
-    email = body.email;
-    const { password } = body;
+    const { email, password } = await request.json();
 
     if (!email || !password) {
       return NextResponse.json({ error: "Please enter email and password" }, { status: 400 });
@@ -60,9 +58,10 @@ export async function POST(request: Request) {
       path: "/",
     });
 
+    logger.info({ method: "POST", url: "/api/auth/login" }, "POST /api/auth/login - Request completed successfully");
     return response;
   } catch (error: any) {
-    logger.error("Login error", error, { email });
+    logError(error, { method: "POST", url: "/api/auth/login" });
     return NextResponse.json({ error: "Server error during login" }, { status: 500 });
   }
 }

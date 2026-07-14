@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
+import { logger, logError } from "@/lib/logger";
 
 async function checkAdminAuth() {
   const cookieStore = await cookies();
@@ -14,6 +15,7 @@ async function checkAdminAuth() {
 
 // GET /api/admin/attendance - Fetch daily or historical attendance logs
 export async function GET(request: Request) {
+  logger.info({ method: "GET", url: "/api/admin/attendance" }, "GET /api/admin/attendance - Request received");
   try {
     const admin = await checkAdminAuth();
     if (!admin) {
@@ -40,15 +42,17 @@ export async function GET(request: Request) {
       orderBy: { loginTime: "desc" },
     });
 
+    logger.info({ method: "GET", url: "/api/admin/attendance" }, "GET /api/admin/attendance - Request completed successfully");
     return NextResponse.json({ logs });
   } catch (error) {
-    console.error("Error fetching attendance logs:", error);
+    logError(error, { method: "GET", url: "/api/admin/attendance" });
     return NextResponse.json({ error: "Server error fetching attendance directory" }, { status: 500 });
   }
 }
 
 // POST /api/admin/attendance - Clock-in a staff member / Manually log attendance
 export async function POST(request: Request) {
+  logger.info({ method: "POST", url: "/api/admin/attendance" }, "POST /api/admin/attendance - Request received");
   try {
     const admin = await checkAdminAuth();
     if (!admin) {
@@ -87,15 +91,17 @@ export async function POST(request: Request) {
       },
     });
 
+    logger.info({ method: "POST", url: "/api/admin/attendance" }, "POST /api/admin/attendance - Request completed successfully");
     return NextResponse.json({ message: "Attendance logged successfully", log: newLog }, { status: 201 });
   } catch (error) {
-    console.error("Error logging attendance:", error);
+    logError(error, { method: "POST", url: "/api/admin/attendance" });
     return NextResponse.json({ error: "Server error during attendance log creation" }, { status: 500 });
   }
 }
 
 // PUT /api/admin/attendance - Clock-out a staff member / Update attendance log
 export async function PUT(request: Request) {
+  logger.info({ method: "PUT", url: "/api/admin/attendance" }, "PUT /api/admin/attendance - Request received");
   try {
     const admin = await checkAdminAuth();
     if (!admin) {
@@ -122,9 +128,10 @@ export async function PUT(request: Request) {
       },
     });
 
+    logger.info({ method: "PUT", url: "/api/admin/attendance" }, "PUT /api/admin/attendance - Request completed successfully");
     return NextResponse.json({ message: "Attendance log updated successfully", log: updatedLog });
   } catch (error) {
-    console.error("Error updating attendance log:", error);
+    logError(error, { method: "PUT", url: "/api/admin/attendance" });
     return NextResponse.json({ error: "Server error updating attendance log" }, { status: 500 });
   }
 }

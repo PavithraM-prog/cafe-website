@@ -7,6 +7,7 @@ import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
 import { ContactForm } from "@/components/ContactForm";
 import { NewsletterForm } from "@/components/NewsletterForm";
+import { AnimatedContent } from "@/components/ui/AnimatedContent";
 import { Coffee, Calendar, MapPin, Phone, Star, ShieldCheck, Gift, Clock, Sparkles, Mail, Heart, Smile } from "lucide-react";
 
 async function getLandingData() {
@@ -18,14 +19,8 @@ async function getLandingData() {
       return acc;
     }, {});
 
-    // 2. Fetch featured products (take first 4) that are available in stock
+    // 2. Fetch featured products (take first 4)
     const products = await db.menuItem.findMany({
-      where: {
-        availability: true,
-        availablePieces: {
-          gt: 0,
-        },
-      },
       take: 4,
       orderBy: { rating: "desc" },
     });
@@ -75,7 +70,13 @@ export default async function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-b from-[#1C100E]/70 via-[#1C100E]/30 to-background" />
         </div>
 
-        <div className="relative z-10 mx-auto max-w-4xl text-center space-y-8 animate-fade-in-up">
+        <AnimatedContent
+          distance={40}
+          direction="vertical"
+          duration={0.8}
+          scale={0.96}
+          className="relative z-10 mx-auto max-w-4xl text-center space-y-8"
+        >
           <div className="inline-flex items-center space-x-2 rounded-full border border-[#D9A441]/40 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-[#D9A441] backdrop-blur-md bg-[#1C100E]/40 shadow-md">
             <Sparkles className="h-3.5 w-3.5" />
             <span>Welcome to Cozy Beans Café</span>
@@ -103,7 +104,7 @@ export default async function HomePage() {
               Book a Table
             </Link>
           </div>
-        </div>
+        </AnimatedContent>
 
         {/* Scroll Indicator */}
         <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-10 flex flex-col items-center space-y-1 opacity-80 animate-bounce">
@@ -115,8 +116,14 @@ export default async function HomePage() {
       </section>
 
       {/* Special Offers / Promotions Banner */}
-      <section className="relative z-20 -mt-12 mx-auto max-w-5xl px-4 animate-fade-in-up animation-delay-100">
-        <div className="rounded-3xl bg-gradient-to-r from-[#4A2C2A] via-[#3E2321] to-[#251311] border border-[#FFF8E7]/10 p-8 md:p-10 shadow-2xl text-white hover:scale-[1.005] hover:shadow-primary/5 transition-all duration-300">
+      <section className="relative z-20 -mt-12 mx-auto max-w-5xl px-4">
+        <AnimatedContent
+          distance={30}
+          direction="vertical"
+          delay={0.15}
+          duration={0.7}
+          className="rounded-3xl bg-gradient-to-r from-[#4A2C2A] via-[#3E2321] to-[#251311] border border-[#FFF8E7]/10 p-8 md:p-10 shadow-2xl text-white hover:scale-[1.005] hover:shadow-primary/5 transition-all duration-300"
+        >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
             <div className="flex items-center space-x-5">
               <div className="rounded-full bg-white/10 p-3.5 shrink-0">
@@ -148,14 +155,18 @@ export default async function HomePage() {
               </Link>
             </div>
           </div>
-        </div>
+        </AnimatedContent>
       </section>
 
       {/* Features Grid */}
       <section className="py-28 bg-[#FFF8E7]/30 border-b border-borderColor/40 shadow-inner">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            <div className="flex flex-col items-center text-center p-8 space-y-4 bg-white border border-borderColor/40 rounded-3xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+            <AnimatedContent
+              distance={25}
+              delay={0.05}
+              className="flex flex-col items-center text-center p-8 space-y-4 bg-white border border-borderColor/40 rounded-3xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+            >
               <div className="rounded-full bg-primary/5 p-5 text-primary">
                 <Coffee className="h-7 w-7 text-accent" />
               </div>
@@ -163,9 +174,13 @@ export default async function HomePage() {
               <p className="text-xs text-textMuted leading-relaxed max-w-xs font-light">
                 Slow-roasted single-origin arabica beans prepared by passionate certified baristas.
               </p>
-            </div>
+            </AnimatedContent>
             
-            <div className="flex flex-col items-center text-center p-8 space-y-4 bg-white border border-borderColor/40 rounded-3xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+            <AnimatedContent
+              distance={25}
+              delay={0.15}
+              className="flex flex-col items-center text-center p-8 space-y-4 bg-white border border-borderColor/40 rounded-3xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+            >
               <div className="rounded-full bg-primary/5 p-5 text-primary">
                 <Heart className="h-7 w-7 text-accent" />
               </div>
@@ -173,9 +188,13 @@ export default async function HomePage() {
               <p className="text-xs text-textMuted leading-relaxed max-w-xs font-light">
                 Soft lighting, peaceful acoustic music, fast Wi-Fi, and comfortable workspaces.
               </p>
-            </div>
+            </AnimatedContent>
 
-            <div className="flex flex-col items-center text-center p-8 space-y-4 bg-white border border-borderColor/40 rounded-3xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+            <AnimatedContent
+              distance={25}
+              delay={0.25}
+              className="flex flex-col items-center text-center p-8 space-y-4 bg-white border border-borderColor/40 rounded-3xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+            >
               <div className="rounded-full bg-primary/5 p-5 text-primary">
                 <Smile className="h-7 w-7 text-accent" />
               </div>
@@ -183,27 +202,27 @@ export default async function HomePage() {
               <p className="text-xs text-textMuted leading-relaxed max-w-xs font-light">
                 Earn points with every purchase and redeem them for free food, drinks, and coupons.
               </p>
-            </div>
+            </AnimatedContent>
           </div>
         </div>
       </section>
 
       {/* Featured Menu Items */}
       <section className="py-32 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center space-y-4 mb-20 max-w-xl mx-auto">
+        <AnimatedContent distance={30} className="text-center space-y-4 mb-20 max-w-xl mx-auto">
           <span className="text-xs font-extrabold text-accent uppercase tracking-widest bg-[#FFF8E7] px-3.5 py-1.5 rounded-full border border-borderColor">Our Favorites</span>
           <h2 className="font-serif text-4xl sm:text-5xl font-bold text-foreground tracking-tight">Featured Specialties</h2>
           <p className="text-sm text-textMuted/90 leading-relaxed font-light">
             Sip and savor our most-ordered drinks and dishes, freshly made with pure love and premium ingredients.
           </p>
-        </div>
+        </AnimatedContent>
 
         {products.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <AnimatedContent distance={40} delay={0.1} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {products.map((product: any) => (
               <ProductCard key={product.id} product={product} />
             ))}
-          </div>
+          </AnimatedContent>
         ) : (
           <div className="text-center text-textMuted text-sm py-10">No items available. Seed the database to view.</div>
         )}
@@ -211,7 +230,7 @@ export default async function HomePage() {
         <div className="text-center pt-16">
           <Link
             href="/menu"
-            className="inline-flex items-center space-x-2 text-primary hover:text-accent font-bold text-xs uppercase tracking-widest transition-colors border-b-2 border-primary hover:border-accent pb-1"
+            className="inline-block items-center space-x-2 text-primary hover:text-accent font-bold text-xs uppercase tracking-widest transition-colors border-b-2 border-primary hover:border-accent pb-1"
           >
             <span>View Complete Menu</span>
             <span>→</span>
@@ -224,7 +243,7 @@ export default async function HomePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
             {/* Story text */}
-            <div className="lg:col-span-7 space-y-8">
+            <AnimatedContent distance={35} className="lg:col-span-7 space-y-8">
               <span className="text-xs font-extrabold text-accent uppercase tracking-widest bg-white px-3.5 py-1.5 rounded-full border border-borderColor">Our Story</span>
               <h2 className="font-serif text-4xl sm:text-5xl font-bold text-foreground leading-tight tracking-tight">
                 Brewing Happiness and Crafting Comfort Daily
@@ -250,10 +269,10 @@ export default async function HomePage() {
                   <span className="text-xs font-semibold text-textMuted uppercase tracking-wider">Workspace</span>
                 </div>
               </div>
-            </div>
+            </AnimatedContent>
 
             {/* Collage Images */}
-            <div className="lg:col-span-5 grid grid-cols-2 gap-5">
+            <AnimatedContent distance={35} delay={0.15} className="lg:col-span-5 grid grid-cols-2 gap-5">
               <div className="space-y-5">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -282,23 +301,23 @@ export default async function HomePage() {
                   className="rounded-3xl object-cover h-48 w-full shadow-lg hover:scale-105 transition-transform duration-500 hover:shadow-xl border border-borderColor/30"
                 />
               </div>
-            </div>
+            </AnimatedContent>
           </div>
         </div>
       </section>
 
       {/* Customer Testimonials */}
       <section className="py-32 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center space-y-4 mb-20 max-w-xl mx-auto">
+        <AnimatedContent distance={30} className="text-center space-y-4 mb-20 max-w-xl mx-auto">
           <span className="text-xs font-extrabold text-accent uppercase tracking-widest bg-[#FFF8E7] px-3.5 py-1.5 rounded-full border border-borderColor">Reviews</span>
           <h2 className="font-serif text-4xl sm:text-5xl font-bold text-foreground tracking-tight">Loved by Our Community</h2>
           <p className="text-sm text-textMuted/90 leading-relaxed font-light">
             Here is what our regular guests say about our service, flavor, and cozy space.
           </p>
-        </div>
+        </AnimatedContent>
 
         {reviews.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <AnimatedContent distance={40} delay={0.1} className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {reviews.map((review: any) => (
               <div
                 key={review.id}
@@ -330,7 +349,7 @@ export default async function HomePage() {
                 </div>
               </div>
             ))}
-          </div>
+          </AnimatedContent>
         ) : (
           <div className="text-center text-textMuted text-xs py-10 bg-white border border-borderColor/40 border-dashed rounded-3xl">No approved reviews yet.</div>
         )}
@@ -419,8 +438,11 @@ export default async function HomePage() {
       </section>
 
       {/* Newsletter / Cozy Club Section */}
-      <section className="py-32 mx-auto max-w-4xl px-4 animate-fade-in-up">
-        <div className="rounded-[2rem] border border-borderColor/40 bg-cardBg p-10 md:p-16 text-center shadow-2xl relative overflow-hidden">
+      <section className="py-32 mx-auto max-w-4xl px-4">
+        <AnimatedContent
+          distance={40}
+          className="rounded-[2rem] border border-borderColor/40 bg-cardBg p-10 md:p-16 text-center shadow-2xl relative overflow-hidden"
+        >
           <div className="absolute top-0 right-0 h-48 w-48 rounded-full bg-secondary/80 filter blur-3xl opacity-65" />
           <div className="absolute bottom-0 left-0 h-48 w-48 rounded-full bg-accent/10 filter blur-3xl opacity-60" />
 
@@ -433,7 +455,7 @@ export default async function HomePage() {
 
             <NewsletterForm />
           </div>
-        </div>
+        </AnimatedContent>
       </section>
 
       <Footer />

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
+import { logger, logError } from "@/lib/logger";
 
 async function getAuthUser() {
   const cookieStore = await cookies();
@@ -12,6 +13,7 @@ async function getAuthUser() {
 
 // GET /api/coupons - Validate a coupon by code OR list all coupons if admin
 export async function GET(request: Request) {
+  logger.info({ method: "GET", url: "/api/coupons" }, "GET /api/coupons - Request received");
   try {
     const { searchParams } = new URL(request.url);
     const code = searchParams.get("code");
@@ -30,6 +32,7 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: "This coupon is no longer active" }, { status: 400 });
       }
 
+      logger.info({ method: "GET", url: "/api/coupons" }, "GET /api/coupons (validate code) - Request completed successfully");
       return NextResponse.json({ coupon });
     }
 
@@ -43,15 +46,17 @@ export async function GET(request: Request) {
       orderBy: { createdAt: "desc" },
     });
 
+    logger.info({ method: "GET", url: "/api/coupons" }, "GET /api/coupons (admin list) - Request completed successfully");
     return NextResponse.json({ coupons });
   } catch (error) {
-    console.error("Error with coupons route:", error);
+    logError(error, { method: "GET", url: "/api/coupons" });
     return NextResponse.json({ error: "Failed to process coupon request" }, { status: 500 });
   }
 }
 
 // POST /api/coupons - Create coupon (Admin Only)
 export async function POST(request: Request) {
+  logger.info({ method: "POST", url: "/api/coupons" }, "POST /api/coupons - Request received");
   try {
     const user = await getAuthUser();
     if (!user || (user.role !== "ADMIN" && user.role !== "STAFF")) {
@@ -82,15 +87,17 @@ export async function POST(request: Request) {
       },
     });
 
+    logger.info({ method: "POST", url: "/api/coupons" }, "POST /api/coupons - Request completed successfully");
     return NextResponse.json({ message: "Coupon created successfully!", coupon }, { status: 201 });
   } catch (error) {
-    console.error("Error creating coupon:", error);
+    logError(error, { method: "POST", url: "/api/coupons" });
     return NextResponse.json({ error: "Server error during coupon creation" }, { status: 500 });
   }
 }
 
 // PUT /api/coupons - Edit coupon (Admin Only)
 export async function PUT(request: Request) {
+  logger.info({ method: "PUT", url: "/api/coupons" }, "PUT /api/coupons - Request received");
   try {
     const user = await getAuthUser();
     if (!user || (user.role !== "ADMIN" && user.role !== "STAFF")) {
@@ -113,15 +120,17 @@ export async function PUT(request: Request) {
       },
     });
 
+    logger.info({ method: "PUT", url: "/api/coupons" }, "PUT /api/coupons - Request completed successfully");
     return NextResponse.json({ message: "Coupon updated successfully!", coupon: updated });
   } catch (error) {
-    console.error("Error updating coupon:", error);
+    logError(error, { method: "PUT", url: "/api/coupons" });
     return NextResponse.json({ error: "Server error updating coupon" }, { status: 500 });
   }
 }
 
 // DELETE /api/coupons - Delete coupon (Admin Only)
 export async function DELETE(request: Request) {
+  logger.info({ method: "DELETE", url: "/api/coupons" }, "DELETE /api/coupons - Request received");
   try {
     const user = await getAuthUser();
     if (!user || (user.role !== "ADMIN" && user.role !== "STAFF")) {
@@ -139,9 +148,10 @@ export async function DELETE(request: Request) {
       where: { id },
     });
 
+    logger.info({ method: "DELETE", url: "/api/coupons" }, "DELETE /api/coupons - Request completed successfully");
     return NextResponse.json({ message: "Coupon deleted successfully!" });
   } catch (error) {
-    console.error("Error deleting coupon:", error);
+    logError(error, { method: "DELETE", url: "/api/coupons" });
     return NextResponse.json({ error: "Server error deleting coupon" }, { status: 500 });
   }
 }

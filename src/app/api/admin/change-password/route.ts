@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
+import { logger, logError } from "@/lib/logger";
 
 async function getAuthUser() {
   const cookieStore = await cookies();
@@ -13,6 +14,7 @@ async function getAuthUser() {
 
 // POST /api/admin/change-password - Change logged-in user password
 export async function POST(request: Request) {
+  logger.info({ method: "POST", url: "/api/admin/change-password" }, "POST /api/admin/change-password - Request received");
   try {
     const authUser = await getAuthUser();
     if (!authUser) {
@@ -54,9 +56,10 @@ export async function POST(request: Request) {
       },
     });
 
+    logger.info({ method: "POST", url: "/api/admin/change-password" }, "POST /api/admin/change-password - Request completed successfully");
     return NextResponse.json({ message: "Password updated successfully!" });
   } catch (error) {
-    console.error("Error changing password:", error);
+    logError(error, { method: "POST", url: "/api/admin/change-password" });
     return NextResponse.json({ error: "Server error changing password" }, { status: 500 });
   }
 }

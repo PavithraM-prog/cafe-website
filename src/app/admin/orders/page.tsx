@@ -46,6 +46,7 @@ interface MenuItem {
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [updatingOrders, setUpdatingOrders] = useState<Record<string, boolean>>({});
   
   // Filtering States
   const [statusFilter, setStatusFilter] = useState("ACTIVE"); // ACTIVE, PENDING, PREPARING, READY, DELIVERED, CANCELLED
@@ -86,7 +87,8 @@ export default function AdminOrdersPage() {
     fetchOrders();
   }, [fetchOrders]);
 
-  const handleUpdateStatus = async (id: string, newStatus: string) => {
+  const handleUpdateStatus = useCallback(async (id: string, newStatus: string) => {
+    setUpdatingOrders((prev) => ({ ...prev, [id]: true }));
     try {
       const res = await fetch("/api/orders", {
         method: "PUT",
@@ -107,11 +109,13 @@ export default function AdminOrdersPage() {
       }
     } catch (e) {
       console.error(e);
+    } finally {
+      setUpdatingOrders((prev) => ({ ...prev, [id]: false }));
     }
-  };
+  }, [statusFilter, fetchOrders]);
 
   // Fetch Menu for Walk-in orders
-  const loadMenu = async () => {
+  const loadMenu = useCallback(async () => {
     try {
       setLoadingMenu(true);
       const res = await fetch("/api/menu");
@@ -124,7 +128,7 @@ export default function AdminOrdersPage() {
     } finally {
       setLoadingMenu(false);
     }
-  };
+  }, []);
 
   const handleOpenWalkInModal = () => {
     setModalOpen(true);
@@ -134,7 +138,7 @@ export default function AdminOrdersPage() {
     loadMenu();
   };
 
-  const addToCart = (product: MenuItem) => {
+  const addToCart = useCallback((product: MenuItem) => {
     setCart((prev) => {
       const existing = prev.find((item) => item.product.id === product.id);
       if (existing) {
@@ -144,9 +148,9 @@ export default function AdminOrdersPage() {
       }
       return [...prev, { product, quantity: 1 }];
     });
-  };
+  }, []);
 
-  const updateCartQty = (productId: string, amount: number) => {
+  const updateCartQty = useCallback((productId: string, amount: number) => {
     setCart((prev) =>
       prev
         .map((item) => {
@@ -158,9 +162,11 @@ export default function AdminOrdersPage() {
         })
         .filter((item) => item.quantity > 0)
     );
-  };
+  }, []);
 
-  const checkLoyaltyMember = async () => {
+  const cartTotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+
+  const checkLoyaltyMember = useCallback(async () => {
     if (!loyaltyEmail) return;
     try {
       setIsCheckingLoyalty(true);
@@ -181,11 +187,9 @@ export default function AdminOrdersPage() {
     } finally {
       setIsCheckingLoyalty(false);
     }
-  };
+  }, [loyaltyEmail, cartTotal]);
 
-  const cartTotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
-
-  const submitWalkInOrder = async (e: React.FormEvent) => {
+  const submitWalkInOrder = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (cart.length === 0) {
       alert("Please add at least one item to the order.");
@@ -224,7 +228,7 @@ export default function AdminOrdersPage() {
       console.error(e);
       alert("Error submitting walk-in order.");
     }
-  };
+  }, [cart, cartTotal, loyaltyEmail, fetchOrders]);
 
   const getStatusColor = (status: string) => {
     if (status === "DELIVERED") return "bg-emerald-50 text-emerald-700 border-emerald-100";
@@ -421,27 +425,42 @@ export default function AdminOrdersPage() {
                           {order.status === "PENDING" && (
                             <button
                               onClick={() => handleUpdateStatus(order.id, "PREPARING")}
-                              className="w-full flex items-center justify-center space-x-1.5 rounded-full bg-[#8c6239] hover:bg-[#734f2d] text-white text-[10px] font-bold py-2 shadow-sm transition-all"
+                              disabled={updatingOrders[order.id]}
+                              className="w-full flex items-center justify-center space-x-1.5 rounded-full bg-[#8c6239] hover:bg-[#734f2d] text-white text-[10px] font-bold py-2 shadow-sm transition-all disabled:opacity-50"
                             >
-                              <Play className="h-3 w-3 fill-current" />
+                              {updatingOrders[order.id] ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : (
+                                <Play className="h-3 w-3 fill-current" />
+                              )}
                               <span>Start Preparing</span>
                             </button>
                           )}
                           {order.status === "PREPARING" && (
                             <button
                               onClick={() => handleUpdateStatus(order.id, "READY")}
-                              className="w-full flex items-center justify-center space-x-1.5 rounded-full bg-amber-600 hover:bg-amber-700 text-white text-[10px] font-bold py-2 shadow-sm transition-all animate-pulse"
+                              disabled={updatingOrders[order.id]}
+                              className="w-full flex items-center justify-center space-x-1.5 rounded-full bg-amber-600 hover:bg-amber-700 text-white text-[10px] font-bold py-2 shadow-sm transition-all disabled:opacity-50 animate-pulse"
                             >
-                              <PackageOpen className="h-3.5 w-3.5" />
+                              {updatingOrders[order.id] ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : (
+                                <PackageOpen className="h-3.5 w-3.5" />
+                              )}
                               <span>Mark Ready</span>
                             </button>
                           )}
                           {order.status === "READY" && (
                             <button
                               onClick={() => handleUpdateStatus(order.id, "DELIVERED")}
-                              className="w-full flex items-center justify-center space-x-1.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold py-2 shadow-sm transition-all col-span-2"
+                              disabled={updatingOrders[order.id]}
+                              className="w-full flex items-center justify-center space-x-1.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold py-2 shadow-sm transition-all disabled:opacity-50 col-span-2"
                             >
-                              <CheckCircle className="h-3.5 w-3.5" />
+                              {updatingOrders[order.id] ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : (
+                                <CheckCircle className="h-3.5 w-3.5" />
+                              )}
                               <span>Serve / Complete</span>
                             </button>
                           )}
@@ -449,9 +468,14 @@ export default function AdminOrdersPage() {
                           {order.status !== "READY" && (
                             <button
                               onClick={() => handleUpdateStatus(order.id, "CANCELLED")}
-                              className="flex items-center justify-center space-x-1 border border-red-200 hover:bg-red-50 text-red-600 rounded-full text-[10px] font-bold py-2 transition-all"
+                              disabled={updatingOrders[order.id]}
+                              className="flex items-center justify-center space-x-1 border border-red-200 hover:bg-red-50 text-red-600 rounded-full text-[10px] font-bold py-2 transition-all disabled:opacity-50"
                             >
-                              <XCircle className="h-3.5 w-3.5" />
+                              {updatingOrders[order.id] ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : (
+                                <XCircle className="h-3.5 w-3.5" />
+                              )}
                               <span>Cancel</span>
                             </button>
                           )}

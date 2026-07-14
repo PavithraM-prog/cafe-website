@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
+import { logger, logError } from "@/lib/logger";
 
 async function checkAdminAuth() {
   const cookieStore = await cookies();
@@ -14,6 +15,7 @@ async function checkAdminAuth() {
 
 // GET /api/admin/staff - Fetch list of all workers
 export async function GET(request: Request) {
+  logger.info({ method: "GET", url: "/api/admin/staff" }, "GET /api/admin/staff - Request received");
   try {
     const admin = await checkAdminAuth();
     if (!admin) {
@@ -37,15 +39,17 @@ export async function GET(request: Request) {
       orderBy: { name: "asc" },
     });
 
+    logger.info({ method: "GET", url: "/api/admin/staff" }, "GET /api/admin/staff - Request completed successfully");
     return NextResponse.json({ staff });
   } catch (error) {
-    console.error("Error fetching staff:", error);
+    logError(error, { method: "GET", url: "/api/admin/staff" });
     return NextResponse.json({ error: "Server error fetching staff directory" }, { status: 500 });
   }
 }
 
 // POST /api/admin/staff - Create/Hire a new worker
 export async function POST(request: Request) {
+  logger.info({ method: "POST", url: "/api/admin/staff" }, "POST /api/admin/staff - Request received");
   try {
     const admin = await checkAdminAuth();
     if (!admin) {
@@ -77,15 +81,17 @@ export async function POST(request: Request) {
       },
     });
 
+    logger.info({ method: "POST", url: "/api/admin/staff" }, "POST /api/admin/staff - Request completed successfully");
     return NextResponse.json({ message: "Staff member added successfully", staff: newWorker }, { status: 201 });
   } catch (error) {
-    console.error("Error creating staff:", error);
+    logError(error, { method: "POST", url: "/api/admin/staff" });
     return NextResponse.json({ error: "Server error adding staff member" }, { status: 500 });
   }
 }
 
 // PUT /api/admin/staff - Edit worker details
 export async function PUT(request: Request) {
+  logger.info({ method: "PUT", url: "/api/admin/staff" }, "PUT /api/admin/staff - Request received");
   try {
     const admin = await checkAdminAuth();
     if (!admin) {
@@ -121,15 +127,17 @@ export async function PUT(request: Request) {
       },
     });
 
+    logger.info({ method: "PUT", url: "/api/admin/staff" }, "PUT /api/admin/staff - Request completed successfully");
     return NextResponse.json({ message: "Staff member updated successfully", staff: updated });
   } catch (error) {
-    console.error("Error updating staff:", error);
+    logError(error, { method: "PUT", url: "/api/admin/staff" });
     return NextResponse.json({ error: "Server error updating staff member details" }, { status: 500 });
   }
 }
 
 // DELETE /api/admin/staff - Fire/Remove a worker
 export async function DELETE(request: Request) {
+  logger.info({ method: "DELETE", url: "/api/admin/staff" }, "DELETE /api/admin/staff - Request received");
   try {
     const admin = await checkAdminAuth();
     if (!admin) {
@@ -147,9 +155,10 @@ export async function DELETE(request: Request) {
       where: { id },
     });
 
+    logger.info({ method: "DELETE", url: "/api/admin/staff" }, "DELETE /api/admin/staff - Request completed successfully");
     return NextResponse.json({ message: "Staff member removed successfully" });
   } catch (error) {
-    console.error("Error deleting staff:", error);
+    logError(error, { method: "DELETE", url: "/api/admin/staff" });
     return NextResponse.json({ error: "Server error deleting staff member" }, { status: 500 });
   }
 }

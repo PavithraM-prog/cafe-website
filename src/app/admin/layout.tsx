@@ -19,20 +19,20 @@ import {
   User
 } from "lucide-react";
 
+const menuItems = [
+  { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { name: "Orders queue", href: "/admin/orders", icon: ClipboardList },
+  { name: "Reservations", href: "/admin/reservations", icon: Calendar },
+  { name: "Loyalty Members", href: "/admin/loyalty", icon: Users },
+  { name: "Staff Management", href: "/admin/staff", icon: UserCheck },
+  { name: "Profile & Settings", href: "/admin/settings", icon: Settings },
+];
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const menuItems = [
-    { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
-    { name: "Orders queue", href: "/admin/orders", icon: ClipboardList },
-    { name: "Reservations", href: "/admin/reservations", icon: Calendar },
-    { name: "Loyalty Members", href: "/admin/loyalty", icon: Users },
-    { name: "Staff Management", href: "/admin/staff", icon: UserCheck },
-    { name: "Profile & Settings", href: "/admin/settings", icon: Settings },
-  ];
 
   const handleLogout = async () => {
     await logout();
@@ -45,7 +45,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   return (
-    <div className="min-h-screen md:h-screen md:overflow-hidden bg-[#faf8f5] flex flex-col md:flex-row text-[#2d1e18] font-sans antialiased">
+    <div className="min-h-screen bg-[#faf8f5] flex flex-col md:flex-row text-[#2d1e18] font-sans antialiased">
       {/* Mobile Header Bar */}
       <div className="flex md:hidden items-center justify-between bg-[#1d140e] text-white px-4 py-4 shrink-0 shadow-md">
         <Link href="/" className="flex items-center space-x-2 text-white font-bold text-lg">
@@ -62,7 +62,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Sidebar navigation */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-[#1d140e] text-[#f2ede4] transform transition-transform duration-300 ease-in-out md:relative md:transform-none shrink-0 flex flex-col justify-between ${
+        className={`fixed inset-y-0 left-0 z-40 w-64 bg-[#1d140e] text-[#f2ede4] transform transition-transform duration-300 ease-in-out shrink-0 flex flex-col justify-between overflow-y-auto ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >
@@ -127,7 +127,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Main Panel Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 bg-[#faf8f5]">
+      <main className="flex-1 flex flex-col min-w-0 bg-[#faf8f5] md:pl-64">
         {/* Top Desktop bar */}
         <header className="hidden md:flex h-16 items-center justify-between bg-white border-b border-[#e8dfd7] px-8 shrink-0">
           <span className="font-serif text-lg font-bold text-[#2d1e18]">Management Workspace</span>

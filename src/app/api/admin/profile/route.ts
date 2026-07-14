@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
+import { logger, logError } from "@/lib/logger";
 
 async function getAuthUser() {
   const cookieStore = await cookies();
@@ -12,6 +13,7 @@ async function getAuthUser() {
 
 // PUT /api/admin/profile - Update admin/staff profile details
 export async function PUT(request: Request) {
+  logger.info({ method: "PUT", url: "/api/admin/profile" }, "PUT /api/admin/profile - Request received");
   try {
     const authUser = await getAuthUser();
     if (!authUser || (authUser.role !== "ADMIN" && authUser.role !== "STAFF")) {
@@ -54,9 +56,10 @@ export async function PUT(request: Request) {
       },
     });
 
+    logger.info({ method: "PUT", url: "/api/admin/profile" }, "PUT /api/admin/profile - Request completed successfully");
     return NextResponse.json({ message: "Profile updated successfully", user: updatedUser });
   } catch (error) {
-    console.error("Error updating admin profile:", error);
+    logError(error, { method: "PUT", url: "/api/admin/profile" });
     return NextResponse.json({ error: "Server error updating profile details" }, { status: 500 });
   }
 }

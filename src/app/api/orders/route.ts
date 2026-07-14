@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
-import { logger } from "@/lib/logger";
+import { logger, logError } from "@/lib/logger";
 
 async function getAuthUser() {
   const cookieStore = await cookies();
@@ -13,6 +13,7 @@ async function getAuthUser() {
 
 // GET /api/orders - Get orders list
 export async function GET(request: Request) {
+  logger.info({ method: "GET", url: "/api/orders" }, "GET /api/orders - Request received");
   try {
     const user = await getAuthUser();
     if (!user) {
@@ -69,6 +70,7 @@ export async function GET(request: Request) {
         where,
         orderBy: { createdAt: "desc" },
       });
+      logger.info({ method: "GET", url: "/api/orders" }, "GET /api/orders (admin/staff) - Request completed successfully");
       return NextResponse.json({ orders });
     }
 
@@ -78,15 +80,17 @@ export async function GET(request: Request) {
       orderBy: { createdAt: "desc" },
     });
 
+    logger.info({ method: "GET", url: "/api/orders" }, "GET /api/orders - Request completed successfully");
     return NextResponse.json({ orders });
   } catch (error) {
-    logger.error("Error fetching orders", error);
+    logError(error, { method: "GET", url: "/api/orders" });
     return NextResponse.json({ error: "Failed to fetch orders" }, { status: 500 });
   }
 }
 
 // POST /api/orders - Place a new order
 export async function POST(request: Request) {
+  logger.info({ method: "POST", url: "/api/orders" }, "POST /api/orders - Request received");
   try {
     const user = await getAuthUser();
     // Allow admin/staff to record walk-in orders even if customer is not logged in
@@ -104,51 +108,55 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing required order information" }, { status: 400 });
     }
 
-    // 1. Calculate loyalty points to award: 1 point for every ₹1 spent
+    // 1. Calculate loyalty points to award: 1 point for every $1 spent
     const pointsEarned = Math.floor(parseFloat(total));
+
+    const userId = user?.id || null;
 
     // 2. Create the order in db
     const newOrder = await db.order.create({
       data: {
-        userId: user.id,
+        userId,
         items: JSON.stringify(items), // JSON array of items as string for SQLite
         total: parseFloat(total),
         discount: discount ? parseFloat(discount) : 0,
-        address: address || (isWalkIn ? "Walk-in Customer" : ""),
-        phone: phone || (isWalkIn ? "N/A" : ""),
-        paymentStatus: "PAID", // Simulation of instant payment success
-        status: isWalkIn ? "DELIVERED" : "PENDING", // Walk-in is served immediately, so default to DELIVERED
+        address,
+        phone,
         source: source || "WEBSITE",
+        paymentStatus: "PAID", // Simulation of instant payment success
+        status: "PENDING",
       },
     });
 
     // 3. Update user loyalty points
-    await db.user.update({
-      where: { id: user.id },
-      data: {
-        loyaltyPoints: {
-          increment: pointsEarned,
+    if (userId) {
+      await db.user.update({
+        where: { id: userId },
+        data: {
+          loyaltyPoints: {
+            increment: pointsEarned,
+          },
         },
-      },
-    });
+      });
+    }
 
     // 4. If a coupon was used, we could invalidate it if single-use, but here we keep it simple
 
+    logger.info({ method: "POST", url: "/api/orders" }, "POST /api/orders - Request completed successfully");
     return NextResponse.json({
       message: "Order placed successfully!",
       order: newOrder,
       pointsEarned,
     }, { status: 201 });
   } catch (error) {
-    logger.error("Error creating order", error);
+    logError(error, { method: "POST", url: "/api/orders" });
     return NextResponse.json({ error: "Server error during checkout" }, { status: 500 });
   }
 }
 
 // PUT /api/orders - Update order status (Admin/Staff only)
 export async function PUT(request: Request) {
-  let id: string | undefined;
-  let status: string | undefined;
+  logger.info({ method: "PUT", url: "/api/orders" }, "PUT /api/orders - Request received");
   try {
     const user = await getAuthUser();
     if (!user || (user.role !== "ADMIN" && user.role !== "STAFF")) {
@@ -156,8 +164,7 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    id = body.id;
-    status = body.status;
+    const { id, status } = body; // status: PENDING, PREPARING, READY, DELIVERED, CANCELLED
 
     if (!id || !status) {
       return NextResponse.json({ error: "Missing order ID or status" }, { status: 400 });
@@ -168,9 +175,10 @@ export async function PUT(request: Request) {
       data: { status },
     });
 
+    logger.info({ method: "PUT", url: "/api/orders" }, "PUT /api/orders - Request completed successfully");
     return NextResponse.json({ message: `Order status updated to ${status}`, order: updatedOrder });
   } catch (error) {
-    logger.error("Error updating order status", error, { id, status });
+    logError(error, { method: "PUT", url: "/api/orders" });
     return NextResponse.json({ error: "Server error updating order status" }, { status: 500 });
   }
 }

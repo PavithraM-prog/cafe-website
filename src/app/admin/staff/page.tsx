@@ -42,6 +42,7 @@ export default function AdminStaffPage() {
   const [staffList, setStaffList] = useState<Staff[]>([]);
   const [attendanceLogs, setAttendanceLogs] = useState<AttendanceLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [updatingStaff, setUpdatingStaff] = useState<Record<string, boolean>>({});
   
   // Filters
   const [staffSearch, setStaffSearch] = useState("");
@@ -98,7 +99,7 @@ export default function AdminStaffPage() {
   }, [activeTab, fetchStaff, fetchAttendance]);
 
   // Handle Hiring/Editing Staff
-  const handleStaffSubmit = async (e: React.FormEvent) => {
+  const handleStaffSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!staffName || !staffEmail || !staffRole) return;
 
@@ -130,7 +131,7 @@ export default function AdminStaffPage() {
     } catch (e) {
       console.error(e);
     }
-  };
+  }, [staffName, staffEmail, staffRole, editMode, selectedStaff, fetchStaff]);
 
   const openAddStaff = () => {
     setEditMode(false);
@@ -150,9 +151,9 @@ export default function AdminStaffPage() {
     setStaffModalOpen(true);
   };
 
-  const handleDeleteStaff = async (id: string) => {
+  const handleDeleteStaff = useCallback(async (id: string) => {
     if (!confirm("Are you sure you want to remove this staff member?")) return;
-
+    setUpdatingStaff((prev) => ({ ...prev, [id]: true }));
     try {
       const res = await fetch(`/api/admin/staff?id=${id}`, {
         method: "DELETE",
@@ -165,11 +166,14 @@ export default function AdminStaffPage() {
       }
     } catch (e) {
       console.error(e);
+    } finally {
+      setUpdatingStaff((prev) => ({ ...prev, [id]: false }));
     }
-  };
+  }, [fetchStaff]);
 
   // Clock-in / Clock-out control
-  const handleClockIn = async (staffId: string) => {
+  const handleClockIn = useCallback(async (staffId: string) => {
+    setUpdatingStaff((prev) => ({ ...prev, [staffId]: true }));
     try {
       const res = await fetch("/api/admin/attendance", {
         method: "POST",
@@ -189,10 +193,13 @@ export default function AdminStaffPage() {
       }
     } catch (e) {
       console.error(e);
+    } finally {
+      setUpdatingStaff((prev) => ({ ...prev, [staffId]: false }));
     }
-  };
+  }, [attendanceDate, fetchAttendance]);
 
-  const handleClockOut = async (logId: string) => {
+  const handleClockOut = useCallback(async (logId: string) => {
+    setUpdatingStaff((prev) => ({ ...prev, [logId]: true }));
     try {
       const res = await fetch("/api/admin/attendance", {
         method: "PUT",
@@ -210,8 +217,10 @@ export default function AdminStaffPage() {
       }
     } catch (e) {
       console.error(e);
+    } finally {
+      setUpdatingStaff((prev) => ({ ...prev, [logId]: false }));
     }
-  };
+  }, [fetchAttendance]);
 
   // Helper formatting total work hours
   const calculateWorkHours = (login: string, logout: string | null) => {
@@ -368,10 +377,15 @@ export default function AdminStaffPage() {
                             </button>
                             <button
                               onClick={() => handleDeleteStaff(staff.id)}
-                              className="p-1.5 rounded-lg hover:bg-[#f2ede4] text-red-500 hover:text-red-700 transition-all"
+                              disabled={updatingStaff[staff.id]}
+                              className="p-1.5 rounded-lg hover:bg-[#f2ede4] text-red-500 hover:text-red-700 transition-all disabled:opacity-50"
                               title="Fire Staff"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              {updatingStaff[staff.id] ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="h-4 w-4" />
+                              )}
                             </button>
                           </td>
                         </tr>
@@ -438,9 +452,13 @@ export default function AdminStaffPage() {
                               {!log.logoutTime && attendanceDate === new Date().toISOString().split("T")[0] && (
                                 <button
                                   onClick={() => handleClockOut(log.id)}
-                                  className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-1 rounded-full text-[10px] font-bold shadow-sm transition-all"
+                                  disabled={updatingStaff[log.id]}
+                                  className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-1 rounded-full text-[10px] font-bold shadow-sm transition-all disabled:opacity-50"
                                 >
-                                  Clock Out
+                                  {updatingStaff[log.id] ? (
+                                    <Loader2 className="h-3 w-3 animate-spin mr-1 inline-block" />
+                                  ) : null}
+                                  <span>Clock Out</span>
                                 </button>
                               )}
                             </td>
@@ -490,9 +508,14 @@ export default function AdminStaffPage() {
                             ) : (
                               <button
                                 onClick={() => handleClockIn(staff.id)}
-                                className="flex items-center space-x-1 bg-[#8c6239] hover:bg-[#734f2d] text-white px-3 py-1 rounded-full text-[10px] font-bold shadow-sm transition-all"
+                                disabled={updatingStaff[staff.id]}
+                                className="flex items-center space-x-1 bg-[#8c6239] hover:bg-[#734f2d] text-white px-3 py-1 rounded-full text-[10px] font-bold shadow-sm transition-all disabled:opacity-50"
                               >
-                                <Play className="h-3 w-3 fill-current" />
+                                {updatingStaff[staff.id] ? (
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                ) : (
+                                  <Play className="h-3 w-3 fill-current" />
+                                )}
                                 <span>Clock In</span>
                               </button>
                             )}

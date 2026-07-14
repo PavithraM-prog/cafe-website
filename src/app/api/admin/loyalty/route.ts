@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
+import { logger, logError } from "@/lib/logger";
 
 async function checkAdminAuth() {
   const cookieStore = await cookies();
@@ -14,6 +15,7 @@ async function checkAdminAuth() {
 
 // GET /api/admin/loyalty - Fetch loyalty members list with optional search
 export async function GET(request: Request) {
+  logger.info({ method: "GET", url: "/api/admin/loyalty" }, "GET /api/admin/loyalty - Request received");
   try {
     const admin = await checkAdminAuth();
     if (!admin) {
@@ -36,15 +38,17 @@ export async function GET(request: Request) {
       orderBy: { points: "desc" },
     });
 
+    logger.info({ method: "GET", url: "/api/admin/loyalty" }, "GET /api/admin/loyalty - Request completed successfully");
     return NextResponse.json({ members });
   } catch (error) {
-    console.error("Error fetching loyalty members:", error);
+    logError(error, { method: "GET", url: "/api/admin/loyalty" });
     return NextResponse.json({ error: "Server error fetching loyalty directory" }, { status: 500 });
   }
 }
 
 // POST /api/admin/loyalty - Register a new loyalty member
 export async function POST(request: Request) {
+  logger.info({ method: "POST", url: "/api/admin/loyalty" }, "POST /api/admin/loyalty - Request received");
   try {
     const admin = await checkAdminAuth();
     if (!admin) {
@@ -76,15 +80,17 @@ export async function POST(request: Request) {
       },
     });
 
+    logger.info({ method: "POST", url: "/api/admin/loyalty" }, "POST /api/admin/loyalty - Request completed successfully");
     return NextResponse.json({ message: "Loyalty member registered successfully", member: newMember }, { status: 201 });
   } catch (error) {
-    console.error("Error creating loyalty member:", error);
+    logError(error, { method: "POST", url: "/api/admin/loyalty" });
     return NextResponse.json({ error: "Server error during loyalty registration" }, { status: 500 });
   }
 }
 
 // PUT /api/admin/loyalty - Update loyalty member details / adjust points
 export async function PUT(request: Request) {
+  logger.info({ method: "PUT", url: "/api/admin/loyalty" }, "PUT /api/admin/loyalty - Request received");
   try {
     const admin = await checkAdminAuth();
     if (!admin) {
@@ -120,15 +126,17 @@ export async function PUT(request: Request) {
       },
     });
 
+    logger.info({ method: "PUT", url: "/api/admin/loyalty" }, "PUT /api/admin/loyalty - Request completed successfully");
     return NextResponse.json({ message: "Loyalty member updated successfully", member: updated });
   } catch (error) {
-    console.error("Error updating loyalty member:", error);
+    logError(error, { method: "PUT", url: "/api/admin/loyalty" });
     return NextResponse.json({ error: "Server error updating loyalty account" }, { status: 500 });
   }
 }
 
 // DELETE /api/admin/loyalty - Remove a loyalty member
 export async function DELETE(request: Request) {
+  logger.info({ method: "DELETE", url: "/api/admin/loyalty" }, "DELETE /api/admin/loyalty - Request received");
   try {
     const admin = await checkAdminAuth();
     if (!admin) {
@@ -146,9 +154,10 @@ export async function DELETE(request: Request) {
       where: { id },
     });
 
+    logger.info({ method: "DELETE", url: "/api/admin/loyalty" }, "DELETE /api/admin/loyalty - Request completed successfully");
     return NextResponse.json({ message: "Loyalty member deleted successfully" });
   } catch (error) {
-    console.error("Error deleting loyalty member:", error);
+    logError(error, { method: "DELETE", url: "/api/admin/loyalty" });
     return NextResponse.json({ error: "Server error deleting loyalty account" }, { status: 500 });
   }
 }
