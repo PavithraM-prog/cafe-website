@@ -120,11 +120,11 @@ export async function POST(request: Request) {
         items: JSON.stringify(items), // JSON array of items as string for SQLite
         total: parseFloat(total),
         discount: discount ? parseFloat(discount) : 0,
-        address,
-        phone,
+        address: address || (isWalkIn ? "Walk-in Customer" : ""),
+        phone: phone || (isWalkIn ? "N/A" : ""),
         source: source || "WEBSITE",
         paymentStatus: "PAID", // Simulation of instant payment success
-        status: "PENDING",
+        status: isWalkIn ? "DELIVERED" : "PENDING", // Walk-in is served immediately, so default to DELIVERED
       },
     });
 
