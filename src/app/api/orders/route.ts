@@ -110,7 +110,7 @@ export async function POST(request: Request) {
     // 2. Create the order in db
     const newOrder = await db.order.create({
       data: {
-        userId: user.id,
+        userId: user ? user.id : null,
         items: JSON.stringify(items), // JSON array of items as string for SQLite
         total: parseFloat(total),
         discount: discount ? parseFloat(discount) : 0,
@@ -123,14 +123,16 @@ export async function POST(request: Request) {
     });
 
     // 3. Update user loyalty points
-    await db.user.update({
-      where: { id: user.id },
-      data: {
-        loyaltyPoints: {
-          increment: pointsEarned,
+    if (user) {
+      await db.user.update({
+        where: { id: user.id },
+        data: {
+          loyaltyPoints: {
+            increment: pointsEarned,
+          },
         },
-      },
-    });
+      });
+    }
 
     // 4. If a coupon was used, we could invalidate it if single-use, but here we keep it simple
 

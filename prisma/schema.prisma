@@ -55,6 +55,7 @@ model MenuItem {
   rating       Float        @default(5.0)
   availability Boolean      @default(true)
   isVeg        Boolean      @default(true)
+  availablePieces Int        @default(10)
   categoryId   String
   deletedAt    DateTime?
   createdAt    DateTime     @default(now())
