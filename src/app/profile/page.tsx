@@ -6,13 +6,9 @@ import { useCart } from "@/context/CartContext";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useRouter } from "next/navigation";
-<<<<<<< HEAD
-import { Award, ShoppingBag, Clock, MapPin, Phone, Star, Send, Loader2, ArrowRight } from "lucide-react";
-import Image from "next/image";
-=======
 import { Award, ShoppingBag, Clock, MapPin, Phone, Star, Send, Loader2, ArrowRight, CreditCard, Printer, RefreshCw } from "lucide-react";
+import Image from "next/image";
 import { formatCurrency } from "@/lib/formatCurrency";
->>>>>>> 10e7606 (Final project)
 
 interface Order {
   id: string;
@@ -215,11 +211,7 @@ export default function ProfilePage() {
                           </span>
                           <button
                             onClick={() => handleReorder(order)}
-<<<<<<< HEAD
-                            className="rounded-full bg-primary hover:bg-primary-hover text-white text-xs font-semibold px-4.5 py-1.5 shadow-sm transition-colors"
-=======
                             className="rounded-full bg-[#f2ede4] hover:bg-borderColor/30 text-foreground text-[10px] font-bold uppercase tracking-wider px-3.5 py-1.5 shadow-sm transition-all hover:scale-105"
->>>>>>> 10e7606 (Final project)
                           >
                             Reorder
                           </button>
@@ -305,13 +297,8 @@ export default function ProfilePage() {
                             {order.discount > 0 && (
                               <p className="text-green-600">Discount: -₹{order.discount.toFixed(2)}</p>
                             )}
-<<<<<<< HEAD
-                            <p className="text-sm font-bold text-foreground">
-                              Paid Total: <span className="text-primary font-sans">₹{order.total.toFixed(2)}</span>
-=======
                             <p className="text-sm font-extrabold text-foreground uppercase tracking-wide">
                               Total Due: <span className="text-primary font-sans text-base ml-1">{formatCurrency(order.total)}</span>
->>>>>>> 10e7606 (Final project)
                             </p>
                           </div>
                         </div>

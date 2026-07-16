@@ -152,21 +152,6 @@ export async function POST(request: Request) {
       },
     });
 
-<<<<<<< HEAD
-    // 3. Update user loyalty points
-    if (user) {
-      await db.user.update({
-        where: { id: user.id },
-        data: {
-          loyaltyPoints: {
-            increment: pointsEarned,
-          },
-        },
-      });
-    }
-
-    // 4. If a coupon was used, we could invalidate it if single-use, but here we keep it simple
-=======
     // Only run stock decrement and loyalty updates on checkout creation if it's a walk-in order (since payment is instant)
     // Website orders will run this inside the payment verification callback
     if (isWalkIn) {
@@ -218,7 +203,6 @@ export async function POST(request: Request) {
         }
       }
     }
->>>>>>> 10e7606 (Final project)
 
 
     return NextResponse.json({
