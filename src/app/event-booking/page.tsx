@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -206,11 +207,13 @@ export default function EventBookingPage() {
               >
                 {/* Background image */}
                 <div className="absolute inset-0 opacity-[0.08] group-hover:opacity-[0.12] transition-opacity">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <Image
                     src={event.image}
                     alt=""
-                    className="h-full w-full object-cover"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    className="object-cover"
+                    loading="lazy"
                   />
                 </div>
 

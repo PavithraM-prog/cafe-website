@@ -152,15 +152,10 @@ model Payment {
 
 model Coupon {
   id            String   @id @default(uuid())
-  userId        String?
-  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  items         String   // Array of items: { productId: string, name: string, price: number, quantity: number, image: string }
-  total         Float
-  discount      Float    @default(0)
-  paymentStatus String   @default("PENDING") // PENDING, PAID, FAILED
-  status        String   @default("PENDING") // PENDING, PREPARING, READY, DELIVERED, CANCELLED
-  address       String
-  phone         String
+  code          String   @unique
+  discountType  String
+  discountValue Float
+  isActive      Boolean  @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 

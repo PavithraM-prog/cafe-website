@@ -1,41 +1,27 @@
 import React from "react";
 export const dynamic = "force-dynamic";
 import Link from "next/link";
-import { db } from "@/lib/db";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
 import { ContactForm } from "@/components/ContactForm";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { Coffee, Calendar, MapPin, Phone, Star, ShieldCheck, Gift, Clock, Sparkles, Mail, Heart, Smile } from "lucide-react";
+import Image from "next/image";
+import { getCachedSettings, getCachedMenu, getCachedApprovedReviews } from "@/lib/cache";
 
 async function getLandingData() {
   try {
-    // 1. Fetch settings
-    const settingsList = await db.setting.findMany();
-    const settings = settingsList.reduce((acc: any, curr) => {
-      acc[curr.id] = curr.value;
-      return acc;
-    }, {});
+    const settings = await getCachedSettings();
+    const { products: allProducts } = await getCachedMenu();
+    // take first 4 with availability and availablePieces > 0
+    const products = allProducts
+      .filter((p) => p.availability && p.availablePieces > 0)
+      .sort((a, b) => b.rating - a.rating)
+      .slice(0, 4);
 
-    // 2. Fetch featured products (take first 4) that are available in stock
-    const products = await db.menuItem.findMany({
-      where: {
-        availability: true,
-        availablePieces: {
-          gt: 0,
-        },
-      },
-      take: 4,
-      orderBy: { rating: "desc" },
-    });
-
-    // 3. Fetch approved reviews
-    const reviews = await db.review.findMany({
-      where: { status: "APPROVED" },
-      take: 3,
-      orderBy: { createdAt: "desc" },
-    });
+    const allApprovedReviews = await getCachedApprovedReviews();
+    const reviews = allApprovedReviews.slice(0, 3);
 
     return { settings, products, reviews };
   } catch (error) {
@@ -66,11 +52,13 @@ export default async function HomePage() {
       <section className="relative flex min-h-[90vh] items-center justify-center overflow-hidden bg-[#1C100E] py-28 px-4 sm:px-6 lg:px-8">
         {/* Background Image with Dark Overlay */}
         <div className="absolute inset-0 z-0">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&q=80&w=1920"
             alt="Warm cozy cafe ambience"
-            className="h-full w-full object-cover object-center opacity-40 scale-105"
+            fill
+            sizes="100vw"
+            priority
+            className="object-cover object-center opacity-40 scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-[#1C100E]/70 via-[#1C100E]/30 to-background" />
         </div>
@@ -255,32 +243,48 @@ export default async function HomePage() {
             {/* Collage Images */}
             <div className="lg:col-span-5 grid grid-cols-2 gap-5">
               <div className="space-y-5">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&q=80&w=400"
-                  alt="Coffee shop interior"
-                  className="rounded-3xl object-cover h-48 w-full shadow-lg hover:scale-105 transition-transform duration-500 hover:shadow-xl border border-borderColor/30"
-                />
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&q=80&w=400"
-                  alt="Espresso extraction"
-                  className="rounded-3xl object-cover h-64 w-full shadow-lg hover:scale-105 transition-transform duration-500 hover:shadow-xl border border-borderColor/30"
-                />
+                <div className="relative h-48 w-full overflow-hidden rounded-3xl shadow-lg border border-borderColor/30 group">
+                  <Image
+                    src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&q=80&w=400"
+                    alt="Coffee shop interior"
+                    fill
+                    sizes="(max-width: 768px) 50vw, 25vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="relative h-64 w-full overflow-hidden rounded-3xl shadow-lg border border-borderColor/30 group">
+                  <Image
+                    src="https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&q=80&w=400"
+                    alt="Espresso extraction"
+                    fill
+                    sizes="(max-width: 768px) 50vw, 25vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                </div>
               </div>
               <div className="space-y-5 pt-8">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=400"
-                  alt="Pouring latte art"
-                  className="rounded-3xl object-cover h-64 w-full shadow-lg hover:scale-105 transition-transform duration-500 hover:shadow-xl border border-borderColor/30"
-                />
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&q=80&w=400"
-                  alt="Fresh snacks"
-                  className="rounded-3xl object-cover h-48 w-full shadow-lg hover:scale-105 transition-transform duration-500 hover:shadow-xl border border-borderColor/30"
-                />
+                <div className="relative h-64 w-full overflow-hidden rounded-3xl shadow-lg border border-borderColor/30 group">
+                  <Image
+                    src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=400"
+                    alt="Pouring latte art"
+                    fill
+                    sizes="(max-width: 768px) 50vw, 25vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="relative h-48 w-full overflow-hidden rounded-3xl shadow-lg border border-borderColor/30 group">
+                  <Image
+                    src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&q=80&w=400"
+                    alt="Fresh snacks"
+                    fill
+                    sizes="(max-width: 768px) 50vw, 25vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -389,11 +393,13 @@ export default async function HomePage() {
 
             {/* Simulated Map Visual Card */}
             <div className="relative rounded-3xl border border-borderColor/40 overflow-hidden h-72 group shadow-xl hover:shadow-2xl transition-all duration-300">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=800"
                 alt="Simulated map background"
-                className="h-full w-full object-cover grayscale opacity-90 group-hover:scale-105 transition-transform duration-500"
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover grayscale opacity-90 group-hover:scale-105 transition-transform duration-500"
+                loading="lazy"
               />
               <div className="absolute inset-0 bg-[#4A2C2A]/10 mix-blend-multiply" />
               

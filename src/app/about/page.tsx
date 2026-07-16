@@ -3,6 +3,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Coffee, Heart, Shield, Leaf, Users, Award } from "lucide-react";
+import Image from "next/image";
 
 const values = [
   {
@@ -87,32 +88,48 @@ export default function AboutPage() {
             {/* Image Grid */}
             <div className="lg:col-span-5 grid grid-cols-2 gap-4">
               <div className="space-y-4">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&q=80&w=400"
-                  alt="Coffee shop interior"
-                  className="rounded-2xl object-cover h-48 w-full shadow-sm hover:shadow-md transition-shadow"
-                />
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&q=80&w=400"
-                  alt="Espresso extraction"
-                  className="rounded-2xl object-cover h-64 w-full shadow-sm hover:shadow-md transition-shadow"
-                />
+                <div className="relative h-48 w-full overflow-hidden rounded-2xl shadow-sm hover:shadow-md border border-borderColor/30 group">
+                  <Image
+                    src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&q=80&w=400"
+                    alt="Coffee shop interior"
+                    fill
+                    sizes="(max-width: 768px) 50vw, 25vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="relative h-64 w-full overflow-hidden rounded-2xl shadow-sm hover:shadow-md border border-borderColor/30 group">
+                  <Image
+                    src="https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&q=80&w=400"
+                    alt="Espresso extraction"
+                    fill
+                    sizes="(max-width: 768px) 50vw, 25vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                </div>
               </div>
               <div className="space-y-4 pt-8">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=400"
-                  alt="Pouring latte art"
-                  className="rounded-2xl object-cover h-64 w-full shadow-sm hover:shadow-md transition-shadow"
-                />
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&q=80&w=400"
-                  alt="Fresh snacks"
-                  className="rounded-2xl object-cover h-48 w-full shadow-sm hover:shadow-md transition-shadow"
-                />
+                <div className="relative h-64 w-full overflow-hidden rounded-2xl shadow-sm hover:shadow-md border border-borderColor/30 group">
+                  <Image
+                    src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=400"
+                    alt="Pouring latte art"
+                    fill
+                    sizes="(max-width: 768px) 50vw, 25vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="relative h-48 w-full overflow-hidden rounded-2xl shadow-sm hover:shadow-md border border-borderColor/30 group">
+                  <Image
+                    src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&q=80&w=400"
+                    alt="Fresh snacks"
+                    fill
+                    sizes="(max-width: 768px) 50vw, 25vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                </div>
               </div>
             </div>
           </div>

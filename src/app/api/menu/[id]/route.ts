@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
+import { revalidateTag } from "next/cache";
 
 async function checkAdminAuth() {
   const cookieStore = await cookies();
@@ -70,6 +71,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       },
     });
 
+    revalidateTag("menu");
+
     return NextResponse.json({ message: "Product updated successfully", product: updatedProduct });
   } catch (error) {
     console.error("Error updating product:", error);
@@ -99,6 +102,8 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     await db.menuItem.delete({
       where: { id },
     });
+
+    revalidateTag("menu");
 
     return NextResponse.json({ message: "Product deleted successfully" });
   } catch (error) {

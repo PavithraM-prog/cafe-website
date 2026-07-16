@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { DollarSign, ShoppingBag, Calendar, Users, Coffee, ArrowUpRight, Laptop, Store } from "lucide-react";
 import Link from "next/link";
 import SalesChart from "@/components/admin/SalesChart";
+import Image from "next/image";
 import { formatCurrency } from "@/lib/formatCurrency";
 
 interface TopItem {
@@ -23,13 +24,20 @@ async function getDashboardData() {
     const endOfToday = new Date();
     endOfToday.setHours(23, 59, 59, 999);
 
-    // 2. Fetch today's orders
+    // 2. Fetch today's orders (with projection)
     const todayOrders = await db.order.findMany({
       where: {
         createdAt: {
           gte: startOfToday,
           lte: endOfToday,
         },
+      },
+      select: {
+        id: true,
+        total: true,
+        paymentStatus: true,
+        status: true,
+        source: true,
       },
     });
 
@@ -67,10 +75,18 @@ async function getDashboardData() {
     // 4. Fetch loyalty members count
     const totalLoyaltyMembers = await db.loyaltyMember.count();
 
-    // 5. Fetch 5 recent orders
+    // 5. Fetch 5 recent orders (with projection)
     const recentOrders = await db.order.findMany({
       take: 5,
       orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        source: true,
+        total: true,
+        status: true,
+        paymentStatus: true,
+        createdAt: true,
+      },
     });
 
     // 6. Calculate Top 5 fastest-selling items (all-time)
@@ -108,7 +124,23 @@ async function getDashboardData() {
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
 
-    // 7. Calculate 7-Day sales trend (last 7 days including today)
+    // 7. Calculate 7-Day sales trend (last 7 days including today in a SINGLE DB query)
+    const startOf7Days = new Date();
+    startOf7Days.setDate(startOf7Days.getDate() - 6);
+    startOf7Days.setHours(0, 0, 0, 0);
+
+    const sevenDaysOrders = await db.order.findMany({
+      where: {
+        createdAt: {
+          gte: startOf7Days,
+          lte: endOfToday,
+        },
+        paymentStatus: "PAID",
+        status: { not: "CANCELLED" },
+      },
+      select: { total: true, source: true, createdAt: true },
+    });
+
     const trendData = [];
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
@@ -120,16 +152,10 @@ async function getDashboardData() {
       const endOfDay = new Date(d);
       endOfDay.setHours(23, 59, 59, 999);
 
-      const dayOrders = await db.order.findMany({
-        where: {
-          createdAt: {
-            gte: startOfDay,
-            lte: endOfDay,
-          },
-          paymentStatus: "PAID",
-          status: { not: "CANCELLED" },
-        },
-        select: { total: true, source: true },
+      // Filter from pre-fetched list
+      const dayOrders = sevenDaysOrders.filter((o) => {
+        const oDate = new Date(o.createdAt);
+        return oDate >= startOfDay && oDate <= endOfDay;
       });
 
       const dayRevenue = dayOrders.reduce((sum, o) => sum + o.total, 0);
@@ -283,10 +309,9 @@ export default async function AdminDashboardPage() {
               stats.topSellingItems.map((item, idx) => (
                 <div key={item.name} className="flex items-center justify-between border-b border-[#f2ede4] pb-3 last:pb-0 last:border-b-0">
                   <div className="flex items-center space-x-3 min-w-0">
-                    <div className="h-10 w-10 rounded-xl overflow-hidden shrink-0 border border-[#e8dfd7] bg-[#f2ede4]">
+                    <div className="relative h-10 w-10 rounded-xl overflow-hidden shrink-0 border border-[#e8dfd7] bg-[#f2ede4]">
                       {item.image ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
+                        <Image src={item.image} alt={item.name} fill sizes="40px" className="object-cover" loading="lazy" />
                       ) : (
                         <Coffee className="h-full w-full p-2 text-[#8c6239]" />
                       )}

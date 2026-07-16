@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import {
   ClipboardList,
   Loader2,
@@ -517,9 +518,8 @@ export default function AdminOrdersPage() {
                         onClick={() => addToCart(prod)}
                         className="bg-[#faf8f5] hover:bg-[#f2ede4] border border-[#e8dfd7] rounded-2xl p-3 text-left cursor-pointer transition-all flex flex-col justify-between space-y-2 hover:border-[#8c6239] hover:shadow-sm"
                       >
-                        <div className="h-20 rounded-xl overflow-hidden bg-[#e8dfd7]">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={prod.image} alt={prod.name} className="h-full w-full object-cover" />
+                        <div className="relative h-20 rounded-xl overflow-hidden bg-[#e8dfd7]">
+                          <Image src={prod.image} alt={prod.name} fill sizes="(max-width: 768px) 33vw, 100px" className="object-cover" loading="lazy" />
                         </div>
                         <div>
                           <span className="block text-[11px] font-bold text-[#2d1e18] truncate leading-tight">

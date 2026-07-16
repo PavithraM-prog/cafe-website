@@ -5,6 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
 import { Search, Loader2, ArrowUpDown, Sparkles } from "lucide-react";
+import Image from "next/image";
 
 interface Product {
   id: string;
@@ -100,11 +101,13 @@ export default function MenuPage() {
       <section className="relative overflow-hidden bg-[#1C100E] py-28 text-center transition-all duration-300">
         {/* Background Image with Dark Overlay */}
         <div className="absolute inset-0 z-0">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src="https://images.unsplash.com/photo-1498804103079-a6351b050096?auto=format&fit=crop&q=80&w=1200"
             alt="Warm roasted coffee beans"
-            className="h-full w-full object-cover object-center opacity-30 scale-105"
+            fill
+            sizes="100vw"
+            priority
+            className="object-cover object-center opacity-30 scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-[#1C100E]/70 via-[#1C100E]/30 to-background" />
         </div>

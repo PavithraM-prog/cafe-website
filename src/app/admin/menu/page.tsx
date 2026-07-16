@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Edit2, Trash2, Check, X, Loader2, Sparkles, Star } from "lucide-react";
 import { formatCurrency } from "@/lib/formatCurrency";
+import Image from "next/image";
 
 interface Product {
   id: string;
@@ -229,12 +230,16 @@ export default function AdminMenuPage() {
                       {/* Item info */}
                       <td className="px-6 py-4">
                         <div className="flex items-center space-x-3.5">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={product.image}
-                            alt={product.name}
-                            className="h-10 w-16 object-cover rounded bg-neutral-100 shrink-0 border border-neutral-200"
-                          />
+                          <div className="relative h-10 w-16 overflow-hidden rounded bg-neutral-100 shrink-0 border border-neutral-200">
+                            <Image
+                              src={product.image}
+                              alt={product.name}
+                              fill
+                              sizes="64px"
+                              className="object-cover"
+                              loading="lazy"
+                            />
+                          </div>
                           <div className="min-w-0">
                             <h4 className="text-sm font-bold text-neutral-800 truncate">{product.name}</h4>
                             <p className="text-[10px] text-neutral-400 line-clamp-1 leading-normal">

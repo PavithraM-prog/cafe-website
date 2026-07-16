@@ -5,8 +5,8 @@
 
 import { Booking, mockBookings } from "@/data/bookingsData";
 
-// Simulate network delay
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+// Resolve immediately to eliminate latency
+const delay = (ms: number) => Promise.resolve();
 
 // Generate a random booking ID
 const generateBookingId = (): string => {

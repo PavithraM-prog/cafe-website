@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
+import { getCachedSettings } from "@/lib/cache";
+import { revalidateTag } from "next/cache";
 
 async function checkAdminAuth() {
   const cookieStore = await cookies();
@@ -15,14 +17,7 @@ async function checkAdminAuth() {
 // GET /api/settings - Fetch all settings as key-value pairs
 export async function GET() {
   try {
-    const settingsList = await db.setting.findMany();
-    
-    // Map list of { id, value } to object { [key]: value }
-    const settings = settingsList.reduce((acc: any, curr) => {
-      acc[curr.id] = curr.value;
-      return acc;
-    }, {});
-
+    const settings = await getCachedSettings();
     return NextResponse.json({ settings });
   } catch (error) {
     console.error("Error fetching settings:", error);
@@ -49,6 +44,7 @@ export async function PUT(request: Request) {
     });
 
     await db.$transaction(updates);
+    revalidateTag("settings");
 
     return NextResponse.json({ message: "Settings updated successfully!" });
   } catch (error) {

@@ -135,19 +135,22 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCouponError(null);
   };
 
-  // Calculations
-  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  // Calculations (memoized to optimize render performance)
+  const subtotal = React.useMemo(() => {
+    return cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  }, [cart]);
 
-  let discountAmount = 0;
-  if (coupon) {
+  const discountAmount = React.useMemo(() => {
+    if (!coupon) return 0;
     if (coupon.discountType === "PERCENTAGE") {
-      discountAmount = (subtotal * coupon.discountValue) / 100;
-    } else {
-      discountAmount = Math.min(coupon.discountValue, subtotal);
+      return (subtotal * coupon.discountValue) / 100;
     }
-  }
+    return Math.min(coupon.discountValue, subtotal);
+  }, [coupon, subtotal]);
 
-  const total = Math.max(subtotal - discountAmount, 0);
+  const total = React.useMemo(() => {
+    return Math.max(subtotal - discountAmount, 0);
+  }, [subtotal, discountAmount]);
 
   return (
     <CartContext.Provider

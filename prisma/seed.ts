@@ -28,6 +28,12 @@ async function main() {
   await prisma.menuItem.deleteMany({});
   await prisma.menuCategory.deleteMany({});
   await prisma.user.deleteMany({});
+  await prisma.role.deleteMany({});
+
+  // 1.5. Create Roles
+  const adminRole = await prisma.role.create({ data: { name: "ADMIN" } });
+  const staffRole = await prisma.role.create({ data: { name: "STAFF" } });
+  const customerRole = await prisma.role.create({ data: { name: "CUSTOMER" } });
 
   // 2. Create Users
   const adminPasswordHash = bcrypt.hashSync("adminpassword", 10);
@@ -263,8 +269,8 @@ async function main() {
   },
   ];
 
-for (const item of products) {
-  await prisma.product.create({ data: item });
+for (const item of productsData) {
+  await prisma.menuItem.create({ data: item });
 }
 console.log("Menu items seeded successfully!");
 
@@ -422,6 +428,10 @@ console.log("Menu items seeded successfully!");
   console.log("Notifications seeded.");
 
   // 19. Seed Orders, Order Items, Payments, Kitchen Orders, and Loyalty Point Transactions (Normalized!)
+  const allMenuItems = await prisma.menuItem.findMany();
+  const item2 = allMenuItems[1] || allMenuItems[0];
+  const item3 = allMenuItems[2] || allMenuItems[0];
+
   const sampleItems = [
     { productId: item2.id, name: item2.name, price: item2.price, quantity: 2, image: item2.image },
     { productId: item3.id, name: item3.name, price: item3.price, quantity: 1, image: item3.image },

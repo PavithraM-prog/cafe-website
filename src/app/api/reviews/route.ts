@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
+import { getCachedApprovedReviews } from "@/lib/cache";
+import { revalidateTag } from "next/cache";
 
 async function getAuthUser() {
   const cookieStore = await cookies();
@@ -24,11 +26,7 @@ export async function GET(request: Request) {
     }
 
     // Public/Customer sees approved reviews
-    const reviews = await db.review.findMany({
-      where: { status: "APPROVED" },
-      orderBy: { createdAt: "desc" },
-      take: 6, // Show top 6 reviews
-    });
+    const reviews = await getCachedApprovedReviews();
 
     return NextResponse.json({ reviews });
   } catch (error) {
@@ -61,6 +59,8 @@ export async function POST(request: Request) {
       },
     });
 
+    revalidateTag("reviews");
+
     return NextResponse.json({
       message: "Review submitted! It will appear after admin approval.",
       review: newReview,
@@ -89,6 +89,8 @@ export async function PUT(request: Request) {
       where: { id },
       data: { status },
     });
+
+    revalidateTag("reviews");
 
     return NextResponse.json({ message: `Review is now ${status}`, review: updatedReview });
   } catch (error) {

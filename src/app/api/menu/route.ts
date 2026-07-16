@@ -3,6 +3,8 @@ import { db } from "@/lib/db";
 import { verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
 import { logger } from "@/lib/logger";
+import { getCachedMenu } from "@/lib/cache";
+import { revalidateTag } from "next/cache";
 
 // Helper to verify if requester is ADMIN or STAFF
 async function checkAdminAuth() {
@@ -21,34 +23,30 @@ export async function GET(request: Request) {
     const categorySlug = searchParams.get("category");
     const search = searchParams.get("search");
 
-    // Fetch all categories
-    const categories = await db.menuCategory.findMany({
-      orderBy: { name: "asc" },
-    });
+    // Fetch from cache
+    const { categories, products: allProducts } = await getCachedMenu();
 
-    // Query builder for products
-    const whereClause: any = {};
+    let products = allProducts;
 
+    // Filter by category slug
     if (categorySlug && categorySlug !== "all") {
-      whereClause.category = { slug: categorySlug };
+      const cat = categories.find((c) => c.slug === categorySlug);
+      if (cat) {
+        products = products.filter((p) => p.categoryId === cat.id);
+      } else {
+        products = [];
+      }
     }
 
+    // Filter by search query
     if (search) {
-      whereClause.OR = [
-        { name: { contains: search, mode: "insensitive" } },
-        { description: { contains: search, mode: "insensitive" } },
-      ];
+      const query = search.toLowerCase();
+      products = products.filter(
+        (p) =>
+          p.name.toLowerCase().includes(query) ||
+          p.description.toLowerCase().includes(query)
+      );
     }
-
-    const products = await db.menuItem.findMany({
-      where: whereClause,
-      include: {
-        category: {
-          select: { name: true, slug: true },
-        },
-      },
-      orderBy: { name: "asc" },
-    });
 
     return NextResponse.json({ categories, products });
   } catch (error) {
@@ -91,6 +89,8 @@ export async function POST(request: Request) {
         category: true,
       },
     });
+
+    revalidateTag("menu");
 
     return NextResponse.json({ message: "Product created successfully", product: newProduct }, { status: 201 });
   } catch (error) {

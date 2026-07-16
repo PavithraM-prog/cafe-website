@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Calendar, Clock, Users, MessageSquare, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
+import Image from "next/image";
 
 interface Reservation {
   id: string;
@@ -58,43 +59,33 @@ export default function ReservationsPage() {
 
   const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !email || !phone || !date || !time || !guests) {
-      setSubmitError("Please fill out all required details.");
-      return;
-    }
+    if (!name || !email || !phone || !date || !time) return;
 
     try {
       setSubmitLoading(true);
-      setSubmitError(null);
       setSubmitSuccess(null);
+      setSubmitError(null);
 
       const res = await fetch("/api/reservations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          email,
-          phone,
-          date,
-          time,
-          guests: parseInt(guests),
-          note,
-        }),
+        body: JSON.stringify({ name, email, phone, date, time, guests: parseInt(guests), note }),
       });
 
       const data = await res.json();
       if (res.ok) {
-        setSubmitSuccess("Table reservation requested successfully! Our team will approve it shortly.");
-        // Clear form fields
+        setSubmitSuccess("Your reservation request has been submitted successfully! Check your history below.");
+        setName("");
+        setEmail("");
+        setPhone("");
         setNote("");
-        // Reload history
         fetchHistory();
       } else {
-        setSubmitError(data.error || "Failed to request reservation");
+        setSubmitError(data.error || "Failed to submit reservation.");
       }
     } catch (err) {
       console.error(err);
-      setSubmitError("An error occurred. Please try again.");
+      setSubmitError("Server connection error. Please try again.");
     } finally {
       setSubmitLoading(false);
     }
@@ -114,11 +105,13 @@ export default function ReservationsPage() {
       <section className="relative overflow-hidden bg-[#1C100E] py-28 text-center transition-all duration-300">
         {/* Background Image with Dark Overlay */}
         <div className="absolute inset-0 z-0">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&q=80&w=1200"
             alt="Warm roasted coffee beans"
-            className="h-full w-full object-cover object-center opacity-30 scale-105"
+            fill
+            sizes="100vw"
+            priority
+            className="object-cover object-center opacity-30 scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-[#1C100E]/70 via-[#1C100E]/30 to-background" />
         </div>

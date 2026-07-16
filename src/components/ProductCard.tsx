@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { Star, Leaf, Flame, Plus, Check } from "lucide-react";
+import Image from "next/image";
 
 interface ProductCardProps {
   product: {
@@ -44,11 +45,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     >
       {/* Product Image */}
       <div className="relative aspect-video w-full overflow-hidden bg-secondary">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src={product.image}
           alt={product.name}
-          className="h-full w-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+          fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
+          loading="lazy"
         />
 
         {/* Dietary Tag */}

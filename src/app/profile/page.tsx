@@ -7,6 +7,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useRouter } from "next/navigation";
 import { Award, ShoppingBag, Clock, MapPin, Phone, Star, Send, Loader2, ArrowRight } from "lucide-react";
+import Image from "next/image";
 
 interface Order {
   id: string;
@@ -199,12 +200,16 @@ export default function ProfilePage() {
                           {orderItems.map((item: any, i: number) => (
                             <div key={i} className="flex justify-between items-center py-2.5 first:pt-0 last:pb-0">
                               <div className="flex items-center space-x-3 min-w-0">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img
-                                  src={item.image}
-                                  alt={item.name}
-                                  className="h-10 w-10 object-cover rounded bg-secondary shrink-0"
-                                />
+                                <div className="relative h-10 w-10 overflow-hidden rounded bg-secondary shrink-0">
+                                  <Image
+                                    src={item.image}
+                                    alt={item.name}
+                                    fill
+                                    sizes="40px"
+                                    className="object-cover"
+                                    loading="lazy"
+                                  />
+                                </div>
                                 <div className="truncate">
                                   <h4 className="text-xs font-bold text-foreground truncate">{item.name}</h4>
                                   <span className="text-[10px] text-textMuted">Qty: {item.quantity}</span>

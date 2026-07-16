@@ -8,6 +8,7 @@ import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { Trash2, ShoppingBag, Plus, Minus, CreditCard, Tag, ArrowRight, MapPin, Phone, Lock, Sparkles, AlertCircle, X, Check } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function CartPage() {
   const {
@@ -97,8 +98,8 @@ export default function CartPage() {
       setPaymentProcessing(true);
       setPaymentError(null);
 
-      // Simulate payment gateway response delay
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Simulate payment gateway response delay (minimized for performance)
+      await new Promise((resolve) => setTimeout(resolve, 50));
 
       // Test payment logic:
       // If card number contains "4000", simulate card decline
@@ -198,12 +199,16 @@ export default function CartPage() {
                   key={item.productId}
                   className="flex items-center space-x-4 border border-borderColor bg-cardBg p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow"
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="h-16 w-16 rounded-lg object-cover bg-secondary shrink-0"
-                  />
+                  <div className="relative h-16 w-16 overflow-hidden rounded-lg bg-secondary shrink-0">
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      fill
+                      sizes="64px"
+                      className="object-cover"
+                      loading="lazy"
+                    />
+                  </div>
 
                   {/* Name and Price */}
                   <div className="flex-1 min-w-0">
