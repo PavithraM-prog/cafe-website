@@ -9,6 +9,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Trash2, ShoppingBag, Plus, Minus, CreditCard, Tag, ArrowRight, MapPin, Phone, Lock, Sparkles, AlertCircle, X, Check, Loader2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 export default function CartPage() {
   const {
@@ -67,6 +68,54 @@ export default function CartPage() {
     }
   };
 
+  const handleOpenPayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (cart.length === 0) return;
+
+    if (!user) {
+      router.push("/login?redirect=/cart");
+      return;
+    }
+
+    if (!address.trim() || !phone.trim()) {
+      setCheckoutError("Delivery address and phone number are required.");
+      return;
+    }
+
+    try {
+      setCheckoutError(null);
+      setPaymentProcessing(true);
+
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: cart,
+          total: total.toFixed(2),
+          discount: discountAmount.toFixed(2),
+          address: address.trim(),
+          phone: phone.trim(),
+          couponCode: coupon?.code || null,
+          source: "WEBSITE",
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.order) {
+        clearCart();
+        // Redirect directly to the PhonePe checkout payment gateway page
+        router.push(`/checkout/pay?orderId=${data.order.id}`);
+      } else {
+        setCheckoutError(data.error || "Failed to place order. Please try again.");
+      }
+    } catch (err) {
+      console.error(err);
+      setCheckoutError("An error occurred while placing order.");
+    } finally {
+      setPaymentProcessing(false);
+    }
+  };
+
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (cart.length === 0) return;
@@ -84,6 +133,25 @@ export default function CartPage() {
     setCheckoutError(null);
     setPaymentError(null);
     setShowPaymentModal(true);
+  };
+
+  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, "");
+    let formatted = "";
+    for (let i = 0; i < value.length; i++) {
+      if (i > 0 && i % 4 === 0) formatted += " ";
+      formatted += value[i];
+    }
+    setCardNumber(formatted.substring(0, 19));
+  };
+
+  const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, "");
+    if (value.length > 2) {
+      setCardExpiry(`${value.substring(0, 2)}/${value.substring(2, 4)}`);
+    } else {
+      setCardExpiry(value);
+    }
   };
 
   const handleProcessPayment = async (e: React.FormEvent) => {
@@ -306,55 +374,6 @@ export default function CartPage() {
                   </div>
                 </div>
 
-                <div className="rounded-lg bg-secondary/50 p-3 flex items-start space-x-2 text-[10px] text-textMuted border border-borderColor/40">
-                  <CreditCard className="h-4.5 w-4.5 text-primary shrink-0 mt-0.5" />
-                  <p className="leading-relaxed">
-                    <strong>Test Payment System:</strong> Clicking "Proceed to Payment" will prompt you to enter dummy card details for a live-simulated authorization.
-                  </p>
-                </div>
-
-                {/* Promo Code section */}
-                <div className="pt-2">
-                  {coupon ? (
-                    <div className="flex items-center justify-between bg-green-50 border border-green-200/60 rounded-2xl px-4 py-3 text-xs">
-                      <div className="flex items-center space-x-2 text-green-800 font-bold">
-                        <Tag className="h-3.5 w-3.5 text-green-700 animate-pulse" />
-                        <span className="tracking-wide">{coupon.code} Applied</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={removeCoupon}
-                        className="text-red-500 hover:text-red-700 text-[10px] font-bold uppercase tracking-wider focus:outline-none"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  ) : (
-                    <form onSubmit={handleApplyCoupon} className="flex gap-2">
-                      <input
-                        type="text"
-                        placeholder="PROMO CODE"
-                        value={couponCodeInput}
-                        onChange={(e) => setCouponCodeInput(e.target.value)}
-                        className="flex-1 rounded-full border border-borderColor bg-[#FFF8E7]/10 focus:bg-white px-4 py-2.5 text-xs text-foreground focus:border-accent transition-all uppercase shadow-sm focus:ring-1 focus:ring-accent font-semibold"
-                      />
-                      <button
-                        type="submit"
-                        className="rounded-full bg-secondary hover:bg-borderColor/50 text-foreground text-xs font-bold uppercase tracking-widest px-5 py-2.5 transition-colors border border-borderColor shadow-sm"
-                      >
-                        Apply
-                      </button>
-                    </form>
-                  )}
-
-                  {checkoutError && (
-                    <div className="p-3 text-xs bg-red-50 border border-red-200 text-red-600 rounded-xl flex items-start space-x-1.5 font-semibold">
-                      <AlertCircle className="h-4 w-4 shrink-0" />
-                      <span>{checkoutError}</span>
-                    </div>
-                  )}
-                </div>
-
                 <div className="rounded-2xl bg-secondary/40 p-4 flex items-start space-x-2.5 text-[10px] text-textMuted border border-borderColor/40">
                   <CreditCard className="h-4.5 w-4.5 text-[#5f259f] shrink-0 mt-0.5" />
                   <p className="leading-relaxed font-light font-medium">
@@ -362,22 +381,12 @@ export default function CartPage() {
                   </p>
                 </div>
 
-                {/* Checkout Error */}
                 {checkoutError && (
-                  <div className="text-xs text-red-600 font-semibold text-center py-1">
-                    {checkoutError}
+                  <div className="p-3 text-xs bg-red-50 border border-red-200 text-red-600 rounded-xl flex items-start space-x-1.5 font-semibold">
+                    <AlertCircle className="h-4 w-4 shrink-0" />
+                    <span>{checkoutError}</span>
                   </div>
                 )}
-
-                {/* Checkout CTA */}
-                <button
-                  onClick={handleOpenPayment}
-                  disabled={cart.length === 0}
-                  className="w-full flex items-center justify-center space-x-2 rounded-full bg-primary hover:bg-primary-hover disabled:bg-neutral-200 disabled:text-neutral-400 text-white text-sm font-semibold py-3 shadow-md transition-colors"
-                >
-                  <span>Proceed to Payment</span>
-                  <ArrowRight className="h-4 w-4" />
-                </button>
               </div>
 
               {/* Promo Coupon Form */}
@@ -427,10 +436,9 @@ export default function CartPage() {
               </button>
             </div>
           </div>
-          </div>
-  )
-}
+        )}
       </section >
+
 
   {/* Payment Processing Modal Overlay */ }
 {
