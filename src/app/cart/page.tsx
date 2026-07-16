@@ -125,8 +125,8 @@ export default function CartPage() {
       if (res.ok) {
         clearCart();
         setShowPaymentModal(false);
-        // Redirect directly to the live Order Tracking page
-        router.push(`/orders/${data.order.id}`);
+        // Redirect directly to the live Order Tracking page in Profile
+        router.push("/profile");
       } else {
         setPaymentError(data.error || "Failed to place order database record.");
       }

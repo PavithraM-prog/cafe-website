@@ -16,22 +16,26 @@ interface CouponDetails {
   discountValue: number;
 }
 
-interface CartContextType {
+interface CartState {
   cart: CartItem[];
   coupon: CouponDetails | null;
   couponError: string | null;
+  subtotal: number;
+  discountAmount: number;
+  total: number;
+}
+
+interface CartActions {
   addToCart: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
   applyCoupon: (code: string) => Promise<boolean>;
   removeCoupon: () => void;
-  subtotal: number;
-  discountAmount: number;
-  total: number;
 }
 
-const CartContext = createContext<CartContextType | undefined>(undefined);
+const CartStateContext = createContext<CartState | undefined>(undefined);
+const CartActionsContext = createContext<CartActions | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -78,7 +82,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [coupon, mounted]);
 
-  const addToCart = (product: Omit<CartItem, "quantity">, quantity = 1) => {
+  const addToCart = React.useCallback((product: Omit<CartItem, "quantity">, quantity = 1) => {
     setCart((prev) => {
       const existing = prev.find((item) => item.productId === product.productId);
       if (existing) {
@@ -90,28 +94,28 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       return [...prev, { ...product, quantity }];
     });
-  };
+  }, []);
 
-  const removeFromCart = (productId: string) => {
+  const removeFromCart = React.useCallback((productId: string) => {
     setCart((prev) => prev.filter((item) => item.productId !== productId));
-  };
+  }, []);
 
-  const updateQuantity = (productId: string, quantity: number) => {
+  const updateQuantity = React.useCallback((productId: string, quantity: number) => {
     if (quantity <= 0) {
-      removeFromCart(productId);
+      setCart((prev) => prev.filter((item) => item.productId !== productId));
       return;
     }
     setCart((prev) =>
       prev.map((item) => (item.productId === productId ? { ...item, quantity } : item))
     );
-  };
+  }, []);
 
-  const clearCart = () => {
+  const clearCart = React.useCallback(() => {
     setCart([]);
     setCoupon(null);
-  };
+  }, []);
 
-  const applyCoupon = async (code: string): Promise<boolean> => {
+  const applyCoupon = React.useCallback(async (code: string): Promise<boolean> => {
     setCouponError(null);
     try {
       const res = await fetch(`/api/coupons?code=${code.toUpperCase()}`);
@@ -128,12 +132,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setCouponError("Could not validate coupon");
       return false;
     }
-  };
+  }, []);
 
-  const removeCoupon = () => {
+  const removeCoupon = React.useCallback(() => {
     setCoupon(null);
     setCouponError(null);
-  };
+  }, []);
 
   // Calculations (memoized to optimize render performance)
   const subtotal = React.useMemo(() => {
@@ -152,32 +156,46 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return Math.max(subtotal - discountAmount, 0);
   }, [subtotal, discountAmount]);
 
+  const actions = React.useMemo(() => ({
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+    clearCart,
+    applyCoupon,
+    removeCoupon,
+  }), [addToCart, removeFromCart, updateQuantity, clearCart, applyCoupon, removeCoupon]);
+
+  const state = React.useMemo(() => ({
+    cart,
+    coupon,
+    couponError,
+    subtotal,
+    discountAmount,
+    total,
+  }), [cart, coupon, couponError, subtotal, discountAmount, total]);
+
   return (
-    <CartContext.Provider
-      value={{
-        cart,
-        coupon,
-        couponError,
-        addToCart,
-        removeFromCart,
-        updateQuantity,
-        clearCart,
-        applyCoupon,
-        removeCoupon,
-        subtotal,
-        discountAmount,
-        total,
-      }}
-    >
-      {children}
-    </CartContext.Provider>
+    <CartStateContext.Provider value={state}>
+      <CartActionsContext.Provider value={actions}>
+        {children}
+      </CartActionsContext.Provider>
+    </CartStateContext.Provider>
   );
 };
 
 export const useCart = () => {
-  const context = useContext(CartContext);
-  if (context === undefined) {
+  const state = useContext(CartStateContext);
+  const actions = useContext(CartActionsContext);
+  if (state === undefined || actions === undefined) {
     throw new Error("useCart must be used within a CartProvider");
   }
-  return context;
+  return { ...state, ...actions };
+};
+
+export const useCartActions = () => {
+  const actions = useContext(CartActionsContext);
+  if (actions === undefined) {
+    throw new Error("useCartActions must be used within a CartProvider");
+  }
+  return actions;
 };

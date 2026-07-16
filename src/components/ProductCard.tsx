@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useCart } from "@/context/CartContext";
+import { useCartActions } from "@/context/CartContext";
 import { Star, Leaf, Flame, Plus, Check } from "lucide-react";
 import Image from "next/image";
 
@@ -18,8 +18,8 @@ interface ProductCardProps {
   };
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const { addToCart } = useCart();
+export const ProductCard: React.FC<ProductCardProps> = React.memo(({ product }) => {
+  const { addToCart } = useCartActions();
   const [added, setAdded] = useState(false);
 
   const handleAddToCart = (e: React.MouseEvent) => {
@@ -122,4 +122,5 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       </div>
     </div>
   );
-};
+});
+ProductCard.displayName = "ProductCard";
