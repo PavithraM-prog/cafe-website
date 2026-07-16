@@ -8,7 +8,15 @@ async function getAuthUser() {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
   if (!token) return null;
-  return verifyToken(token);
+  const decoded = verifyToken(token);
+  if (!decoded) return null;
+  try {
+    const dbUser = await db.user.findUnique({ where: { id: decoded.id } });
+    if (!dbUser) return null;
+  } catch (e) {
+    return null;
+  }
+  return decoded;
 }
 
 // GET /api/orders - Get orders list
@@ -20,6 +28,26 @@ export async function GET(request: Request) {
     }
 
     const { searchParams } = new URL(request.url);
+    const orderId = searchParams.get("orderId");
+
+    if (orderId) {
+      const order = await db.order.findUnique({
+        where: { id: orderId },
+        include: {
+          user: {
+            select: { name: true, email: true },
+          },
+        },
+      });
+      if (!order) {
+        return NextResponse.json({ error: "Order not found" }, { status: 404 });
+      }
+      // Ensure only the customer who placed the order or an admin/staff can access it
+      if (order.userId !== user.id && user.role !== "ADMIN" && user.role !== "STAFF") {
+        return NextResponse.json({ error: "Unauthorized access to order" }, { status: 403 });
+      }
+      return NextResponse.json({ order });
+    }
     const filterStatus = searchParams.get("status");
     const filterSource = searchParams.get("source");
     const filterDate = searchParams.get("date"); // today, week, or YYYY-MM-DD
@@ -67,6 +95,7 @@ export async function GET(request: Request) {
 
       const orders = await db.order.findMany({
         where,
+        include: { payments: true },
         orderBy: { createdAt: "desc" },
       });
       return NextResponse.json({ orders });
@@ -75,6 +104,7 @@ export async function GET(request: Request) {
     // Standard user sees their own orders
     const orders = await db.order.findMany({
       where: { userId: user.id },
+      include: { payments: true },
       orderBy: { createdAt: "desc" },
     });
 
@@ -116,12 +146,13 @@ export async function POST(request: Request) {
         discount: discount ? parseFloat(discount) : 0,
         address: address || (isWalkIn ? "Walk-in Customer" : ""),
         phone: phone || (isWalkIn ? "N/A" : ""),
-        paymentStatus: "PAID", // Simulation of instant payment success
+        paymentStatus: isWalkIn ? "PAID" : "PENDING", // Walk-in is paid instantly, website is PENDING
         status: isWalkIn ? "DELIVERED" : "PENDING", // Walk-in is served immediately, so default to DELIVERED
         source: source || "WEBSITE",
       },
     });
 
+<<<<<<< HEAD
     // 3. Update user loyalty points
     if (user) {
       await db.user.update({
@@ -135,6 +166,60 @@ export async function POST(request: Request) {
     }
 
     // 4. If a coupon was used, we could invalidate it if single-use, but here we keep it simple
+=======
+    // Only run stock decrement and loyalty updates on checkout creation if it's a walk-in order (since payment is instant)
+    // Website orders will run this inside the payment verification callback
+    if (isWalkIn) {
+      // Decrement stock for ordered items
+      try {
+        const parsedItems = typeof items === "string" ? JSON.parse(items) : items;
+        if (Array.isArray(parsedItems)) {
+          for (const item of parsedItems) {
+            const itemId = item.productId || item.id;
+            if (itemId) {
+              const menuItem = await db.menuItem.findUnique({
+                where: { id: itemId },
+              });
+              if (menuItem) {
+                const newCount = Math.max(0, menuItem.availablePieces - (item.quantity || 1));
+                await db.menuItem.update({
+                  where: { id: itemId },
+                  data: {
+                    availablePieces: newCount,
+                    availability: newCount > 0 ? menuItem.availability : false,
+                  },
+                });
+              }
+            }
+          }
+        }
+      } catch (e) {
+        logger.error("Error updating availablePieces during order checkout", e);
+      }
+
+      // Update walk-in loyalty member points if email provided
+      if (loyaltyEmail) {
+        try {
+          const lm = await db.loyaltyMember.findUnique({
+            where: { email: loyaltyEmail.toLowerCase() },
+          });
+          if (lm) {
+            await db.loyaltyMember.update({
+              where: { id: lm.id },
+              data: {
+                points: {
+                  increment: pointsEarned,
+                },
+              },
+            });
+          }
+        } catch (e) {
+          logger.error("Error updating walk-in loyalty member points", e, { loyaltyEmail });
+        }
+      }
+    }
+>>>>>>> 10e7606 (Final project)
+
 
     return NextResponse.json({
       message: "Order placed successfully!",

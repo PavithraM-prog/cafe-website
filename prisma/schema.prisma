@@ -115,6 +115,7 @@ model Reservation {
   time      String
   guests    Int
   status    String   @default("PENDING")
+  type      String   @default("TABLE")
   note      String?
   tableId   String?
   createdAt DateTime @default(now())
@@ -139,10 +140,11 @@ model Table {
 model Payment {
   id            String   @id @default(uuid())
   orderId       String
+  transactionId String?  @unique
+  paymentMethod String
   amount        Float
-  method        String
-  status        String
-  transactionId String?
+  paymentStatus String
+  paymentTime   DateTime @default(now())
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)

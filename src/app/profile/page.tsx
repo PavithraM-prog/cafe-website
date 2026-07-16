@@ -6,8 +6,13 @@ import { useCart } from "@/context/CartContext";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useRouter } from "next/navigation";
+<<<<<<< HEAD
 import { Award, ShoppingBag, Clock, MapPin, Phone, Star, Send, Loader2, ArrowRight } from "lucide-react";
 import Image from "next/image";
+=======
+import { Award, ShoppingBag, Clock, MapPin, Phone, Star, Send, Loader2, ArrowRight, CreditCard, Printer, RefreshCw } from "lucide-react";
+import { formatCurrency } from "@/lib/formatCurrency";
+>>>>>>> 10e7606 (Final project)
 
 interface Order {
   id: string;
@@ -19,12 +24,20 @@ interface Order {
   address: string;
   phone: string;
   createdAt: string;
+  payments?: any[];
 }
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const { addToCart } = useCart();
   const router = useRouter();
+
+  // Redirect to login if user is not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading, router]);
 
   // Orders state
   const [orders, setOrders] = useState<Order[]>([]);
@@ -164,6 +177,10 @@ export default function ProfilePage() {
               <div className="space-y-6">
                 {orders.map((order) => {
                   const orderItems = typeof order.items === "string" ? JSON.parse(order.items) : order.items;
+                  const successPayment = order.payments?.find((p: any) => p.paymentStatus === "SUCCESS");
+                  const failedPayment = order.payments?.find((p: any) => p.paymentStatus === "FAILED");
+                  const txnId = successPayment?.transactionId || failedPayment?.transactionId || "N/A";
+                  
                   return (
                     <div
                       key={order.id}
@@ -177,17 +194,32 @@ export default function ProfilePage() {
                           </span>
                           <span className="text-[10px] text-textMuted font-mono">ID: {order.id.slice(0, 8)}...</span>
                         </div>
-                        <div className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-2">
                           <span
                             className={`rounded-full border px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider ${getOrderStatusColor(
                               order.status
                             )}`}
                           >
-                            {order.status}
+                            Order: {order.status}
+                          </span>
+                          <span
+                            className={`rounded-full border px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
+                              order.paymentStatus === "PAID"
+                                ? "bg-green-100 text-green-700 border-green-200"
+                                : order.paymentStatus === "FAILED"
+                                ? "bg-red-100 text-red-700 border-red-200"
+                                : "bg-amber-100 text-amber-700 border-amber-200"
+                            }`}
+                          >
+                            Payment: {order.paymentStatus}
                           </span>
                           <button
                             onClick={() => handleReorder(order)}
+<<<<<<< HEAD
                             className="rounded-full bg-primary hover:bg-primary-hover text-white text-xs font-semibold px-4.5 py-1.5 shadow-sm transition-colors"
+=======
+                            className="rounded-full bg-[#f2ede4] hover:bg-borderColor/30 text-foreground text-[10px] font-bold uppercase tracking-wider px-3.5 py-1.5 shadow-sm transition-all hover:scale-105"
+>>>>>>> 10e7606 (Final project)
                           >
                             Reorder
                           </button>
@@ -234,14 +266,52 @@ export default function ProfilePage() {
                           </div>
                         </div>
 
+                        {/* Payment metadata details */}
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pt-4 border-t border-borderColor/30 text-xs text-textMuted">
+                          <div className="space-y-1 text-left font-medium">
+                            <p className="flex items-center">
+                              <CreditCard className="h-3.5 w-3.5 mr-1.5 text-accent shrink-0" />
+                              <span>Transaction ID: <strong className="font-mono text-foreground font-bold">{txnId}</strong></span>
+                            </p>
+                            <p>
+                              Paid Amount: <strong className="text-foreground font-bold">{formatCurrency(order.total)}</strong>
+                            </p>
+                          </div>
+                          <div className="flex items-center space-x-2 w-full sm:w-auto justify-end">
+                            {order.paymentStatus === "PAID" && (
+                              <button
+                                onClick={() => router.push(`/checkout/result?orderId=${order.id}&status=SUCCESS&txnId=${txnId}`)}
+                                className="flex items-center space-x-1.5 rounded-full border border-[#5f259f] text-[#5f259f] hover:bg-[#5f259f]/5 text-[10px] font-bold uppercase tracking-wider px-4 py-2 transition-all duration-300"
+                              >
+                                <Printer className="h-3.5 w-3.5" />
+                                <span>Invoice</span>
+                              </button>
+                            )}
+                            {(order.paymentStatus === "FAILED" || order.paymentStatus === "PENDING") && (
+                              <button
+                                onClick={() => router.push(`/checkout/pay?orderId=${order.id}`)}
+                                className="flex items-center space-x-1.5 rounded-full bg-[#5f259f] hover:bg-[#4b1d7f] text-white text-[10px] font-bold uppercase tracking-wider px-4 py-2 transition-all duration-300 shadow-sm"
+                              >
+                                <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                                <span>Retry Payment</span>
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
                         {/* Pricing details */}
                         <div className="flex justify-end pt-3 border-t border-borderColor/40 text-xs font-medium">
                           <div className="text-right space-y-1">
                             {order.discount > 0 && (
                               <p className="text-green-600">Discount: -₹{order.discount.toFixed(2)}</p>
                             )}
+<<<<<<< HEAD
                             <p className="text-sm font-bold text-foreground">
                               Paid Total: <span className="text-primary font-sans">₹{order.total.toFixed(2)}</span>
+=======
+                            <p className="text-sm font-extrabold text-foreground uppercase tracking-wide">
+                              Total Due: <span className="text-primary font-sans text-base ml-1">{formatCurrency(order.total)}</span>
+>>>>>>> 10e7606 (Final project)
                             </p>
                           </div>
                         </div>

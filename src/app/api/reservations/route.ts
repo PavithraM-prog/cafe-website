@@ -8,7 +8,15 @@ async function getAuthUser() {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
   if (!token) return null;
-  return verifyToken(token);
+  const decoded = verifyToken(token);
+  if (!decoded) return null;
+  try {
+    const dbUser = await db.user.findUnique({ where: { id: decoded.id } });
+    if (!dbUser) return null;
+  } catch (e) {
+    return null;
+  }
+  return decoded;
 }
 
 // GET /api/reservations - Fetch reservations (customer's own, or all if admin)
@@ -57,7 +65,7 @@ export async function POST(request: Request) {
     const user = await getAuthUser(); // Optional, user can book as guest, but associate if logged in
     
     const body = await request.json();
-    const { name, email, phone, date, time, guests, note } = body;
+    const { name, email, phone, date, time, guests, note, type } = body;
 
     if (!name || !email || !phone || !date || !time || !guests) {
       return NextResponse.json({ error: "Missing required booking details" }, { status: 400 });
@@ -74,6 +82,7 @@ export async function POST(request: Request) {
         note: note || "",
         status: "PENDING",
         userId: user ? user.id : null,
+        type: type || "TABLE",
       },
     });
 

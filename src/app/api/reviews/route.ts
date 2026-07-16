@@ -9,7 +9,15 @@ async function getAuthUser() {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
   if (!token) return null;
-  return verifyToken(token);
+  const decoded = verifyToken(token);
+  if (!decoded) return null;
+  try {
+    const dbUser = await db.user.findUnique({ where: { id: decoded.id } });
+    if (!dbUser) return null;
+  } catch (e) {
+    return null;
+  }
+  return decoded;
 }
 
 // GET /api/reviews - Get reviews (Approved only for customer/public, or all for admin)

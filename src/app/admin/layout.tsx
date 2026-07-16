@@ -16,7 +16,8 @@ import {
   Coffee,
   Menu as MenuIcon,
   X,
-  User
+  User,
+  CreditCard
 } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -27,7 +28,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const menuItems = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+    { name: "Menu Manager", href: "/admin/menu", icon: Coffee },
     { name: "Orders queue", href: "/admin/orders", icon: ClipboardList },
+    { name: "Payments Ledger", href: "/admin/payments", icon: CreditCard },
     { name: "Reservations", href: "/admin/reservations", icon: Calendar },
     { name: "Loyalty Members", href: "/admin/loyalty", icon: Users },
     { name: "Staff Management", href: "/admin/staff", icon: UserCheck },
