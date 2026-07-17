@@ -68,54 +68,6 @@ export default function CartPage() {
     }
   };
 
-  const handleOpenPayment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (cart.length === 0) return;
-
-    if (!user) {
-      router.push("/login?redirect=/cart");
-      return;
-    }
-
-    if (!address.trim() || !phone.trim()) {
-      setCheckoutError("Delivery address and phone number are required.");
-      return;
-    }
-
-    try {
-      setCheckoutError(null);
-      setPaymentProcessing(true);
-
-      const res = await fetch("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items: cart,
-          total: total.toFixed(2),
-          discount: discountAmount.toFixed(2),
-          address: address.trim(),
-          phone: phone.trim(),
-          couponCode: coupon?.code || null,
-          source: "WEBSITE",
-        }),
-      });
-
-      const data = await res.json();
-      if (res.ok && data.order) {
-        clearCart();
-        // Redirect directly to the PhonePe checkout payment gateway page
-        router.push(`/checkout/pay?orderId=${data.order.id}`);
-      } else {
-        setCheckoutError(data.error || "Failed to place order. Please try again.");
-      }
-    } catch (err) {
-      console.error(err);
-      setCheckoutError("An error occurred while placing order.");
-    } finally {
-      setPaymentProcessing(false);
-    }
-  };
-
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (cart.length === 0) return;
@@ -133,25 +85,6 @@ export default function CartPage() {
     setCheckoutError(null);
     setPaymentError(null);
     setShowPaymentModal(true);
-  };
-
-  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/\D/g, "");
-    let formatted = "";
-    for (let i = 0; i < value.length; i++) {
-      if (i > 0 && i % 4 === 0) formatted += " ";
-      formatted += value[i];
-    }
-    setCardNumber(formatted.substring(0, 19));
-  };
-
-  const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/\D/g, "");
-    if (value.length > 2) {
-      setCardExpiry(`${value.substring(0, 2)}/${value.substring(2, 4)}`);
-    } else {
-      setCardExpiry(value);
-    }
   };
 
   const handleProcessPayment = async (e: React.FormEvent) => {
@@ -203,6 +136,34 @@ export default function CartPage() {
       setCheckoutError("An error occurred while placing order.");
     } finally {
       setPaymentProcessing(false);
+    }
+  };
+
+  // Helper to format Card Number
+  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/\D/g, "").substring(0, 16);
+    const matches = val.match(/\d{4,16}/g);
+    const match = (matches && matches[0]) || "";
+    const parts = [];
+
+    for (let i = 0, len = match.length; i < len; i += 4) {
+      parts.push(match.substring(i, i + 4));
+    }
+
+    if (parts.length > 0) {
+      setCardNumber(parts.join(" "));
+    } else {
+      setCardNumber(val);
+    }
+  };
+
+  // Helper to format Expiry
+  const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/\D/g, "").substring(0, 4);
+    if (val.length >= 2) {
+      setCardExpiry(`${val.substring(0, 2)}/${val.substring(2, 4)}`);
+    } else {
+      setCardExpiry(val);
     }
   };
 
@@ -374,6 +335,55 @@ export default function CartPage() {
                   </div>
                 </div>
 
+                <div className="rounded-lg bg-secondary/50 p-3 flex items-start space-x-2 text-[10px] text-textMuted border border-borderColor/40">
+                  <CreditCard className="h-4.5 w-4.5 text-primary shrink-0 mt-0.5" />
+                  <p className="leading-relaxed">
+                    <strong>Test Payment System:</strong> Clicking "Proceed to Payment" will prompt you to enter dummy card details for a live-simulated authorization.
+                  </p>
+                </div>
+
+                {/* Promo Code section */}
+                <div className="pt-2">
+                  {coupon ? (
+                    <div className="flex items-center justify-between bg-green-50 border border-green-200/60 rounded-2xl px-4 py-3 text-xs">
+                      <div className="flex items-center space-x-2 text-green-800 font-bold">
+                        <Tag className="h-3.5 w-3.5 text-green-700 animate-pulse" />
+                        <span className="tracking-wide">{coupon.code} Applied</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={removeCoupon}
+                        className="text-red-500 hover:text-red-700 text-[10px] font-bold uppercase tracking-wider focus:outline-none"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleApplyCoupon} className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="PROMO CODE"
+                        value={couponCodeInput}
+                        onChange={(e) => setCouponCodeInput(e.target.value)}
+                        className="flex-1 rounded-full border border-borderColor bg-[#FFF8E7]/10 focus:bg-white px-4 py-2.5 text-xs text-foreground focus:border-accent transition-all uppercase shadow-sm focus:ring-1 focus:ring-accent font-semibold"
+                      />
+                      <button
+                        type="submit"
+                        className="rounded-full bg-secondary hover:bg-borderColor/50 text-foreground text-xs font-bold uppercase tracking-widest px-5 py-2.5 transition-colors border border-borderColor shadow-sm"
+                      >
+                        Apply
+                      </button>
+                    </form>
+                  )}
+
+                  {checkoutError && (
+                    <div className="p-3 text-xs bg-red-50 border border-red-200 text-red-600 rounded-xl flex items-start space-x-1.5 font-semibold">
+                      <AlertCircle className="h-4 w-4 shrink-0" />
+                      <span>{checkoutError}</span>
+                    </div>
+                  )}
+                </div>
+
                 <div className="rounded-2xl bg-secondary/40 p-4 flex items-start space-x-2.5 text-[10px] text-textMuted border border-borderColor/40">
                   <CreditCard className="h-4.5 w-4.5 text-[#5f259f] shrink-0 mt-0.5" />
                   <p className="leading-relaxed font-light font-medium">
@@ -381,12 +391,22 @@ export default function CartPage() {
                   </p>
                 </div>
 
+                {/* Checkout Error */}
                 {checkoutError && (
-                  <div className="p-3 text-xs bg-red-50 border border-red-200 text-red-600 rounded-xl flex items-start space-x-1.5 font-semibold">
-                    <AlertCircle className="h-4 w-4 shrink-0" />
-                    <span>{checkoutError}</span>
+                  <div className="text-xs text-red-600 font-semibold text-center py-1">
+                    {checkoutError}
                   </div>
                 )}
+
+                {/* Checkout CTA */}
+                <button
+                  onClick={handlePlaceOrder}
+                  disabled={cart.length === 0}
+                  className="w-full flex items-center justify-center space-x-2 rounded-full bg-primary hover:bg-primary-hover disabled:bg-neutral-200 disabled:text-neutral-400 text-white text-sm font-semibold py-3 shadow-md transition-colors"
+                >
+                  <span>Proceed to Payment</span>
+                  <ArrowRight className="h-4 w-4" />
+                </button>
               </div>
 
               {/* Promo Coupon Form */}
@@ -426,163 +446,152 @@ export default function CartPage() {
                 {couponError && <p className="text-[9px] font-bold text-red-600 mt-2 pl-2 uppercase tracking-wide">⚠️ {couponError}</p>}
                 {couponMessage && <p className="text-[9px] font-bold text-green-600 mt-2 pl-2 uppercase tracking-wide">✓ {couponMessage}</p>}
               </div>
-
-              <button
-                onClick={handleOpenPayment}
-                className="w-full flex items-center justify-center space-x-2 rounded-full bg-accent hover:bg-accent-hover text-white text-xs font-bold uppercase tracking-widest py-4 shadow-lg hover:shadow transition-all duration-300 focus:outline-none hover:scale-[1.005] active:scale-95"
-              >
-                <span>Proceed to Payment</span>
-                <ArrowRight className="h-4 w-4" />
-              </button>
             </div>
           </div>
         )}
-      </section >
+      </section>
 
-
-  {/* Payment Processing Modal Overlay */ }
-{
-  showPaymentModal && (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-[4px] animate-in fade-in duration-200">
-      <div className="relative w-full max-w-md bg-cardBg border border-borderColor/40 p-8 rounded-3xl shadow-2xl space-y-6 animate-in zoom-in-95 duration-200">
-        {/* Modal Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-borderColor/40">
-          <div className="flex items-center space-x-2 text-primary font-bold">
-            <Lock className="h-4.5 w-4.5 text-accent" />
-            <span className="font-serif uppercase tracking-wider text-sm">Secure Payment</span>
-          </div>
-          <button
-            onClick={() => !paymentProcessing && setShowPaymentModal(false)}
-            disabled={paymentProcessing}
-            className="text-textMuted hover:text-foreground hover:bg-secondary p-1 rounded-full transition-colors disabled:opacity-40"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
-        {paymentProcessing ? (
-          /* Simulated processing animation */
-          <div className="flex flex-col items-center justify-center py-10 space-y-4 text-center">
-            <div className="relative flex items-center justify-center">
-              <div className="h-14 w-14 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
-              <Lock className="absolute h-5 w-5 text-primary animate-pulse" />
-            </div>
-            <div className="space-y-1">
-              <h3 className="font-serif text-lg font-bold text-foreground">Processing Payment</h3>
-              <p className="text-xs text-textMuted max-w-xs leading-relaxed font-light">
-                Authorizing card credentials and securing transaction with Cozy Beans mock processor...
-              </p>
-            </div>
-          </div>
-        ) : (
-          /* Credit Card Input Form */
-          <form onSubmit={handleProcessPayment} className="space-y-4">
-            {paymentError && (
-              <div className="p-3 text-xs bg-red-50 border border-red-200 text-red-600 rounded-xl flex items-start space-x-1.5 font-semibold">
-                <AlertCircle className="h-4 w-4 shrink-0" />
-                <span>{paymentError}</span>
+      {/* Payment Processing Modal Overlay */}
+      {showPaymentModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-[4px] animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md bg-cardBg border border-borderColor/40 p-8 rounded-3xl shadow-2xl space-y-6 animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-borderColor/40">
+              <div className="flex items-center space-x-2 text-primary font-bold">
+                <Lock className="h-4.5 w-4.5 text-accent" />
+                <span className="font-serif uppercase tracking-wider text-sm">Secure Payment</span>
               </div>
+              <button
+                onClick={() => !paymentProcessing && setShowPaymentModal(false)}
+                disabled={paymentProcessing}
+                className="text-textMuted hover:text-foreground hover:bg-secondary p-1 rounded-full transition-colors disabled:opacity-40"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {paymentProcessing ? (
+              /* Simulated processing animation */
+              <div className="flex flex-col items-center justify-center py-10 space-y-4 text-center">
+                <div className="relative flex items-center justify-center">
+                  <div className="h-14 w-14 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+                  <Lock className="absolute h-5 w-5 text-primary animate-pulse" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="font-serif text-lg font-bold text-foreground">Processing Payment</h3>
+                  <p className="text-xs text-textMuted max-w-xs leading-relaxed font-light">
+                    Authorizing card credentials and securing transaction with Cozy Beans mock processor...
+                  </p>
+                </div>
+              </div>
+            ) : (
+              /* Credit Card Input Form */
+              <form onSubmit={handleProcessPayment} className="space-y-4">
+                {paymentError && (
+                  <div className="p-3 text-xs bg-red-50 border border-red-200 text-red-600 rounded-xl flex items-start space-x-1.5 font-semibold">
+                    <AlertCircle className="h-4 w-4 shrink-0" />
+                    <span>{paymentError}</span>
+                  </div>
+                )}
+
+                {/* Dummy Card Info Helper */}
+                <div className="rounded-2xl bg-secondary/50 p-4 border border-borderColor/40 space-y-2">
+                  <span className="text-[9px] font-bold text-primary uppercase tracking-widest block">Available Test Cards</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-[9px] text-textMuted font-bold">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCardNumber("4242 4242 4242 4242");
+                        setCardExpiry("12/28");
+                        setCardCvc("123");
+                      }}
+                      className="text-left bg-cardBg border border-borderColor/60 p-2 rounded-xl hover:border-primary hover:text-foreground transition-all flex items-center justify-between"
+                    >
+                      <span>💳 Success Test</span>
+                      <span className="font-bold text-green-700 font-sans">4242</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCardNumber("4000 0000 0000 0002");
+                        setCardExpiry("05/29");
+                        setCardCvc("666");
+                      }}
+                      className="text-left bg-cardBg border border-borderColor/60 p-2 rounded-xl hover:border-red-400 hover:text-foreground transition-all flex items-center justify-between"
+                    >
+                      <span>💳 Decline Test</span>
+                      <span className="font-bold text-red-700 font-sans">0002</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-textMuted">Cardholder Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={cardName}
+                    onChange={(e) => setCardName(e.target.value)}
+                    placeholder="e.g. John Doe"
+                    className="w-full rounded-xl border border-borderColor bg-[#FFF8E7]/10 focus:bg-white px-3.5 py-2.5 text-xs text-foreground focus:border-accent transition-all font-semibold focus:ring-1 focus:ring-accent"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-textMuted">Card Number</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      required
+                      value={cardNumber}
+                      onChange={handleCardNumberChange}
+                      placeholder="4242 4242 4242 4242"
+                      className="w-full rounded-xl border border-borderColor bg-[#FFF8E7]/10 focus:bg-white pl-10 pr-3 py-2.5 text-xs text-foreground focus:border-accent transition-all font-mono focus:ring-1 focus:ring-accent font-semibold"
+                    />
+                    <CreditCard className="absolute left-3.5 top-3.5 h-4.5 w-4.5 text-textMuted" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-textMuted">Expiration Date</label>
+                    <input
+                      type="text"
+                      required
+                      value={cardExpiry}
+                      onChange={handleExpiryChange}
+                      placeholder="MM/YY"
+                      className="w-full rounded-xl border border-borderColor bg-[#FFF8E7]/10 focus:bg-white px-3.5 py-2.5 text-xs text-foreground focus:border-accent transition-all font-mono text-center focus:ring-1 focus:ring-accent font-semibold"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-textMuted">CVC</label>
+                    <input
+                      type="password"
+                      required
+                      value={cardCvc}
+                      onChange={(e) => setCardCvc(e.target.value.replace(/\D/g, "").substring(0, 3))}
+                      placeholder="•••"
+                      className="w-full rounded-xl border border-borderColor bg-[#FFF8E7]/10 focus:bg-white px-3.5 py-2.5 text-xs text-foreground focus:border-accent transition-all font-mono text-center focus:ring-1 focus:ring-accent font-semibold"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    className="w-full flex items-center justify-center space-x-2 rounded-full bg-accent hover:bg-accent-hover text-white text-xs font-bold uppercase tracking-widest py-3.5 shadow-lg transition-all duration-300 hover:scale-[1.005] active:scale-95"
+                  >
+                    <span>Pay {formatCurrency(total)}</span>
+                  </button>
+                </div>
+              </form>
             )}
+          </div>
+        </div>
+      )}
 
-            {/* Dummy Card Info Helper */}
-            <div className="rounded-2xl bg-secondary/50 p-4 border border-borderColor/40 space-y-2">
-              <span className="text-[9px] font-bold text-primary uppercase tracking-widest block">Available Test Cards</span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-[9px] text-textMuted font-bold">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCardNumber("4242 4242 4242 4242");
-                    setCardExpiry("12/28");
-                    setCardCvc("123");
-                  }}
-                  className="text-left bg-cardBg border border-borderColor/60 p-2 rounded-xl hover:border-primary hover:text-foreground transition-all flex items-center justify-between"
-                >
-                  <span>💳 Success Test</span>
-                  <span className="font-bold text-green-700 font-sans">4242</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCardNumber("4000 0000 0000 0002");
-                    setCardExpiry("05/29");
-                    setCardCvc("666");
-                  }}
-                  className="text-left bg-cardBg border border-borderColor/60 p-2 rounded-xl hover:border-red-400 hover:text-foreground transition-all flex items-center justify-between"
-                >
-                  <span>💳 Decline Test</span>
-                  <span className="font-bold text-red-700 font-sans">0002</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-textMuted">Cardholder Name</label>
-              <input
-                type="text"
-                required
-                value={cardName}
-                onChange={(e) => setCardName(e.target.value)}
-                placeholder="e.g. John Doe"
-                className="w-full rounded-xl border border-borderColor bg-[#FFF8E7]/10 focus:bg-white px-3.5 py-2.5 text-xs text-foreground focus:border-accent transition-all font-semibold focus:ring-1 focus:ring-accent"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-textMuted">Card Number</label>
-              <div className="relative">
-                <input
-                  type="text"
-                  required
-                  value={cardNumber}
-                  onChange={handleCardNumberChange}
-                  placeholder="4242 4242 4242 4242"
-                  className="w-full rounded-xl border border-borderColor bg-[#FFF8E7]/10 focus:bg-white pl-10 pr-3 py-2.5 text-xs text-foreground focus:border-accent transition-all font-mono focus:ring-1 focus:ring-accent font-semibold"
-                />
-                <CreditCard className="absolute left-3.5 top-3.5 h-4.5 w-4.5 text-textMuted" />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-textMuted">Expiration Date</label>
-                <input
-                  type="text"
-                  required
-                  value={cardExpiry}
-                  onChange={handleExpiryChange}
-                  placeholder="MM/YY"
-                  className="w-full rounded-xl border border-borderColor bg-[#FFF8E7]/10 focus:bg-white px-3.5 py-2.5 text-xs text-foreground focus:border-accent transition-all font-mono text-center focus:ring-1 focus:ring-accent font-semibold"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-textMuted">CVC</label>
-                <input
-                  type="password"
-                  required
-                  value={cardCvc}
-                  onChange={(e) => setCardCvc(e.target.value.replace(/\D/g, "").substring(0, 3))}
-                  placeholder="•••"
-                  className="w-full rounded-xl border border-borderColor bg-[#FFF8E7]/10 focus:bg-white px-3.5 py-2.5 text-xs text-foreground focus:border-accent transition-all font-mono text-center focus:ring-1 focus:ring-accent font-semibold"
-                />
-              </div>
-            </div>
-
-            <div className="pt-2">
-              <button
-                type="submit"
-                className="w-full flex items-center justify-center space-x-2 rounded-full bg-accent hover:bg-accent-hover text-white text-xs font-bold uppercase tracking-widest py-3.5 shadow-lg transition-all duration-300 hover:scale-[1.005] active:scale-95"
-              >
-                <span>Pay {formatCurrency(total)}</span>
-              </button>
-            </div>
-          </form>
-        )}
-      </div>
+      <Footer />
     </div>
-  )
-}
-
-<Footer />
-    </div >
   );
 }
