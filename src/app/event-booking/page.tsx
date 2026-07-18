@@ -62,6 +62,16 @@ interface FormErrors {
   eventType?: string;
 }
 
+function parseDateString(dateStr: string): Date | null {
+  if (!dateStr) return null;
+  const parts = dateStr.split("-");
+  if (parts.length !== 3) return null;
+  const year = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10) - 1;
+  const day = parseInt(parts[2], 10);
+  const date = new Date(year, month, day);
+  return isNaN(date.getTime()) ? null : date;
+}
 
 export default function EventBookingPage() {
   // Selection state
@@ -173,10 +183,9 @@ export default function EventBookingPage() {
       setSubmitLoading(true);
 
       const parsedDate = parseDateString(eventDate);
-      const formattedDateForDb = parsedDate 
+      const formattedDateForDb = parsedDate
         ? `${parsedDate.getFullYear()}-${String(parsedDate.getMonth() + 1).padStart(2, '0')}-${String(parsedDate.getDate()).padStart(2, '0')}`
         : eventDate;
-
       const result = await submitEventBooking({
         name,
         email,
@@ -237,11 +246,10 @@ export default function EventBookingPage() {
                     document.getElementById("booking-form")?.scrollIntoView({ behavior: "smooth" });
                   }, 100);
                 }}
-                className={`group relative flex flex-col items-start rounded-2xl border-2 p-6 text-left transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] overflow-hidden ${
-                  selectedEventType === event.id
+                className={`group relative flex flex-col items-start rounded-2xl border-2 p-6 text-left transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] overflow-hidden ${selectedEventType === event.id
                     ? "border-primary bg-primary/5 shadow-md"
                     : "border-borderColor bg-cardBg hover:border-primary/40"
-                }`}
+                  }`}
               >
                 {/* Background image */}
                 <div className="absolute inset-0 opacity-[0.08] group-hover:opacity-[0.12] transition-opacity">
@@ -257,11 +265,10 @@ export default function EventBookingPage() {
 
                 <div className="relative z-10 space-y-3">
                   <div
-                    className={`flex h-12 w-12 items-center justify-center rounded-xl transition-colors ${
-                      selectedEventType === event.id
+                    className={`flex h-12 w-12 items-center justify-center rounded-xl transition-colors ${selectedEventType === event.id
                         ? "bg-primary text-white"
                         : "bg-secondary text-primary"
-                    }`}
+                      }`}
                   >
                     {iconMap[event.icon]}
                   </div>
@@ -314,11 +321,10 @@ export default function EventBookingPage() {
                       if (errors.selectedPackage)
                         setErrors((prev) => ({ ...prev, selectedPackage: undefined }));
                     }}
-                    className={`relative flex flex-col rounded-2xl border-2 p-6 text-left transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] ${
-                      selectedPackage === pkg.name
+                    className={`relative flex flex-col rounded-2xl border-2 p-6 text-left transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] ${selectedPackage === pkg.name
                         ? "border-primary bg-primary/5 shadow-md"
                         : "border-borderColor bg-cardBg hover:border-primary/40"
-                    }`}
+                      }`}
                   >
                     {/* Popular Badge */}
                     {pkg.popular && (
@@ -333,11 +339,10 @@ export default function EventBookingPage() {
                     <div className="space-y-4 flex-1">
                       <div className="flex items-center space-x-3">
                         <div
-                          className={`flex h-10 w-10 items-center justify-center rounded-lg ${
-                            selectedPackage === pkg.name
+                          className={`flex h-10 w-10 items-center justify-center rounded-lg ${selectedPackage === pkg.name
                               ? "bg-primary text-white"
                               : "bg-secondary text-primary"
-                          }`}
+                            }`}
                         >
                           {tierIcons[pkg.tier]}
                         </div>
@@ -405,11 +410,10 @@ export default function EventBookingPage() {
                         if (errors.name) setErrors((prev) => ({ ...prev, name: undefined }));
                       }}
                       placeholder="Your full name"
-                      className={`w-full rounded-lg border bg-background px-4 py-2.5 text-sm text-foreground transition-all ${
-                        errors.name
+                      className={`w-full rounded-lg border bg-background px-4 py-2.5 text-sm text-foreground transition-all ${errors.name
                           ? "border-red-400 focus:border-red-500"
                           : "border-borderColor focus:border-primary"
-                      }`}
+                        }`}
                     />
                     {errors.name && (
                       <p className="text-[11px] text-red-600 font-medium animate-slideDown">
@@ -431,11 +435,10 @@ export default function EventBookingPage() {
                         if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }));
                       }}
                       placeholder="you@example.com"
-                      className={`w-full rounded-lg border bg-background px-4 py-2.5 text-sm text-foreground transition-all ${
-                        errors.email
+                      className={`w-full rounded-lg border bg-background px-4 py-2.5 text-sm text-foreground transition-all ${errors.email
                           ? "border-red-400 focus:border-red-500"
                           : "border-borderColor focus:border-primary"
-                      }`}
+                        }`}
                     />
                     {errors.email && (
                       <p className="text-[11px] text-red-600 font-medium animate-slideDown">
@@ -460,11 +463,10 @@ export default function EventBookingPage() {
                         if (errors.phone) setErrors((prev) => ({ ...prev, phone: undefined }));
                       }}
                       placeholder="+1 (555) 000-0000"
-                      className={`w-full rounded-lg border bg-background px-4 py-2.5 text-sm text-foreground transition-all ${
-                        errors.phone
+                      className={`w-full rounded-lg border bg-background px-4 py-2.5 text-sm text-foreground transition-all ${errors.phone
                           ? "border-red-400 focus:border-red-500"
                           : "border-borderColor focus:border-primary"
-                      }`}
+                        }`}
                     />
                     {errors.phone && (
                       <p className="text-[11px] text-red-600 font-medium animate-slideDown">
@@ -487,11 +489,10 @@ export default function EventBookingPage() {
                         setGuests(e.target.value);
                         if (errors.guests) setErrors((prev) => ({ ...prev, guests: undefined }));
                       }}
-                      className={`w-full rounded-lg border bg-background px-4 py-2.5 text-sm text-foreground transition-all ${
-                        errors.guests
+                      className={`w-full rounded-lg border bg-background px-4 py-2.5 text-sm text-foreground transition-all ${errors.guests
                           ? "border-red-400 focus:border-red-500"
                           : "border-borderColor focus:border-primary"
-                      }`}
+                        }`}
                     />
                     {errors.guests && (
                       <p className="text-[11px] text-red-600 font-medium animate-slideDown">
@@ -532,11 +533,10 @@ export default function EventBookingPage() {
                         if (errors.eventDate)
                           setErrors((prev) => ({ ...prev, eventDate: undefined }));
                       }}
-                      className={`w-full rounded-lg border bg-background px-4 py-2.5 text-sm text-foreground transition-all cursor-pointer ${
-                        errors.eventDate
+                      className={`w-full rounded-lg border bg-background px-4 py-2.5 text-sm text-foreground transition-all cursor-pointer ${errors.eventDate
                           ? "border-red-400 focus:border-red-500"
                           : "border-borderColor focus:border-primary"
-                      }`}
+                        }`}
                     />
                     {errors.eventDate && (
                       <p className="text-[11px] text-red-600 font-medium animate-slideDown">
