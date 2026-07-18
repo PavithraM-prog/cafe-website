@@ -59,7 +59,9 @@ interface FormErrors {
   guests?: string;
   eventDate?: string;
   selectedPackage?: string;
+  eventType?: string;
 }
+
 
 export default function EventBookingPage() {
   // Selection state
@@ -90,6 +92,10 @@ export default function EventBookingPage() {
   const validate = (): boolean => {
     const newErrors: FormErrors = {};
 
+    if (!selectedEventType) {
+      newErrors.eventType = "Please select an event type";
+    }
+
     if (!name.trim()) newErrors.name = "Name is required";
     if (!email.trim()) {
       newErrors.email = "Email is required";
@@ -101,17 +107,43 @@ export default function EventBookingPage() {
     } else if (!/^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,4}[-\s\.]?[0-9]{1,9}$/.test(phone.replace(/\s/g, ""))) {
       newErrors.phone = "Please enter a valid phone number";
     }
+
+    // Date validation
     if (!eventDate) {
       newErrors.eventDate = "Event date is required";
     } else {
       const sel = new Date(eventDate);
-      const tod = new Date();
-      tod.setHours(0, 0, 0, 0);
-      if (sel < tod) newErrors.eventDate = "Please select a future date";
+      if (isNaN(sel.getTime())) {
+        newErrors.eventDate = "Please select a valid date";
+      } else {
+        const tod = new Date();
+        tod.setHours(0, 0, 0, 0);
+        if (sel < tod) newErrors.eventDate = "Please select a future date";
+      }
     }
+
+    // Guest validation
+    const guestNum = parseInt(guests);
+    if (isNaN(guestNum)) {
+      newErrors.guests = "Number of guests must be a valid number";
+    } else {
+      const min = selectedEvent?.minGuests || 2;
+      const max = selectedEvent?.maxGuests || 60;
+      if (guestNum < min) {
+        newErrors.guests = `Minimum guests for this event is ${min}`;
+      } else if (guestNum > max) {
+        newErrors.guests = `Maximum guests for this event is ${max}`;
+      }
+    }
+
     if (!selectedPackage) newErrors.selectedPackage = "Please select a package";
 
     setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      console.error("Validation failed with errors:", newErrors);
+    }
+
     return Object.keys(newErrors).length === 0;
   };
 
@@ -140,13 +172,18 @@ export default function EventBookingPage() {
     try {
       setSubmitLoading(true);
 
+      const parsedDate = parseDateString(eventDate);
+      const formattedDateForDb = parsedDate 
+        ? `${parsedDate.getFullYear()}-${String(parsedDate.getMonth() + 1).padStart(2, '0')}-${String(parsedDate.getDate()).padStart(2, '0')}`
+        : eventDate;
+
       const result = await submitEventBooking({
         name,
         email,
         phone,
         eventType: selectedEvent?.name || "",
         guests: parseInt(guests),
-        eventDate,
+        eventDate: formattedDateForDb,
         decorationTheme,
         foodPackage,
         selectedPackage,
@@ -155,7 +192,8 @@ export default function EventBookingPage() {
 
       setConfirmation(result);
       setShowConfirmModal(true);
-    } catch {
+    } catch (err) {
+      console.error("Error submitting event booking:", err);
       setToast({ message: "Something went wrong. Please try again.", type: "error" });
     } finally {
       setSubmitLoading(false);
@@ -445,9 +483,21 @@ export default function EventBookingPage() {
                       value={guests}
                       min={selectedEvent?.minGuests || 2}
                       max={selectedEvent?.maxGuests || 60}
-                      onChange={(e) => setGuests(e.target.value)}
-                      className="w-full rounded-lg border border-borderColor bg-background px-4 py-2.5 text-sm text-foreground focus:border-primary transition-all"
+                      onChange={(e) => {
+                        setGuests(e.target.value);
+                        if (errors.guests) setErrors((prev) => ({ ...prev, guests: undefined }));
+                      }}
+                      className={`w-full rounded-lg border bg-background px-4 py-2.5 text-sm text-foreground transition-all ${
+                        errors.guests
+                          ? "border-red-400 focus:border-red-500"
+                          : "border-borderColor focus:border-primary"
+                      }`}
                     />
+                    {errors.guests && (
+                      <p className="text-[11px] text-red-600 font-medium animate-slideDown">
+                        {errors.guests}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -465,6 +515,7 @@ export default function EventBookingPage() {
                       )}
                       <span className="font-medium">{selectedEvent?.name}</span>
                     </div>
+                    <input type="hidden" name="eventType" value={selectedEvent?.name || ""} />
                   </div>
 
                   <div className="space-y-1.5">

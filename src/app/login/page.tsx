@@ -21,7 +21,11 @@ function LoginForm() {
   // If user is already logged in, redirect immediately
   useEffect(() => {
     if (user && !loading) {
-      router.push(redirect);
+      if (user.role === "admin" || user.role === "ADMIN") {
+        router.push("/admin");
+      } else {
+        router.push(redirect);
+      }
     }
   }, [user, loading, redirect, router]);
 
@@ -31,9 +35,13 @@ function LoginForm() {
 
     try {
       setLocalLoading(true);
-      const success = await login(email, password);
-      if (success) {
-        router.push(redirect);
+      const loggedInUser = await login(email, password);
+      if (loggedInUser) {
+        if (loggedInUser.role === "admin" || loggedInUser.role === "ADMIN") {
+          router.push("/admin");
+        } else {
+          router.push(redirect);
+        }
         router.refresh();
       }
     } catch (err) {

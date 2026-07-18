@@ -212,7 +212,7 @@ export default function AdminReservationsPage() {
                                 : "bg-orange-50 text-[#8c6239] border border-orange-100"
                             }`}
                           >
-                            {booking.type}
+                            {booking.type === "EVENT" ? "Event Booking" : "Table Booking"}
                           </span>
                         </div>
                         <span className="text-[10px] text-[#705e55] font-medium block mt-0.5">

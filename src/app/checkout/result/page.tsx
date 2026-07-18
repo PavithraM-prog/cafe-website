@@ -197,7 +197,7 @@ function ResultContent() {
                 <span className="font-serif text-2xl font-black text-foreground">Cozy Beans Café</span>
                 <span className="block text-[10px] text-textMuted uppercase tracking-widest font-extrabold">Tax Invoice / Receipt</span>
                 <p className="text-[10px] text-textMuted leading-relaxed max-w-xs font-light">
-                  123 Aroma Lane, Coffee District, CA 90210 <br/>
+                  AKC, Mogappair, Nerkundram, Chennai, Greater Chennai, Tamil Nadu 600107 <br/>
                   GSTIN: 27AAAAA1111A1Z1
                 </p>
               </div>

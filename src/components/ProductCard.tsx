@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useTransition, useCallback } from "react";
 import { useCartActions } from "@/context/CartContext";
 import { Star, Leaf, Flame, Plus, Check } from "lucide-react";
 import Image from "next/image";
@@ -21,25 +21,31 @@ interface ProductCardProps {
 export const ProductCard: React.FC<ProductCardProps> = React.memo(({ product }) => {
   const { addToCart } = useCartActions();
   const [added, setAdded] = useState(false);
+  const [, startTransition] = useTransition();
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  const handleAddToCart = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
-    if (!product.availability) return;
+    if (!product.availability || added) return;
 
-    addToCart({
-      productId: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.image,
+    // Immediate optimistic visual feedback — before any state propagation
+    setAdded(true);
+
+    // Defer the cart context update so it doesn't block the click frame
+    startTransition(() => {
+      addToCart({
+        productId: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+      });
     });
 
-    setAdded(true);
-    setTimeout(() => setAdded(false), 2000);
-  };
+    setTimeout(() => setAdded(false), 1800);
+  }, [added, product, addToCart]);
 
   return (
     <div
-      className={`group flex flex-col rounded-2xl border border-borderColor bg-cardBg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 ${
+      className={`group flex flex-col rounded-2xl border border-borderColor bg-cardBg overflow-hidden shadow-sm hover:shadow-md transition-[box-shadow,transform] duration-300 ${
         !product.availability ? "opacity-60" : ""
       }`}
     >
@@ -107,7 +113,7 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({ product }) 
           <button
             onClick={handleAddToCart}
             disabled={!product.availability}
-            className={`flex h-10 w-10 items-center justify-center rounded-full shadow-sm hover:scale-105 active:scale-95 transition-all focus:outline-none ${
+            className={`flex h-10 w-10 items-center justify-center rounded-full shadow-sm hover:scale-105 active:scale-95 transition-colors focus:outline-none ${
               !product.availability
                 ? "bg-neutral-100 text-neutral-400 cursor-not-allowed"
                 : added
@@ -124,3 +130,4 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({ product }) 
   );
 });
 ProductCard.displayName = "ProductCard";
+

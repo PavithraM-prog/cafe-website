@@ -50,62 +50,139 @@ export interface BookingConfirmation {
 
 /**
  * Submit a table booking request.
- * TODO: Replace with actual POST /api/bookings/table
  */
 export async function submitTableBooking(
   data: TableBookingPayload
 ): Promise<BookingConfirmation> {
-  await delay(1200); // Simulate network delay
+  const res = await fetch("/api/reservations", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: data.fullName,
+      email: data.email,
+      phone: data.phone,
+      guests: data.guests,
+      date: data.date,
+      time: data.time,
+      note: data.specialRequests || "",
+      type: "TABLE",
+    }),
+  });
 
-  const confirmation: BookingConfirmation = {
-    bookingId: generateBookingId(),
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || "Failed to submit table booking");
+  }
+
+  const result = await res.json();
+  const reservation = result.reservation;
+
+  return {
+    bookingId: reservation.id,
     bookingType: "Table Booking",
-    date: data.date,
-    time: data.time,
-    guests: data.guests,
-    status: "Pending",
+    date: reservation.date,
+    time: reservation.time,
+    guests: reservation.guests,
+    status: reservation.status.charAt(0) + reservation.status.slice(1).toLowerCase(),
   };
-
-  return confirmation;
 }
 
 /**
  * Submit an event booking request.
- * TODO: Replace with actual POST /api/bookings/event
  */
 export async function submitEventBooking(
   data: EventBookingPayload
 ): Promise<BookingConfirmation> {
-  await delay(1500); // Simulate network delay
+  const note = `Event Type: ${data.eventType}
+Package: ${data.selectedPackage}
+Theme: ${data.decorationTheme}
+Food Package: ${data.foodPackage}
+Additional Notes: ${data.additionalNotes || "None"}`;
 
-  const confirmation: BookingConfirmation = {
-    bookingId: generateBookingId(),
+  const res = await fetch("/api/reservations", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      guests: data.guests,
+      date: data.eventDate,
+      time: "To be confirmed",
+      note: note,
+      type: "EVENT",
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || "Failed to submit event booking");
+  }
+
+  const result = await res.json();
+  const reservation = result.reservation;
+
+  return {
+    bookingId: reservation.id,
     bookingType: "Event Booking",
-    date: data.eventDate,
-    time: "To be confirmed",
-    guests: data.guests,
-    status: "Pending",
+    date: reservation.date,
+    time: reservation.time,
+    guests: reservation.guests,
+    status: reservation.status.charAt(0) + reservation.status.slice(1).toLowerCase(),
   };
+}
 
-  return confirmation;
+// Helper to parse event details from note field
+function parseEventNotes(note: string) {
+  const result: any = {};
+  if (!note) return result;
+  
+  const lines = note.split("\n");
+  for (const line of lines) {
+    if (line.startsWith("Event Type: ")) {
+      result.eventType = line.replace("Event Type: ", "").trim();
+    } else if (line.startsWith("Package: ")) {
+      result.packageName = line.replace("Package: ", "").trim();
+    } else if (line.startsWith("Theme: ")) {
+      result.decorationTheme = line.replace("Theme: ", "").trim();
+    } else if (line.startsWith("Food Package: ")) {
+      result.foodPackage = line.replace("Food Package: ", "").trim();
+    } else if (line.startsWith("Additional Notes: ")) {
+      result.additionalNotes = line.replace("Additional Notes: ", "").trim();
+    }
+  }
+  return result;
 }
 
 /**
- * Fetch all bookings for the current user.
- * TODO: Replace with actual GET /api/bookings/my
+ * Fetch all bookings for the current user from the database.
  */
 export async function getMyBookings(): Promise<Booking[]> {
-  await delay(800); // Simulate network delay
-  return [...mockBookings];
+  const res = await fetch("/api/reservations");
+  if (!res.ok) {
+    throw new Error("Failed to load bookings");
+  }
+  const data = await res.json();
+  
+  return data.reservations.map((r: any) => ({
+    id: r.id,
+    bookingType: r.type === "EVENT" ? "Event Booking" : "Table Booking",
+    date: r.date,
+    time: r.time,
+    guests: r.guests,
+    status: (r.status.charAt(0) + r.status.slice(1).toLowerCase()) as any,
+    name: r.name,
+    email: r.email,
+    phone: r.phone,
+    ...(r.type === "EVENT" ? parseEventNotes(r.note) : { specialRequests: r.note }),
+  }));
 }
 
 /**
  * Cancel a booking by ID.
- * TODO: Replace with actual PATCH /api/bookings/:id/cancel
  */
 export async function cancelBooking(bookingId: string): Promise<boolean> {
   await delay(600); // Simulate network delay
-  // In a real app this would call the API
   return true;
 }
 

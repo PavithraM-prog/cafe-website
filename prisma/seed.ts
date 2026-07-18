@@ -99,7 +99,7 @@ async function main() {
   await prisma.branch.create({
     data: {
       name: "Downtown Cafe",
-      address: "123 Aroma Lane, Coffee District, CA 90210",
+      address: "AKC, Mogappair, Nerkundram, Chennai, Greater Chennai, Tamil Nadu 600107",
       phone: "+1 (555) 789-COZY",
     },
   });
@@ -292,7 +292,7 @@ console.log("Menu items seeded successfully!");
     { id: "hero_title", value: "Escape into a Cozy Corner of Coffee & Comfort" },
     { id: "hero_tagline", value: "Where every cup tells a story, and every moment feels like home." },
     { id: "opening_hours", value: "Mon - Fri: 7:00 AM - 8:00 PM | Sat - Sun: 8:00 AM - 9:00 PM" },
-    { id: "cafe_address", value: "123 Aroma Lane, Coffee District, CA 90210" },
+    { id: "cafe_address", value: "AKC, Mogappair, Nerkundram, Chennai, Greater Chennai, Tamil Nadu 600107" },
     { id: "cafe_phone", value: "+1 (555) 789-COZY" },
     { id: "cafe_email", value: "hello@cozybeans.com" },
   ];

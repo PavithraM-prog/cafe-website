@@ -31,7 +31,7 @@ async function getLandingData() {
         hero_title: "Escape into a Cozy Corner of Coffee & Comfort",
         hero_tagline: "Where every cup tells a story, and every moment feels like home.",
         opening_hours: "Mon - Fri: 7:00 AM - 8:00 PM | Sat - Sun: 8:00 AM - 9:00 PM",
-        cafe_address: "123 Aroma Lane, Coffee District, CA 90210",
+        cafe_address: "AKC, Mogappair, Nerkundram, Chennai, Greater Chennai, Tamil Nadu 600107",
         cafe_phone: "+1 (555) 789-COZY",
         cafe_email: "hello@cozybeans.com",
       },
@@ -359,7 +359,7 @@ export default async function HomePage() {
               </div>
               <h3 className="font-serif font-bold text-lg text-foreground">Location Address</h3>
               <p className="text-xs text-textMuted font-light leading-relaxed">
-                {settings.cafe_address || "123 Aroma Lane, Coffee District, CA 90210"}
+                {settings.cafe_address || "AKC, Mogappair, Nerkundram, Chennai, Greater Chennai, Tamil Nadu 600107"}
               </p>
             </div>
             <div className="flex flex-col items-center md:items-start p-6 pt-8 md:pt-6 space-y-3">
@@ -406,7 +406,7 @@ export default async function HomePage() {
               {/* Floating Address Overlay */}
               <div className="absolute bottom-5 left-5 right-5 p-5 rounded-2xl glass border border-borderColor/40 text-foreground space-y-1 shadow-lg">
                 <span className="text-[10px] font-extrabold text-[#4A2C2A] uppercase tracking-widest block">Find Us</span>
-                <span className="text-sm font-bold block">{settings.cafe_address || "123 Aroma Lane, CA 90210"}</span>
+                <span className="text-sm font-bold block">{settings.cafe_address || "AKC, Mogappair, Nerkundram, Chennai, Greater Chennai, Tamil Nadu 600107"}</span>
                 <span className="text-[10px] text-[#7A635B] block font-light">Tap maps icon on your mobile to navigate</span>
               </div>
 

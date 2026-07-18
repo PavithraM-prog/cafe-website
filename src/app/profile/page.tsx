@@ -29,9 +29,14 @@ export default function ProfilePage() {
   const router = useRouter();
 
   // Redirect to login if user is not authenticated
+  // Also redirect to /admin if user is admin
   useEffect(() => {
-    if (!loading && !user) {
-      router.push("/login");
+    if (!loading) {
+      if (!user) {
+        router.push("/login");
+      } else if (user.role === "admin" || user.role === "ADMIN") {
+        router.push("/admin");
+      }
     }
   }, [user, loading, router]);
 

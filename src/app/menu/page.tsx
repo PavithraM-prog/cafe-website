@@ -6,6 +6,7 @@ import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
 import { Search, Loader2, ArrowUpDown, Sparkles } from "lucide-react";
 import Image from "next/image";
+import { FloatingCartBar } from "@/components/FloatingCartBar";
 
 interface Product {
   id: string;
@@ -235,6 +236,9 @@ export default function MenuPage() {
           </>
         )}
       </section>
+
+      {/* Floating cart bar — Swiggy/Zomato style, fixed at the bottom */}
+      <FloatingCartBar />
 
       <Footer />
     </div>
