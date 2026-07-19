@@ -3,51 +3,63 @@
 @tailwind utilities;
 
 :root {
-  --background: #F5EFE6; /* Soft warm beige background */
-  --foreground: #4A2C2A; /* Deep coffee brown */
+  --background: #FFF8F0; /* Warm cream background */
+  --foreground: #3E2723; /* Dark espresso primary text */
   
-  --primary: #4A2C2A; /* Deep coffee brown */
-  --primary-hover: #371e1d;
+  --primary: #3E2723; /* Dark espresso */
+  --primary-hover: #2E1C19;
   
-  --secondary: #FFF8E7; /* Lux Cream background */
+  --secondary: #FFF3E3; /* Cream milk background */
   
-  --accent: #D9A441; /* Warm caramel gold */
-  --accent-hover: #C59134;
+  --accent: #C68E57; /* Warm caramel gold */
+  --accent-hover: #B37C45;
   
   --card-bg: #ffffff;
-  --border: #E6DDD0;
-  --text-muted: #7A635B;
+  --border: #E0D4C5; /* Soft mocha border */
+  --text-muted: #6F4E37; /* Coffee brown */
   
-  --font-outfit: 'Outfit', sans-serif;
+  --font-poppins: 'Poppins', sans-serif;
   --font-playfair: 'Playfair Display', serif;
 }
 
 .dark {
-  --background: #140d0c; /* Very dark espresso */
-  --foreground: #F6ECE2; /* Smooth cream milk */
+  --background: #1F1210; /* Very dark espresso background */
+  --foreground: #FFF8F0; /* Smooth cream milk text */
   
-  --primary: #D9A441; /* Caramel gold primary for dark */
-  --primary-hover: #C59134;
+  --primary: #C68E57; /* Caramel gold primary for dark */
+  --primary-hover: #B37C45;
   
-  --secondary: #1F1210; /* Dark coffee secondary background */
+  --secondary: #2D1C19; /* Dark coffee secondary background */
   
-  --accent: #D9A441;
-  --accent-hover: #C59134;
+  --accent: #C68E57;
+  --accent-hover: #B37C45;
   
-  --card-bg: #1B100E;
-  --border: #2D1B18;
-  --text-muted: #B39D97;
+  --card-bg: #281715;
+  --border: #3E2723;
+  --text-muted: #E0D4C5;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: var(--font-outfit), Inter, sans-serif;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  font-family: var(--font-poppins), Inter, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-playfair), 'Playfair Display', Georgia, serif;
+}
+
+/* snappy clicks optimizations */
+a, button, select, input, textarea, [role="button"] {
+  touch-action: manipulation; /* removes 300ms double-tap delay on mobile */
+  -webkit-tap-highlight-color: transparent; /* removes gray overlay on tap */
+}
+
+/* mechanical tactile response on click (active state) */
+button:active, a:active, [role="button"]:active {
+  transform: scale(0.97) !important;
+  transition: none !important; /* overrides transition to apply instantly */
 }
 
 /* Glassmorphism utility */
@@ -398,6 +410,7 @@ input, select, textarea {
 
 .ripple-pulse {
   animation: ripplePulse 2.5s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  will-change: transform, opacity;
 }
 
 .ripple-delay-1 {
@@ -416,6 +429,7 @@ input, select, textarea {
 
 .pin-bounce {
   animation: pinBounce 2.5s ease-in-out infinite;
+  will-change: transform;
 }
 
 /* Floating SVG Coffee Beans */
@@ -433,16 +447,19 @@ input, select, textarea {
 
 .particle-floating-1 {
   animation: particleFloatSlow 12s ease-in-out infinite;
+  will-change: transform;
 }
 
 .particle-floating-2 {
   animation: particleFloatSlow 9s ease-in-out infinite;
   animation-delay: 2s;
+  will-change: transform;
 }
 
 .particle-floating-3 {
   animation: particleFloatSlow 15s ease-in-out infinite;
   animation-delay: 4s;
+  will-change: transform;
 }
 
 /* Speed up particles on hover */
@@ -456,5 +473,21 @@ input, select, textarea {
 
 .group:hover .particle-floating-3 {
   animation-duration: 5s;
+}
+
+/* Page transitions entry animations */
+@keyframes pageFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-enter {
+  animation: pageFadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 

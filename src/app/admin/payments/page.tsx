@@ -8,9 +8,9 @@ interface Payment {
   id: string;
   orderId: string;
   transactionId: string | null;
-  paymentMethod: string;
+  method: string;
   amount: number;
-  paymentStatus: string;
+  status: string;
   paymentTime: string;
   createdAt: string;
   order: {
@@ -220,10 +220,10 @@ export default function AdminPaymentsPage() {
                       {formatCurrency(payment.amount)}
                     </td>
 
-                    {/* Payment Method */}
+                     {/* Payment Method */}
                     <td className="p-4 text-center">
                       <span className="rounded-full bg-[#f2ede4] border border-borderColor/60 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-slate-700">
-                        {payment.paymentMethod}
+                        {payment.method}
                       </span>
                     </td>
 
@@ -236,21 +236,21 @@ export default function AdminPaymentsPage() {
                     <td className="p-4 text-center">
                       <span
                         className={`inline-flex items-center space-x-1 rounded-full border px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
-                          payment.paymentStatus === "SUCCESS"
+                          payment.status === "SUCCESS"
                             ? "bg-green-50 text-green-700 border-green-200"
-                            : payment.paymentStatus === "FAILED"
+                            : payment.status === "FAILED"
                             ? "bg-red-50 text-red-700 border-red-200"
                             : "bg-amber-50 text-amber-700 border-amber-200"
                         }`}
                       >
-                        {payment.paymentStatus === "SUCCESS" ? (
+                        {payment.status === "SUCCESS" ? (
                           <CheckCircle2 className="h-3 w-3 mr-0.5 shrink-0 text-green-700" />
-                        ) : payment.paymentStatus === "FAILED" ? (
+                        ) : payment.status === "FAILED" ? (
                           <XCircle className="h-3 w-3 mr-0.5 shrink-0 text-red-700" />
                         ) : (
                           <Clock className="h-3 w-3 mr-0.5 shrink-0 text-amber-700" />
                         )}
-                        <span>{payment.paymentStatus}</span>
+                        <span>{payment.status}</span>
                       </span>
                     </td>
 

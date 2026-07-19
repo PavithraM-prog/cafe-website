@@ -12,6 +12,15 @@ export const Navbar: React.FC = () => {
   const { cart } = useCart();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = React.useState(false);
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
 
@@ -35,12 +44,18 @@ export const Navbar: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-borderColor/40 glass shadow-sm transition-all duration-300">
+    <header className={`sticky top-0 z-50 w-full border-b border-borderColor/40 transition-all duration-300 ${
+      scrolled 
+        ? "bg-white/80 dark:bg-[#1C100E]/80 backdrop-blur-md py-1.5 shadow-md" 
+        : "bg-white/95 dark:bg-[#1C100E]/95 py-3.5 shadow-sm"
+    }`}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-20 items-center justify-between">
+        <div className={`flex items-center justify-between transition-all duration-300 ${
+          scrolled ? "h-14" : "h-20"
+        }`}>
           {/* Logo */}
           <div className="flex">
-            <Link href="/" className="flex items-center space-x-2 text-primary font-bold text-2xl hover:scale-[1.02] transition-transform duration-200">
+            <Link href="/" className="flex items-center space-x-2 text-primary font-bold text-2xl hover:scale-[1.02] transition-transform duration-300">
               <Coffee className="h-7 w-7 text-accent" />
               <span className="font-serif tracking-tight">Cozy Beans</span>
             </Link>

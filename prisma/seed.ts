@@ -471,8 +471,8 @@ console.log("Menu items seeded successfully!");
     data: {
       orderId: order.id,
       amount: orderTotal,
-      paymentMethod: "CARD",
-      paymentStatus: "SUCCESS",
+      method: "CARD",
+      status: "SUCCESS",
       transactionId: "TXN-SEED-001",
     },
   });

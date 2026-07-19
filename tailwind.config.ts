@@ -29,7 +29,7 @@ const config: Config = {
       },
       fontFamily: {
         serif: ["var(--font-playfair)", "Georgia", "serif"],
-        sans: ["var(--font-outfit)", "Inter", "sans-serif"],
+        sans: ["var(--font-poppins)", "Inter", "sans-serif"],
       },
     },
   },

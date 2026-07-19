@@ -178,8 +178,8 @@ export default function ProfilePage() {
               <div className="space-y-6">
                 {orders.map((order) => {
                   const orderItems = typeof order.items === "string" ? JSON.parse(order.items) : order.items;
-                  const successPayment = order.payments?.find((p: any) => p.paymentStatus === "SUCCESS");
-                  const failedPayment = order.payments?.find((p: any) => p.paymentStatus === "FAILED");
+                  const successPayment = order.payments?.find((p: any) => p.status === "SUCCESS");
+                  const failedPayment = order.payments?.find((p: any) => p.status === "FAILED");
                   const txnId = successPayment?.transactionId || failedPayment?.transactionId || "N/A";
                   
                   return (

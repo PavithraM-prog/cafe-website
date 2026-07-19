@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     if (order.paymentStatus === "PAID" && status === "SUCCESS") {
       // Find existing payment
       const existingPayment = await db.payment.findFirst({
-        where: { orderId, paymentStatus: "SUCCESS" },
+        where: { orderId, status: "SUCCESS" },
       });
       return NextResponse.json({
         message: "Order already paid",
@@ -59,10 +59,9 @@ export async function POST(request: Request) {
       data: {
         orderId,
         amount: order.total,
-        paymentMethod,
-        paymentStatus: status, // SUCCESS, FAILED, CANCELLED
+        method: paymentMethod,
+        status: status, // SUCCESS, FAILED, CANCELLED
         transactionId: transactionId || null,
-        paymentTime: new Date(),
       },
     });
 

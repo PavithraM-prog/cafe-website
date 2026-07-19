@@ -18,7 +18,10 @@ import {
   Loader2,
   Armchair,
   TreePine,
+  Sparkles,
+  ChevronRight
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface FormErrors {
   fullName?: string;
@@ -27,10 +30,8 @@ interface FormErrors {
   guests?: string;
   date?: string;
   time?: string;
-  seatingPreference?: string;
 }
 
-// Cafe working hours
 const timeSlots = [
   { value: "07:00", label: "7:00 AM" },
   { value: "08:00", label: "8:00 AM" },
@@ -49,7 +50,6 @@ const timeSlots = [
 ];
 
 export default function TableBookingPage() {
-  // Form state
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -59,17 +59,14 @@ export default function TableBookingPage() {
   const [seatingPreference, setSeatingPreference] = useState("indoor");
   const [specialRequests, setSpecialRequests] = useState("");
 
-  // UI state
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitLoading, setSubmitLoading] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
   const [confirmation, setConfirmation] = useState<BookingConfirmation | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  // Get today's date in YYYY-MM-DD format for min date
   const today = new Date().toISOString().split("T")[0];
 
-  // Validation
   const validate = (): boolean => {
     const newErrors: FormErrors = {};
 
@@ -104,11 +101,6 @@ export default function TableBookingPage() {
 
     if (!time) {
       newErrors.time = "Booking time is required";
-    } else {
-      const hour = parseInt(time.split(":")[0]);
-      if (hour < 7 || hour > 20) {
-        newErrors.time = "Please select a time within cafe hours (7 AM - 9 PM)";
-      }
     }
 
     setErrors(newErrors);
@@ -131,13 +123,12 @@ export default function TableBookingPage() {
     e.preventDefault();
 
     if (!validate()) {
-      setToast({ message: "Please fix the errors in the form.", type: "error" });
+      setToast({ message: "Please resolve form validation errors.", type: "error" });
       return;
     }
 
     try {
       setSubmitLoading(true);
-
       const result = await submitTableBooking({
         fullName,
         email,
@@ -166,10 +157,9 @@ export default function TableBookingPage() {
       <PageHeader
         tagline="Reserve a Spot"
         title="Table Booking"
-        description="Reserve your perfect table in advance. Whether it's a romantic dinner, a business meeting, or a family gathering — we've got you covered."
+        description="Reserve your perfect table in advance. Whether it's a workspace afternoon, a cozy reading session, or a weekend coffee catch-up — we've got you covered."
       />
 
-      {/* Toast */}
       {toast && (
         <Toast
           message={toast.message}
@@ -179,221 +169,327 @@ export default function TableBookingPage() {
       )}
 
       {/* Booking Form Section */}
-      <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16 page-enter">
-        <div className="border border-borderColor bg-cardBg p-6 sm:p-10 rounded-2xl shadow-sm space-y-8">
-          <div className="space-y-1">
-            <h2 className="font-serif text-2xl font-bold text-foreground">Book Your Table</h2>
-            <p className="text-xs text-textMuted">Fill in the details below and we&apos;ll confirm your reservation.</p>
+      <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16">
+        
+        {/* Main Card (Glassmorphism + Framer Motion) */}
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 70, damping: 15 }}
+          className="glass border border-borderColor/40 p-6 sm:p-10 rounded-[32px] shadow-xl space-y-8 relative overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-full filter blur-2xl pointer-events-none" />
+          
+          <div className="space-y-1.5 flex items-center justify-between">
+            <div>
+              <h2 className="font-serif text-2xl font-bold text-foreground">Book Your Table</h2>
+              <p className="text-xs text-textMuted dark:text-neutral-400">Secure your aromatic table reservation at Cozy Beans.</p>
+            </div>
+            <Sparkles className="w-6 h-6 text-accent shrink-0 animate-pulse hidden sm:block" />
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-            {/* Name & Email */}
+            
+            {/* Custom Floating Label Inputs */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-textMuted flex items-center">
-                  <User className="h-3.5 w-3.5 mr-1" />
-                  Full Name <span className="text-red-500 ml-0.5">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => {
-                    setFullName(e.target.value);
-                    if (errors.fullName) setErrors((prev) => ({ ...prev, fullName: undefined }));
-                  }}
-                  placeholder="John Doe"
-                  className={`w-full rounded-lg border bg-background px-4 py-2.5 text-sm text-foreground transition-all ${
-                    errors.fullName ? "border-red-400 focus:border-red-500" : "border-borderColor focus:border-primary"
-                  }`}
-                />
-                {errors.fullName && (
-                  <p className="text-[11px] text-red-600 font-medium animate-slideDown">{errors.fullName}</p>
-                )}
+              
+              {/* Full Name */}
+              <div className="space-y-1">
+                <div className={`relative rounded-2xl border-2 bg-[#FFF8F0]/30 dark:bg-[#1F1210]/20 px-4 py-3 transition-all flex items-center ${
+                  errors.fullName 
+                    ? "border-red-400 focus-within:border-red-500" 
+                    : "border-borderColor/40 focus-within:border-accent"
+                }`}>
+                  <User className="h-4.5 w-4.5 text-textMuted dark:text-neutral-500 mr-2.5 shrink-0" />
+                  <div className="relative flex-1">
+                    <input
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => {
+                        setFullName(e.target.value);
+                        if (errors.fullName) setErrors((prev) => ({ ...prev, fullName: undefined }));
+                      }}
+                      className="peer w-full bg-transparent text-sm text-foreground focus:outline-none placeholder-transparent pt-2.5"
+                      placeholder="Full Name"
+                    />
+                    <label className={`absolute left-0 top-0.5 pointer-events-none transition-all duration-200 text-xs text-textMuted/65 font-bold uppercase tracking-wider ${
+                      fullName ? "-translate-y-2 text-[9px] text-accent" : "peer-placeholder-shown:translate-y-1 peer-placeholder-shown:text-xs peer-focus:-translate-y-2 peer-focus:text-[9px] peer-focus:text-accent"
+                    }`}>
+                      Full Name *
+                    </label>
+                  </div>
+                </div>
+                <AnimatePresence>
+                  {errors.fullName && (
+                    <motion.p
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="text-[10px] text-red-600 font-bold pl-2.5 pt-0.5"
+                    >
+                      {errors.fullName}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-textMuted flex items-center">
-                  <Mail className="h-3.5 w-3.5 mr-1" />
-                  Email Address <span className="text-red-500 ml-0.5">*</span>
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }));
-                  }}
-                  placeholder="john@example.com"
-                  className={`w-full rounded-lg border bg-background px-4 py-2.5 text-sm text-foreground transition-all ${
-                    errors.email ? "border-red-400 focus:border-red-500" : "border-borderColor focus:border-primary"
-                  }`}
-                />
-                {errors.email && (
-                  <p className="text-[11px] text-red-600 font-medium animate-slideDown">{errors.email}</p>
-                )}
+              {/* Email Address */}
+              <div className="space-y-1">
+                <div className={`relative rounded-2xl border-2 bg-[#FFF8F0]/30 dark:bg-[#1F1210]/20 px-4 py-3 transition-all flex items-center ${
+                  errors.email 
+                    ? "border-red-400 focus-within:border-red-500" 
+                    : "border-borderColor/40 focus-within:border-accent"
+                }`}>
+                  <Mail className="h-4.5 w-4.5 text-textMuted dark:text-neutral-500 mr-2.5 shrink-0" />
+                  <div className="relative flex-1">
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }));
+                      }}
+                      className="peer w-full bg-transparent text-sm text-foreground focus:outline-none placeholder-transparent pt-2.5"
+                      placeholder="Email Address"
+                    />
+                    <label className={`absolute left-0 top-0.5 pointer-events-none transition-all duration-200 text-xs text-textMuted/65 font-bold uppercase tracking-wider ${
+                      email ? "-translate-y-2 text-[9px] text-accent" : "peer-placeholder-shown:translate-y-1 peer-placeholder-shown:text-xs peer-focus:-translate-y-2 peer-focus:text-[9px] peer-focus:text-accent"
+                    }`}>
+                      Email Address *
+                    </label>
+                  </div>
+                </div>
+                <AnimatePresence>
+                  {errors.email && (
+                    <motion.p
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="text-[10px] text-red-600 font-bold pl-2.5 pt-0.5"
+                    >
+                      {errors.email}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
 
-            {/* Phone & Guests */}
+            {/* Phone Number & Seating Preference Info */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-textMuted flex items-center">
-                  <Phone className="h-3.5 w-3.5 mr-1" />
-                  Phone Number <span className="text-red-500 ml-0.5">*</span>
-                </label>
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => {
-                    setPhone(e.target.value);
-                    if (errors.phone) setErrors((prev) => ({ ...prev, phone: undefined }));
-                  }}
-                  placeholder="+1 (555) 000-0000"
-                  className={`w-full rounded-lg border bg-background px-4 py-2.5 text-sm text-foreground transition-all ${
-                    errors.phone ? "border-red-400 focus:border-red-500" : "border-borderColor focus:border-primary"
-                  }`}
-                />
-                {errors.phone && (
-                  <p className="text-[11px] text-red-600 font-medium animate-slideDown">{errors.phone}</p>
-                )}
+              
+              {/* Phone Input */}
+              <div className="space-y-1">
+                <div className={`relative rounded-2xl border-2 bg-[#FFF8F0]/30 dark:bg-[#1F1210]/20 px-4 py-3 transition-all flex items-center ${
+                  errors.phone 
+                    ? "border-red-400 focus-within:border-red-500" 
+                    : "border-borderColor/40 focus-within:border-accent"
+                }`}>
+                  <Phone className="h-4.5 w-4.5 text-textMuted dark:text-neutral-500 mr-2.5 shrink-0" />
+                  <div className="relative flex-1">
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => {
+                        setPhone(e.target.value);
+                        if (errors.phone) setErrors((prev) => ({ ...prev, phone: undefined }));
+                      }}
+                      className="peer w-full bg-transparent text-sm text-foreground focus:outline-none placeholder-transparent pt-2.5"
+                      placeholder="Phone Number"
+                    />
+                    <label className={`absolute left-0 top-0.5 pointer-events-none transition-all duration-200 text-xs text-textMuted/65 font-bold uppercase tracking-wider ${
+                      phone ? "-translate-y-2 text-[9px] text-accent" : "peer-placeholder-shown:translate-y-1 peer-placeholder-shown:text-xs peer-focus:-translate-y-2 peer-focus:text-[9px] peer-focus:text-accent"
+                    }`}>
+                      Phone Number *
+                    </label>
+                  </div>
+                </div>
+                <AnimatePresence>
+                  {errors.phone && (
+                    <motion.p
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="text-[10px] text-red-600 font-bold pl-2.5 pt-0.5"
+                    >
+                      {errors.phone}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
               </div>
 
+              {/* Seating Preference Selector */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-textMuted flex items-center">
-                  <Users className="h-3.5 w-3.5 mr-1" />
-                  Number of Guests <span className="text-red-500 ml-0.5">*</span>
+                <label className="text-[10px] font-bold text-[#6F4E37] dark:text-[#E0D4C5] uppercase tracking-widest">
+                  Seating Option
                 </label>
-                <select
-                  value={guests}
-                  onChange={(e) => setGuests(e.target.value)}
-                  className="w-full rounded-lg border border-borderColor bg-background px-4 py-2.5 text-sm text-foreground focus:border-primary transition-all cursor-pointer"
-                >
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
-                    <option key={n} value={n}>
-                      {n} {n === 1 ? "Guest" : "Guests"}
-                    </option>
-                  ))}
-                  <option value="12">10+ Guests</option>
-                </select>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setSeatingPreference("indoor")}
+                    className={`flex items-center justify-center space-x-2 py-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                      seatingPreference === "indoor"
+                        ? "bg-accent border-accent text-[#3E2723] scale-[1.01] shadow-sm"
+                        : "bg-white dark:bg-transparent border-[#E0D4C5]/50 text-textMuted hover:border-accent"
+                    }`}
+                  >
+                    <Armchair className="w-4 h-4 shrink-0" />
+                    <span>Indoor</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSeatingPreference("outdoor")}
+                    className={`flex items-center justify-center space-x-2 py-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                      seatingPreference === "outdoor"
+                        ? "bg-accent border-accent text-[#3E2723] scale-[1.01] shadow-sm"
+                        : "bg-white dark:bg-transparent border-[#E0D4C5]/50 text-textMuted hover:border-accent"
+                    }`}
+                  >
+                    <TreePine className="w-4 h-4 shrink-0" />
+                    <span>Outdoor</span>
+                  </button>
+                </div>
               </div>
+
             </div>
 
-            {/* Date & Time */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-textMuted flex items-center">
-                  <Calendar className="h-3.5 w-3.5 mr-1" />
-                  Booking Date <span className="text-red-500 ml-0.5">*</span>
-                </label>
-                <input
-                  type="date"
-                  value={date}
-                  min={today}
-                  onChange={(e) => {
-                    setDate(e.target.value);
-                    if (errors.date) setErrors((prev) => ({ ...prev, date: undefined }));
-                  }}
-                  className={`w-full rounded-lg border bg-background px-4 py-2.5 text-sm text-foreground transition-all cursor-pointer ${
-                    errors.date ? "border-red-400 focus:border-red-500" : "border-borderColor focus:border-primary"
-                  }`}
-                />
-                {errors.date && (
-                  <p className="text-[11px] text-red-600 font-medium animate-slideDown">{errors.date}</p>
-                )}
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-textMuted flex items-center">
-                  <Clock className="h-3.5 w-3.5 mr-1" />
-                  Booking Time <span className="text-red-500 ml-0.5">*</span>
-                </label>
-                <select
-                  value={time}
-                  onChange={(e) => {
-                    setTime(e.target.value);
-                    if (errors.time) setErrors((prev) => ({ ...prev, time: undefined }));
-                  }}
-                  className={`w-full rounded-lg border bg-background px-4 py-2.5 text-sm text-foreground transition-all cursor-pointer ${
-                    errors.time ? "border-red-400 focus:border-red-500" : "border-borderColor focus:border-primary"
-                  }`}
-                >
-                  {timeSlots.map((slot) => (
-                    <option key={slot.value} value={slot.value}>
-                      {slot.label}
-                    </option>
-                  ))}
-                </select>
-                {errors.time && (
-                  <p className="text-[11px] text-red-600 font-medium animate-slideDown">{errors.time}</p>
-                )}
-              </div>
-            </div>
-
-            {/* Seating Preference */}
-            <div className="space-y-2.5">
-              <label className="text-xs font-semibold text-textMuted">
-                Seating Preference
+            {/* Circular Guest Pill Selector */}
+            <div className="space-y-2">
+              <label className="text-[10px] font-extrabold text-textMuted dark:text-neutral-400 uppercase tracking-widest flex items-center">
+                <Users className="h-4 w-4 mr-1.5 text-accent" />
+                <span>Number of Guests *</span>
               </label>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-wrap gap-2 pt-1">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => setGuests(n.toString())}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs border transition-all cursor-pointer ${
+                      guests === n.toString()
+                        ? "bg-accent border-accent text-[#3E2723] scale-108 shadow-md shadow-accent/20"
+                        : "bg-white dark:bg-transparent border-[#E0D4C5]/60 text-textMuted hover:border-accent/40"
+                    }`}
+                  >
+                    {n}
+                  </button>
+                ))}
                 <button
                   type="button"
-                  onClick={() => setSeatingPreference("indoor")}
-                  className={`flex items-center justify-center space-x-2.5 rounded-xl border-2 p-4 transition-all hover:scale-[1.02] active:scale-[0.98] ${
-                    seatingPreference === "indoor"
-                      ? "border-primary bg-primary/5 text-primary shadow-sm"
-                      : "border-borderColor bg-background text-textMuted hover:border-primary/30"
+                  onClick={() => setGuests("12")}
+                  className={`px-4 h-10 rounded-full flex items-center justify-center font-bold text-xs border transition-all cursor-pointer ${
+                    guests === "12"
+                      ? "bg-accent border-accent text-[#3E2723] scale-108 shadow-md shadow-accent/20"
+                      : "bg-white dark:bg-transparent border-[#E0D4C5]/60 text-textMuted hover:border-accent/40"
                   }`}
                 >
-                  <Armchair className="h-5 w-5" />
-                  <span className="text-sm font-semibold">Indoor</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSeatingPreference("outdoor")}
-                  className={`flex items-center justify-center space-x-2.5 rounded-xl border-2 p-4 transition-all hover:scale-[1.02] active:scale-[0.98] ${
-                    seatingPreference === "outdoor"
-                      ? "border-primary bg-primary/5 text-primary shadow-sm"
-                      : "border-borderColor bg-background text-textMuted hover:border-primary/30"
-                  }`}
-                >
-                  <TreePine className="h-5 w-5" />
-                  <span className="text-sm font-semibold">Outdoor</span>
+                  10+ Guests
                 </button>
               </div>
+            </div>
+
+            {/* Date & Time Selectors */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              
+              {/* Date Input */}
+              <div className="space-y-1">
+                <div className={`relative rounded-2xl border-2 bg-[#FFF8F0]/30 dark:bg-[#1F1210]/20 px-4 py-3 transition-all flex items-center ${
+                  errors.date 
+                    ? "border-red-400 focus-within:border-red-500" 
+                    : "border-borderColor/40 focus-within:border-accent"
+                }`}>
+                  <Calendar className="h-4.5 w-4.5 text-textMuted dark:text-neutral-500 mr-2.5 shrink-0" />
+                  <div className="relative flex-1">
+                    <input
+                      type="date"
+                      value={date}
+                      min={today}
+                      onChange={(e) => {
+                        setDate(e.target.value);
+                        if (errors.date) setErrors((prev) => ({ ...prev, date: undefined }));
+                      }}
+                      className="peer w-full bg-transparent text-sm text-foreground focus:outline-none placeholder-transparent pt-2.5 cursor-pointer"
+                    />
+                    <label className="absolute left-0 -translate-y-2 text-[9px] text-accent font-bold uppercase tracking-wider">
+                      Booking Date *
+                    </label>
+                  </div>
+                </div>
+                <AnimatePresence>
+                  {errors.date && (
+                    <motion.p
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="text-[10px] text-red-600 font-bold pl-2.5 pt-0.5"
+                    >
+                      {errors.date}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Time Slots Selector */}
+              <div className="space-y-1">
+                <div className="relative rounded-2xl border-2 bg-[#FFF8F0]/30 dark:bg-[#1F1210]/20 border-borderColor/40 focus-within:border-accent px-4 py-3 transition-all flex items-center">
+                  <Clock className="h-4.5 w-4.5 text-textMuted dark:text-neutral-500 mr-2.5 shrink-0" />
+                  <div className="relative flex-1">
+                    <select
+                      value={time}
+                      onChange={(e) => setTime(e.target.value)}
+                      className="peer w-full bg-transparent text-sm text-foreground focus:outline-none pt-2.5 cursor-pointer border-none"
+                    >
+                      {timeSlots.map((slot) => (
+                        <option key={slot.value} value={slot.value} className="bg-white dark:bg-[#1C100E] text-foreground">
+                          {slot.label}
+                        </option>
+                      ))}
+                    </select>
+                    <label className="absolute left-0 -translate-y-2 text-[9px] text-accent font-bold uppercase tracking-wider">
+                      Booking Time *
+                    </label>
+                  </div>
+                </div>
+              </div>
+
             </div>
 
             {/* Special Requests */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-textMuted flex items-center">
-                <MessageSquare className="h-3.5 w-3.5 mr-1" />
-                Special Requests
+              <label className="text-[10px] font-extrabold text-textMuted dark:text-neutral-400 uppercase tracking-widest flex items-center">
+                <MessageSquare className="h-4 w-4 mr-1.5 text-accent" />
+                <span>Special Requests</span>
               </label>
               <textarea
                 value={specialRequests}
                 onChange={(e) => setSpecialRequests(e.target.value)}
-                placeholder="E.g. Table near the window, high-chair for a baby, anniversary setup..."
+                placeholder="E.g. Table near window, birthday decoration themes, etc."
                 rows={3}
-                className="w-full rounded-lg border border-borderColor bg-background px-4 py-2.5 text-sm text-foreground focus:border-primary transition-all resize-none"
+                className="w-full rounded-2xl border border-borderColor/60 dark:border-[#3E2723] bg-[#FFF8F0]/10 px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none transition-all resize-none font-light leading-relaxed"
               />
             </div>
 
-            {/* Submit */}
-            <button
+            {/* Submit Button (Gradient + Glow) */}
+            <motion.button
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
               type="submit"
               disabled={submitLoading}
-              className="w-full flex items-center justify-center space-x-2 rounded-full bg-primary hover:bg-primary-hover disabled:bg-neutral-300 disabled:cursor-not-allowed text-white text-sm font-semibold py-3.5 shadow-md transition-all hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] focus:outline-none"
+              className="w-full flex items-center justify-center space-x-2 rounded-full py-4 bg-primary dark:bg-accent hover:opacity-90 disabled:bg-neutral-300 disabled:dark:bg-neutral-800 disabled:cursor-not-allowed text-white dark:text-[#1B100E] text-sm font-extrabold uppercase tracking-widest shadow-lg transition-all focus:outline-none cursor-pointer"
             >
               {submitLoading ? (
                 <>
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  <span>Booking...</span>
+                  <Loader2 className="h-4.5 w-4.5 animate-spin" />
+                  <span>Reserving Table...</span>
                 </>
               ) : (
-                <span>Confirm Booking</span>
+                <>
+                  <span>Confirm Table Booking</span>
+                  <ChevronRight className="w-4 h-4" />
+                </>
               )}
-            </button>
+            </motion.button>
           </form>
-        </div>
+        </motion.div>
       </section>
 
       {/* Confirmation Modal */}

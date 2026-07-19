@@ -25,7 +25,7 @@ export async function GET(request: Request) {
 
     const where: any = {};
     if (filterStatus && filterStatus !== "ALL") {
-      where.paymentStatus = filterStatus;
+      where.status = filterStatus;
     }
 
     // Fetch payments list
@@ -47,13 +47,13 @@ export async function GET(request: Request) {
     const totalPayments = await db.payment.count();
 
     const revenueAggregate = await db.payment.aggregate({
-      where: { paymentStatus: "SUCCESS" },
+      where: { status: "SUCCESS" },
       _sum: { amount: true },
     });
     const totalRevenue = revenueAggregate._sum.amount || 0;
 
     const failedPayments = await db.payment.count({
-      where: { paymentStatus: "FAILED" },
+      where: { status: "FAILED" },
     });
 
     // Pending payments: count of orders that are PENDING payment

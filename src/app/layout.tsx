@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Outfit } from "next/font/google";
+import { Playfair_Display, Poppins } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
@@ -11,9 +11,9 @@ const playfair = Playfair_Display({
   display: "swap",
 });
 
-const outfit = Outfit({
+const poppins = Poppins({
   subsets: ["latin"],
-  variable: "--font-outfit",
+  variable: "--font-poppins",
   weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
@@ -32,7 +32,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <body
-        className={`${playfair.variable} ${outfit.variable} font-sans antialiased`}
+        className={`${playfair.variable} ${poppins.variable} font-sans antialiased`}
       >
         <AuthProvider>
           <CartProvider>

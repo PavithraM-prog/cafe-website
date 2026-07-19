@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
 import { Search, Loader2, ArrowUpDown, Sparkles } from "lucide-react";
 import Image from "next/image";
 import { FloatingCartBar } from "@/components/FloatingCartBar";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Product {
   id: string;
@@ -58,41 +59,43 @@ export default function MenuPage() {
     fetchMenu();
   }, []);
 
-  // Filter and Sort Logic
-  const filteredProducts = products
-    .filter((product) => {
-      // Hide sold out items
-      if (!product.availability || product.availablePieces <= 0) {
-        return false;
-      }
+  // Filter and Sort Logic (Memoized)
+  const filteredProducts = useMemo(() => {
+    return products
+      .filter((product) => {
+        // Hide sold out items
+        if (!product.availability || product.availablePieces <= 0) {
+          return false;
+        }
 
-      // Category Filter
-      if (selectedCategory !== "all") {
-        const cat = categories.find((c) => c.slug === selectedCategory);
-        if (product.categoryId !== cat?.id) return false;
-      }
+        // Category Filter
+        if (selectedCategory !== "all") {
+          const cat = categories.find((c) => c.slug === selectedCategory);
+          if (product.categoryId !== cat?.id) return false;
+        }
 
-      // Search query Filter
-      if (searchQuery.trim() !== "") {
-        const query = searchQuery.toLowerCase();
-        const matchesName = product.name.toLowerCase().includes(query);
-        const matchesDesc = product.description.toLowerCase().includes(query);
-        if (!matchesName && !matchesDesc) return false;
-      }
+        // Search query Filter
+        if (searchQuery.trim() !== "") {
+          const query = searchQuery.toLowerCase();
+          const matchesName = product.name.toLowerCase().includes(query);
+          const matchesDesc = product.description.toLowerCase().includes(query);
+          if (!matchesName && !matchesDesc) return false;
+        }
 
-      // Veg Filter
-      if (vegOnly && !product.isVeg) {
-        return false;
-      }
+        // Veg Filter
+        if (vegOnly && !product.isVeg) {
+          return false;
+        }
 
-      return true;
-    })
-    .sort((a, b) => {
-      if (sortBy === "price-asc") return a.price - b.price;
-      if (sortBy === "price-desc") return b.price - a.price;
-      if (sortBy === "rating-desc") return b.rating - a.rating;
-      return 0; // default (alphabetical by seeding order)
-    });
+        return true;
+      })
+      .sort((a, b) => {
+        if (sortBy === "price-asc") return a.price - b.price;
+        if (sortBy === "price-desc") return b.price - a.price;
+        if (sortBy === "rating-desc") return b.rating - a.rating;
+        return 0; // default (alphabetical by seeding order)
+      });
+  }, [products, categories, selectedCategory, searchQuery, vegOnly, sortBy]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -220,11 +223,25 @@ export default function MenuPage() {
         {!loading && !error && (
           <>
             {filteredProducts.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                {filteredProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
+              <motion.div 
+                layout
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
+              >
+                <AnimatePresence mode="popLayout">
+                  {filteredProducts.map((product) => (
+                    <motion.div
+                      layout
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      transition={{ duration: 0.25 }}
+                      key={product.id}
+                    >
+                      <ProductCard product={product} />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </motion.div>
             ) : (
               <div className="text-center py-24 space-y-3 border border-dashed border-borderColor/60 rounded-3xl bg-[#FFF8E7]/10">
                 <p className="font-serif text-xl font-bold text-foreground">No Items Found</p>

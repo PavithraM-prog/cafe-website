@@ -35,21 +35,22 @@ import {
   Crown,
   ChevronRight,
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Map icon names from data to components
 const iconMap: Record<string, React.ReactNode> = {
-  Cake: <Cake className="h-7 w-7" />,
-  Heart: <Heart className="h-7 w-7" />,
-  Briefcase: <Briefcase className="h-7 w-7" />,
-  Baby: <Baby className="h-7 w-7" />,
-  Music: <Music className="h-7 w-7" />,
-  Users: <Users className="h-7 w-7" />,
+  Cake: <Cake className="h-6 w-6" />,
+  Heart: <Heart className="h-6 w-6" />,
+  Briefcase: <Briefcase className="h-6 w-6" />,
+  Baby: <Baby className="h-6 w-6" />,
+  Music: <Music className="h-6 w-6" />,
+  Users: <Users className="h-6 w-6" />,
 };
 
 const tierIcons: Record<string, React.ReactNode> = {
-  basic: <Star className="h-5 w-5" />,
-  premium: <Sparkles className="h-5 w-5" />,
-  luxury: <Crown className="h-5 w-5" />,
+  basic: <Star className="h-5 w-5 text-accent" />,
+  premium: <Sparkles className="h-5 w-5 text-accent" />,
+  luxury: <Crown className="h-5 w-5 text-accent" />,
 };
 
 interface FormErrors {
@@ -62,6 +63,10 @@ interface FormErrors {
   eventType?: string;
 }
 
+const parseDateString = (dateStr: string): Date | null => {
+  const d = new Date(dateStr);
+  return isNaN(d.getTime()) ? null : d;
+};
 
 export default function EventBookingPage() {
   // Selection state
@@ -86,7 +91,6 @@ export default function EventBookingPage() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const today = new Date().toISOString().split("T")[0];
-
   const selectedEvent = eventTypes.find((e) => e.id === selectedEventType);
 
   const validate = (): boolean => {
@@ -125,9 +129,9 @@ export default function EventBookingPage() {
     // Guest validation
     const guestNum = parseInt(guests);
     if (isNaN(guestNum)) {
-      newErrors.guests = "Number of guests must be a valid number";
+      newErrors.guests = "Guests count must be a number";
     } else {
-      const min = selectedEvent?.minGuests || 2;
+      const min = selectedEvent?.minGuests || 5;
       const max = selectedEvent?.maxGuests || 60;
       if (guestNum < min) {
         newErrors.guests = `Minimum guests for this event is ${min}`;
@@ -139,11 +143,6 @@ export default function EventBookingPage() {
     if (!selectedPackage) newErrors.selectedPackage = "Please select a package";
 
     setErrors(newErrors);
-
-    if (Object.keys(newErrors).length > 0) {
-      console.error("Validation failed with errors:", newErrors);
-    }
-
     return Object.keys(newErrors).length === 0;
   };
 
@@ -165,7 +164,7 @@ export default function EventBookingPage() {
     e.preventDefault();
 
     if (!validate()) {
-      setToast({ message: "Please fix the errors in the form.", type: "error" });
+      setToast({ message: "Please resolve the errors in the form.", type: "error" });
       return;
     }
 
@@ -176,6 +175,7 @@ export default function EventBookingPage() {
       const formattedDateForDb = parsedDate
         ? `${parsedDate.getFullYear()}-${String(parsedDate.getMonth() + 1).padStart(2, '0')}-${String(parsedDate.getDate()).padStart(2, '0')}`
         : eventDate;
+
       const result = await submitEventBooking({
         name,
         email,
@@ -213,429 +213,509 @@ export default function EventBookingPage() {
         <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
       )}
 
-      <div className="page-enter">
-        {/* ── Event Type Selection ── */}
-        <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center space-y-2 mb-10">
-            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-foreground">
-              Choose Your Event Type
-            </h2>
-            <p className="text-sm text-textMuted">
-              Select the type of event you&apos;d like to host at our café.
-            </p>
-          </div>
+      {/* ── Event Type Selection Section ── */}
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
+        <div className="text-center space-y-3 mb-12 max-w-xl mx-auto">
+          <span className="text-xs font-extrabold text-accent uppercase tracking-widest bg-[#FFF3E3] dark:bg-[#2D1C19] px-3.5 py-1.5 rounded-full border border-[#E0D4C5]">
+            Occasions
+          </span>
+          <h2 className="font-serif text-3xl sm:text-4xl font-bold text-foreground">
+            Choose Your Event Type
+          </h2>
+          <p className="text-xs sm:text-sm text-textMuted dark:text-neutral-400 font-light leading-relaxed">
+            Select the type of event you'd like to host at our café to unlock customized packages.
+          </p>
+        </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {eventTypes.map((event) => (
-              <button
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {eventTypes.map((event) => {
+            const isSelected = selectedEventType === event.id;
+            return (
+              <motion.button
                 key={event.id}
+                whileHover={{ y: -6, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => {
                   setSelectedEventType(event.id);
-                  // Scroll to form after selecting
+                  // Scroll to form
                   setTimeout(() => {
                     document.getElementById("booking-form")?.scrollIntoView({ behavior: "smooth" });
-                  }, 100);
+                  }, 150);
                 }}
-                className={`group relative flex flex-col items-start rounded-2xl border-2 p-6 text-left transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] overflow-hidden ${selectedEventType === event.id
-                    ? "border-primary bg-primary/5 shadow-md"
-                    : "border-borderColor bg-cardBg hover:border-primary/40"
-                  }`}
+                className={`group relative flex flex-col items-start rounded-3xl border-2 p-6 text-left transition-all overflow-hidden h-64 justify-between ${
+                  isSelected
+                    ? "border-accent bg-[#FFF3E3]/40 dark:bg-[#2D1C19]/20 shadow-md shadow-accent/10"
+                    : "border-[#E0D4C5]/60 bg-white dark:bg-[#281715]/45 hover:border-accent/40"
+                }`}
               >
-                {/* Background image */}
-                <div className="absolute inset-0 opacity-[0.08] group-hover:opacity-[0.12] transition-opacity">
+                {/* Large Background image (zoom on hover) */}
+                <div className="absolute inset-0 z-0">
                   <Image
                     src={event.image}
                     alt=""
                     fill
                     sizes="(max-width: 768px) 100vw, 33vw"
-                    className="object-cover"
+                    className="object-cover opacity-20 dark:opacity-10 group-hover:scale-108 transition-transform duration-700 ease-out"
                     loading="lazy"
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-transparent" />
                 </div>
 
-                <div className="relative z-10 space-y-3">
+                <div className="relative z-10 space-y-2">
                   <div
-                    className={`flex h-12 w-12 items-center justify-center rounded-xl transition-colors ${selectedEventType === event.id
-                        ? "bg-primary text-white"
-                        : "bg-secondary text-primary"
-                      }`}
+                    className={`flex h-12 w-12 items-center justify-center rounded-2xl transition-colors ${
+                      isSelected
+                        ? "bg-[#3E2723] text-white dark:bg-accent dark:text-[#1B100E]"
+                        : "bg-[#FFF3E3] dark:bg-[#2D1C19] text-primary"
+                    }`}
                   >
                     {iconMap[event.icon]}
                   </div>
 
-                  <h3 className="font-serif text-lg font-bold text-foreground">{event.name}</h3>
-                  <p className="text-xs text-textMuted leading-relaxed">{event.description}</p>
-
-                  <div className="flex items-center text-xs text-textMuted pt-1">
-                    <Users className="h-3.5 w-3.5 mr-1 text-accent" />
-                    <span>
-                      {event.minGuests} - {event.maxGuests} guests
-                    </span>
-                  </div>
+                  <h3 className="font-serif text-lg font-bold text-foreground pt-2">
+                    {event.name}
+                  </h3>
+                  <p className="text-xs text-textMuted dark:text-neutral-400 leading-relaxed font-light line-clamp-3">
+                    {event.description}
+                  </p>
                 </div>
 
-                {selectedEventType === event.id && (
-                  <div className="absolute top-4 right-4 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-white">
-                    <Check className="h-4 w-4" />
+                <div className="relative z-10 flex items-center text-[10px] font-bold text-accent pt-1">
+                  <Users className="h-3.5 w-3.5 mr-1" />
+                  <span>
+                    {event.minGuests} - {event.maxGuests} guests maximum
+                  </span>
+                </div>
+
+                {isSelected && (
+                  <div className="absolute top-4 right-4 flex h-6 w-6 items-center justify-center rounded-full bg-accent text-[#3E2723] shadow-md border border-white/20">
+                    <Check className="h-3.5 w-3.5 stroke-[3]" />
                   </div>
                 )}
-              </button>
-            ))}
-          </div>
-        </section>
+              </motion.button>
+            );
+          })}
+        </div>
+      </section>
 
-        {/* ── Event Packages ── */}
+      {/* ── Event Packages Section ── */}
+      <AnimatePresence>
         {selectedEventType && (
-          <section className="bg-secondary/30 border-y border-borderColor py-16 transition-all">
+          <motion.section 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="bg-[#FFF3E3]/40 dark:bg-transparent border-y border-[#E0D4C5]/30 py-16 overflow-hidden"
+          >
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-              <div className="text-center space-y-2 mb-10">
-                <h2 className="font-serif text-2xl sm:text-3xl font-bold text-foreground">
+              <div className="text-center space-y-2 mb-12 max-w-xl mx-auto">
+                <h2 className="font-serif text-3xl font-bold text-foreground">
                   Select Your Package
                 </h2>
-                <p className="text-sm text-textMuted">
-                  Choose the package that best suits your celebration.
+                <p className="text-xs sm:text-sm text-textMuted dark:text-neutral-400 font-light">
+                  Choose a tailored package tier containing gourmet food options and decor.
                 </p>
                 {errors.selectedPackage && (
-                  <p className="text-[11px] text-red-600 font-medium animate-slideDown">
+                  <p className="text-[10px] text-red-600 font-bold animate-pulse">
                     {errors.selectedPackage}
                   </p>
                 )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {eventPackages.map((pkg) => (
-                  <button
-                    key={pkg.id}
-                    onClick={() => {
-                      setSelectedPackage(pkg.name);
-                      if (errors.selectedPackage)
-                        setErrors((prev) => ({ ...prev, selectedPackage: undefined }));
-                    }}
-                    className={`relative flex flex-col rounded-2xl border-2 p-6 text-left transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] ${selectedPackage === pkg.name
-                        ? "border-primary bg-primary/5 shadow-md"
-                        : "border-borderColor bg-cardBg hover:border-primary/40"
+                {eventPackages.map((pkg) => {
+                  const isSelected = selectedPackage === pkg.name;
+                  return (
+                    <motion.button
+                      key={pkg.id}
+                      whileHover={{ y: -8, scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => {
+                        setSelectedPackage(pkg.name);
+                        if (errors.selectedPackage) {
+                          setErrors((prev) => ({ ...prev, selectedPackage: undefined }));
+                        }
+                      }}
+                      className={`relative flex flex-col rounded-3xl border-2 p-6 text-left transition-all ${
+                        isSelected
+                          ? "border-accent bg-white dark:bg-[#281715]/40 shadow-xl shadow-accent/5"
+                          : "border-[#E0D4C5]/60 bg-white dark:bg-[#281715]/25 hover:border-accent/40"
                       }`}
-                  >
-                    {/* Popular Badge */}
-                    {pkg.popular && (
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                        <span className="inline-flex items-center space-x-1 rounded-full bg-accent px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm">
-                          <Sparkles className="h-3 w-3" />
-                          <span>Most Popular</span>
-                        </span>
-                      </div>
-                    )}
-
-                    <div className="space-y-4 flex-1">
-                      <div className="flex items-center space-x-3">
-                        <div
-                          className={`flex h-10 w-10 items-center justify-center rounded-lg ${selectedPackage === pkg.name
-                              ? "bg-primary text-white"
-                              : "bg-secondary text-primary"
-                            }`}
-                        >
-                          {tierIcons[pkg.tier]}
-                        </div>
-                        <div>
-                          <h3 className="font-serif text-lg font-bold text-foreground">
-                            {pkg.name}
-                          </h3>
-                          <span className="text-xl font-bold text-primary font-sans">
-                            ₹{pkg.price}
+                    >
+                      {/* Popular Badge */}
+                      {pkg.popular && (
+                        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
+                          <span className="inline-flex items-center space-x-1 rounded-full bg-accent px-3 py-1.5 text-[9px] font-extrabold uppercase tracking-widest text-[#FFF8F0] dark:text-[#1B100E] shadow-md">
+                            <Sparkles className="h-3 w-3" />
+                            <span>Most Popular</span>
                           </span>
                         </div>
+                      )}
+
+                      <div className="space-y-4 flex-1">
+                        <div className="flex items-center space-x-3">
+                          <div
+                            className={`flex h-11 w-11 items-center justify-center rounded-xl ${
+                              isSelected
+                                ? "bg-accent text-[#3E2723]"
+                                : "bg-[#FFF3E3] dark:bg-[#2D1C19] text-primary"
+                            }`}
+                          >
+                            {tierIcons[pkg.tier]}
+                          </div>
+                          <div>
+                            <h3 className="font-serif text-base font-bold text-foreground">
+                              {pkg.name}
+                            </h3>
+                            <span className="text-xl font-extrabold text-primary dark:text-accent font-sans">
+                              ₹{pkg.price.toLocaleString()}
+                            </span>
+                          </div>
+                        </div>
+
+                        <ul className="space-y-2.5 pt-4 border-t border-[#E0D4C5]/30">
+                          {pkg.features.map((feature, i) => (
+                            <li key={i} className="flex items-start space-x-2 text-xs text-textMuted dark:text-neutral-300">
+                              <Check className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                              <span className="font-light">{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
                       </div>
 
-                      <ul className="space-y-2.5 pt-2">
-                        {pkg.features.map((feature, i) => (
-                          <li key={i} className="flex items-start space-x-2 text-xs text-textMuted">
-                            <Check className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
-                            <span>{feature}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    {selectedPackage === pkg.name && (
-                      <div className="absolute top-4 right-4 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-white">
-                        <Check className="h-4 w-4" />
-                      </div>
-                    )}
-                  </button>
-                ))}
+                      {isSelected && (
+                        <div className="absolute top-4 right-4 flex h-6 w-6 items-center justify-center rounded-full bg-accent text-[#3E2723] shadow-md border border-white/20">
+                          <Check className="h-3.5 w-3.5 stroke-[3]" />
+                        </div>
+                      )}
+                    </motion.button>
+                  );
+                })}
               </div>
             </div>
-          </section>
+          </motion.section>
         )}
+      </AnimatePresence>
 
-        {/* ── Booking Form ── */}
+      {/* ── Event Booking Form ── */}
+      <AnimatePresence>
         {selectedEventType && (
-          <section id="booking-form" className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16">
-            <div className="border border-borderColor bg-cardBg p-6 sm:p-10 rounded-2xl shadow-sm space-y-8">
+          <motion.section 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 30 }}
+            id="booking-form" 
+            className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16"
+          >
+            <div className="glass border border-borderColor/40 p-6 sm:p-10 rounded-[32px] shadow-xl space-y-8 relative">
+              
               <div className="space-y-1">
-                <div className="flex items-center space-x-2 text-primary">
+                <div className="flex items-center space-x-2.5 text-accent">
                   {iconMap[selectedEvent?.icon || "Cake"]}
                   <h2 className="font-serif text-2xl font-bold text-foreground">
                     Book {selectedEvent?.name}
                   </h2>
                 </div>
-                <p className="text-xs text-textMuted">
-                  Fill in your details and we&apos;ll get back to you with a confirmation.
+                <p className="text-xs text-textMuted dark:text-neutral-400">
+                  Fill in your custom details and we'll craft an unforgettable event menu.
                 </p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-                {/* Name & Email */}
+                
+                {/* Floating Inputs: Name & Email */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-textMuted flex items-center">
-                      <User className="h-3.5 w-3.5 mr-1" />
-                      Name <span className="text-red-500 ml-0.5">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={(e) => {
-                        setName(e.target.value);
-                        if (errors.name) setErrors((prev) => ({ ...prev, name: undefined }));
-                      }}
-                      placeholder="Your full name"
-                      className={`w-full rounded-lg border bg-background px-4 py-2.5 text-sm text-foreground transition-all ${errors.name
-                          ? "border-red-400 focus:border-red-500"
-                          : "border-borderColor focus:border-primary"
-                        }`}
-                    />
+                  
+                  {/* Name Input */}
+                  <div className="space-y-1">
+                    <div className={`relative rounded-2xl border-2 bg-[#FFF8F0]/30 dark:bg-[#1F1210]/20 px-4 py-3 transition-all flex items-center ${
+                      errors.name 
+                        ? "border-red-400 focus-within:border-red-500" 
+                        : "border-borderColor/40 focus-within:border-accent"
+                    }`}>
+                      <User className="h-4.5 w-4.5 text-textMuted dark:text-neutral-500 mr-2.5 shrink-0" />
+                      <div className="relative flex-1">
+                        <input
+                          type="text"
+                          value={name}
+                          onChange={(e) => {
+                            setName(e.target.value);
+                            if (errors.name) setErrors((prev) => ({ ...prev, name: undefined }));
+                          }}
+                          className="peer w-full bg-transparent text-sm text-foreground focus:outline-none placeholder-transparent pt-2.5"
+                          placeholder="Your Name"
+                        />
+                        <label className={`absolute left-0 top-0.5 pointer-events-none transition-all duration-200 text-xs text-textMuted/65 font-bold uppercase tracking-wider ${
+                          name ? "-translate-y-2 text-[9px] text-accent" : "peer-placeholder-shown:translate-y-1 peer-placeholder-shown:text-xs peer-focus:-translate-y-2 peer-focus:text-[9px] peer-focus:text-accent"
+                        }`}>
+                          Full Name *
+                        </label>
+                      </div>
+                    </div>
                     {errors.name && (
-                      <p className="text-[11px] text-red-600 font-medium animate-slideDown">
-                        {errors.name}
-                      </p>
+                      <p className="text-[10px] text-red-600 font-bold pl-2.5 pt-0.5">{errors.name}</p>
                     )}
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-textMuted flex items-center">
-                      <Mail className="h-3.5 w-3.5 mr-1" />
-                      Email <span className="text-red-500 ml-0.5">*</span>
-                    </label>
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => {
-                        setEmail(e.target.value);
-                        if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }));
-                      }}
-                      placeholder="you@example.com"
-                      className={`w-full rounded-lg border bg-background px-4 py-2.5 text-sm text-foreground transition-all ${errors.email
-                          ? "border-red-400 focus:border-red-500"
-                          : "border-borderColor focus:border-primary"
-                        }`}
-                    />
+                  {/* Email Input */}
+                  <div className="space-y-1">
+                    <div className={`relative rounded-2xl border-2 bg-[#FFF8F0]/30 dark:bg-[#1F1210]/20 px-4 py-3 transition-all flex items-center ${
+                      errors.email 
+                        ? "border-red-400 focus-within:border-red-500" 
+                        : "border-[#E0D4C5]/40 focus-within:border-accent"
+                    }`}>
+                      <Mail className="h-4.5 w-4.5 text-textMuted dark:text-neutral-500 mr-2.5 shrink-0" />
+                      <div className="relative flex-1">
+                        <input
+                          type="email"
+                          value={email}
+                          onChange={(e) => {
+                            setEmail(e.target.value);
+                            if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }));
+                          }}
+                          className="peer w-full bg-transparent text-sm text-foreground focus:outline-none placeholder-transparent pt-2.5"
+                          placeholder="Email Address"
+                        />
+                        <label className={`absolute left-0 top-0.5 pointer-events-none transition-all duration-200 text-xs text-textMuted/65 font-bold uppercase tracking-wider ${
+                          email ? "-translate-y-2 text-[9px] text-accent" : "peer-placeholder-shown:translate-y-1 peer-placeholder-shown:text-xs peer-focus:-translate-y-2 peer-focus:text-[9px] peer-focus:text-accent"
+                        }`}>
+                          Email Address *
+                        </label>
+                      </div>
+                    </div>
                     {errors.email && (
-                      <p className="text-[11px] text-red-600 font-medium animate-slideDown">
-                        {errors.email}
-                      </p>
+                      <p className="text-[10px] text-red-600 font-bold pl-2.5 pt-0.5">{errors.email}</p>
                     )}
                   </div>
                 </div>
 
-                {/* Phone & Guests */}
+                {/* Phone & Guests Count Selector */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-textMuted flex items-center">
-                      <Phone className="h-3.5 w-3.5 mr-1" />
-                      Phone <span className="text-red-500 ml-0.5">*</span>
-                    </label>
-                    <input
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => {
-                        setPhone(e.target.value);
-                        if (errors.phone) setErrors((prev) => ({ ...prev, phone: undefined }));
-                      }}
-                      placeholder="+1 (555) 000-0000"
-                      className={`w-full rounded-lg border bg-background px-4 py-2.5 text-sm text-foreground transition-all ${errors.phone
-                          ? "border-red-400 focus:border-red-500"
-                          : "border-borderColor focus:border-primary"
-                        }`}
-                    />
+                  
+                  {/* Phone Input */}
+                  <div className="space-y-1">
+                    <div className={`relative rounded-2xl border-2 bg-[#FFF8F0]/30 dark:bg-[#1F1210]/20 px-4 py-3 transition-all flex items-center ${
+                      errors.phone 
+                        ? "border-red-400 focus-within:border-red-500" 
+                        : "border-[#E0D4C5]/40 focus-within:border-accent"
+                    }`}>
+                      <Phone className="h-4.5 w-4.5 text-textMuted dark:text-neutral-500 mr-2.5 shrink-0" />
+                      <div className="relative flex-1">
+                        <input
+                          type="tel"
+                          value={phone}
+                          onChange={(e) => {
+                            setPhone(e.target.value);
+                            if (errors.phone) setErrors((prev) => ({ ...prev, phone: undefined }));
+                          }}
+                          className="peer w-full bg-transparent text-sm text-foreground focus:outline-none placeholder-transparent pt-2.5"
+                          placeholder="Phone Number"
+                        />
+                        <label className={`absolute left-0 top-0.5 pointer-events-none transition-all duration-200 text-xs text-textMuted/65 font-bold uppercase tracking-wider ${
+                          phone ? "-translate-y-2 text-[9px] text-accent" : "peer-placeholder-shown:translate-y-1 peer-placeholder-shown:text-xs peer-focus:-translate-y-2 peer-focus:text-[9px] peer-focus:text-accent"
+                        }`}>
+                          Phone Number *
+                        </label>
+                      </div>
+                    </div>
                     {errors.phone && (
-                      <p className="text-[11px] text-red-600 font-medium animate-slideDown">
-                        {errors.phone}
-                      </p>
+                      <p className="text-[10px] text-red-600 font-bold pl-2.5 pt-0.5">{errors.phone}</p>
                     )}
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-textMuted flex items-center">
-                      <Users className="h-3.5 w-3.5 mr-1" />
-                      Number of Guests <span className="text-red-500 ml-0.5">*</span>
-                    </label>
-                    <input
-                      type="number"
-                      value={guests}
-                      min={selectedEvent?.minGuests || 2}
-                      max={selectedEvent?.maxGuests || 60}
-                      onChange={(e) => {
-                        setGuests(e.target.value);
-                        if (errors.guests) setErrors((prev) => ({ ...prev, guests: undefined }));
-                      }}
-                      className={`w-full rounded-lg border bg-background px-4 py-2.5 text-sm text-foreground transition-all ${errors.guests
-                          ? "border-red-400 focus:border-red-500"
-                          : "border-borderColor focus:border-primary"
-                        }`}
-                    />
+                  {/* Guests Input */}
+                  <div className="space-y-1">
+                    <div className={`relative rounded-2xl border-2 bg-[#FFF8F0]/30 dark:bg-[#1F1210]/20 px-4 py-3 transition-all flex items-center ${
+                      errors.guests 
+                        ? "border-red-400 focus-within:border-red-500" 
+                        : "border-[#E0D4C5]/40 focus-within:border-accent"
+                    }`}>
+                      <Users className="h-4.5 w-4.5 text-textMuted dark:text-neutral-500 mr-2.5 shrink-0" />
+                      <div className="relative flex-1">
+                        <input
+                          type="number"
+                          value={guests}
+                          min={selectedEvent?.minGuests || 5}
+                          max={selectedEvent?.maxGuests || 60}
+                          onChange={(e) => {
+                            setGuests(e.target.value);
+                            if (errors.guests) setErrors((prev) => ({ ...prev, guests: undefined }));
+                          }}
+                          className="peer w-full bg-transparent text-sm text-foreground focus:outline-none placeholder-transparent pt-2.5"
+                          placeholder="Guests count"
+                        />
+                        <label className="absolute left-0 -translate-y-2 text-[9px] text-accent font-bold uppercase tracking-wider">
+                          Guests ({selectedEvent?.minGuests}-{selectedEvent?.maxGuests}) *
+                        </label>
+                      </div>
+                    </div>
                     {errors.guests && (
-                      <p className="text-[11px] text-red-600 font-medium animate-slideDown">
-                        {errors.guests}
-                      </p>
+                      <p className="text-[10px] text-red-600 font-bold pl-2.5 pt-0.5">{errors.guests}</p>
                     )}
                   </div>
                 </div>
 
-                {/* Event Type (pre-selected) & Date */}
+                {/* Event Type & Date Input */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-textMuted">
-                      Event Type
-                    </label>
-                    <div className="flex items-center space-x-2 rounded-lg border border-borderColor bg-secondary/30 px-4 py-2.5 text-sm text-foreground">
+                  
+                  {/* Event Type (Read Only) */}
+                  <div className="space-y-1">
+                    <div className="relative rounded-2xl border bg-secondary/40 dark:bg-[#2D1C19]/20 border-[#E0D4C5]/60 px-4 py-3 flex items-center h-[52px]">
                       {iconMap[selectedEvent?.icon || "Cake"] && (
-                        <span className="text-primary scale-75">
+                        <span className="text-accent shrink-0 mr-2">
                           {iconMap[selectedEvent?.icon || "Cake"]}
                         </span>
                       )}
-                      <span className="font-medium">{selectedEvent?.name}</span>
+                      <div className="flex-1">
+                        <span className="block text-[8px] font-bold text-textMuted dark:text-neutral-500 uppercase tracking-widest leading-none">Occasion Type</span>
+                        <span className="text-xs font-extrabold text-foreground leading-normal mt-0.5 block">{selectedEvent?.name}</span>
+                      </div>
                     </div>
-                    <input type="hidden" name="eventType" value={selectedEvent?.name || ""} />
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-textMuted flex items-center">
-                      <Calendar className="h-3.5 w-3.5 mr-1" />
-                      Event Date <span className="text-red-500 ml-0.5">*</span>
-                    </label>
-                    <input
-                      type="date"
-                      value={eventDate}
-                      min={today}
-                      onChange={(e) => {
-                        setEventDate(e.target.value);
-                        if (errors.eventDate)
-                          setErrors((prev) => ({ ...prev, eventDate: undefined }));
-                      }}
-                      className={`w-full rounded-lg border bg-background px-4 py-2.5 text-sm text-foreground transition-all cursor-pointer ${errors.eventDate
-                          ? "border-red-400 focus:border-red-500"
-                          : "border-borderColor focus:border-primary"
-                        }`}
-                    />
+                  {/* Date Input */}
+                  <div className="space-y-1">
+                    <div className={`relative rounded-2xl border-2 bg-[#FFF8F0]/30 dark:bg-[#1F1210]/20 px-4 py-3 transition-all flex items-center ${
+                      errors.eventDate 
+                        ? "border-red-400 focus-within:border-red-500" 
+                        : "border-[#E0D4C5]/40 focus-within:border-accent"
+                    }`}>
+                      <Calendar className="h-4.5 w-4.5 text-textMuted dark:text-neutral-500 mr-2.5 shrink-0" />
+                      <div className="relative flex-1">
+                        <input
+                          type="date"
+                          value={eventDate}
+                          min={today}
+                          onChange={(e) => {
+                            setEventDate(e.target.value);
+                            if (errors.eventDate) setErrors((prev) => ({ ...prev, eventDate: undefined }));
+                          }}
+                          className="peer w-full bg-transparent text-sm text-foreground focus:outline-none placeholder-transparent pt-2.5 cursor-pointer"
+                        />
+                        <label className="absolute left-0 -translate-y-2 text-[9px] text-accent font-bold uppercase tracking-wider">
+                          Event Date *
+                        </label>
+                      </div>
+                    </div>
                     {errors.eventDate && (
-                      <p className="text-[11px] text-red-600 font-medium animate-slideDown">
-                        {errors.eventDate}
-                      </p>
+                      <p className="text-[10px] text-red-600 font-bold pl-2.5 pt-0.5">{errors.eventDate}</p>
                     )}
                   </div>
                 </div>
 
-                {/* Decoration Theme & Food Package */}
+                {/* Decoration Theme & Food Package Selects */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-textMuted flex items-center">
-                      <Palette className="h-3.5 w-3.5 mr-1" />
-                      Decoration Theme
-                    </label>
-                    <select
-                      value={decorationTheme}
-                      onChange={(e) => setDecorationTheme(e.target.value)}
-                      className="w-full rounded-lg border border-borderColor bg-background px-4 py-2.5 text-sm text-foreground focus:border-primary transition-all cursor-pointer"
-                    >
-                      {decorationThemes.map((theme) => (
-                        <option key={theme} value={theme}>
-                          {theme}
-                        </option>
-                      ))}
-                    </select>
+                  
+                  {/* Decor Theme Dropdown */}
+                  <div className="space-y-1">
+                    <div className="relative rounded-2xl border-2 bg-[#FFF8F0]/30 dark:bg-[#1F1210]/20 border-[#E0D4C5]/40 focus-within:border-accent px-4 py-3 flex items-center">
+                      <Palette className="h-4.5 w-4.5 text-textMuted dark:text-neutral-500 mr-2.5 shrink-0" />
+                      <div className="relative flex-1">
+                        <select
+                          value={decorationTheme}
+                          onChange={(e) => setDecorationTheme(e.target.value)}
+                          className="peer w-full bg-transparent text-sm text-foreground focus:outline-none pt-2.5 cursor-pointer border-none"
+                        >
+                          {decorationThemes.map((theme) => (
+                            <option key={theme} value={theme} className="bg-white dark:bg-[#1C100E] text-foreground">
+                              {theme}
+                            </option>
+                          ))}
+                        </select>
+                        <label className="absolute left-0 -translate-y-2 text-[9px] text-accent font-bold uppercase tracking-wider">
+                          Decor Theme
+                        </label>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-textMuted flex items-center">
-                      <UtensilsCrossed className="h-3.5 w-3.5 mr-1" />
-                      Food Package
-                    </label>
-                    <select
-                      value={foodPackage}
-                      onChange={(e) => setFoodPackage(e.target.value)}
-                      className="w-full rounded-lg border border-borderColor bg-background px-4 py-2.5 text-sm text-foreground focus:border-primary transition-all cursor-pointer"
-                    >
-                      {foodPackageOptions.map((opt) => (
-                        <option key={opt} value={opt}>
-                          {opt}
-                        </option>
-                      ))}
-                    </select>
+                  {/* Food Package Dropdown */}
+                  <div className="space-y-1">
+                    <div className="relative rounded-2xl border-2 bg-[#FFF8F0]/30 dark:bg-[#1F1210]/20 border-[#E0D4C5]/40 focus-within:border-accent px-4 py-3 flex items-center">
+                      <UtensilsCrossed className="h-4.5 w-4.5 text-textMuted dark:text-neutral-500 mr-2.5 shrink-0" />
+                      <div className="relative flex-1">
+                        <select
+                          value={foodPackage}
+                          onChange={(e) => setFoodPackage(e.target.value)}
+                          className="peer w-full bg-transparent text-sm text-foreground focus:outline-none pt-2.5 cursor-pointer border-none"
+                        >
+                          {foodPackageOptions.map((opt) => (
+                            <option key={opt} value={opt} className="bg-white dark:bg-[#1C100E] text-foreground">
+                              {opt}
+                            </option>
+                          ))}
+                        </select>
+                        <label className="absolute left-0 -translate-y-2 text-[9px] text-accent font-bold uppercase tracking-wider">
+                          Gourmet Menu
+                        </label>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                {/* Additional Notes */}
+                {/* Additional Notes Textarea */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-textMuted flex items-center">
-                    <MessageSquare className="h-3.5 w-3.5 mr-1" />
-                    Additional Notes
+                  <label className="text-[10px] font-extrabold text-textMuted dark:text-neutral-400 uppercase tracking-widest flex items-center">
+                    <MessageSquare className="h-4 w-4 mr-1.5 text-accent" />
+                    <span>Additional Setup Notes</span>
                   </label>
                   <textarea
                     value={additionalNotes}
                     onChange={(e) => setAdditionalNotes(e.target.value)}
-                    placeholder="Any special requirements or details about your event..."
+                    placeholder="Enter any themes, special cake sizes, or acoustic playlist preferences..."
                     rows={3}
-                    className="w-full rounded-lg border border-borderColor bg-background px-4 py-2.5 text-sm text-foreground focus:border-primary transition-all resize-none"
+                    className="w-full rounded-2xl border border-borderColor/60 dark:border-[#3E2723] bg-[#FFF8F0]/10 px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none transition-all resize-none font-light leading-relaxed"
                   />
                 </div>
 
-                {/* Selected Package Summary */}
+                {/* Package Price Summary Card */}
                 {selectedPackage && (
-                  <div className="flex items-center justify-between rounded-xl border border-primary/30 bg-primary/5 p-4">
+                  <div className="flex items-center justify-between rounded-2xl border border-accent/30 bg-accent/5 p-4 animate-slideDown">
                     <div className="flex items-center space-x-2">
-                      <Check className="h-4 w-4 text-primary" />
-                      <span className="text-sm font-semibold text-foreground">
-                        {selectedPackage}
+                      <Check className="h-4.5 w-4.5 text-accent stroke-[3]" />
+                      <span className="text-xs font-bold text-foreground">
+                        Selected: {selectedPackage}
                       </span>
                     </div>
-                    <span className="text-lg font-bold text-primary font-sans">
+                    <span className="text-lg font-extrabold text-primary dark:text-accent font-sans">
                       ₹
-                      {eventPackages.find((p) => p.name === selectedPackage)?.price || 0}
+                      {(eventPackages.find((p) => p.name === selectedPackage)?.price || 0).toLocaleString()}
                     </span>
                   </div>
                 )}
 
-                {/* Submit */}
-                <button
+                {/* Submit Event Button */}
+                <motion.button
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
                   type="submit"
                   disabled={submitLoading}
-                  className="w-full flex items-center justify-center space-x-2 rounded-full bg-primary hover:bg-primary-hover disabled:bg-neutral-300 disabled:cursor-not-allowed text-white text-sm font-semibold py-3.5 shadow-md transition-all hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] focus:outline-none"
+                  className="w-full flex items-center justify-center space-x-2 rounded-full py-4 bg-primary dark:bg-accent hover:opacity-90 disabled:bg-neutral-300 disabled:dark:bg-neutral-800 disabled:cursor-not-allowed text-white dark:text-[#1B100E] text-sm font-extrabold uppercase tracking-widest shadow-lg transition-all focus:outline-none cursor-pointer"
                 >
                   {submitLoading ? (
                     <>
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                      <span>Submitting...</span>
+                      <Loader2 className="h-4.5 w-4.5 animate-spin" />
+                      <span>Booking Event...</span>
                     </>
                   ) : (
                     <>
-                      <span>Book Event</span>
-                      <ChevronRight className="h-4 w-4" />
+                      <span>Submit Event Booking</span>
+                      <ChevronRight className="h-4.5 w-4.5" />
                     </>
                   )}
-                </button>
+                </motion.button>
               </form>
             </div>
-          </section>
+          </motion.section>
         )}
+      </AnimatePresence>
 
-        {/* Prompt to select event if none selected */}
-        {!selectedEventType && (
-          <div className="text-center py-8 text-sm text-textMuted">
-            <p>👆 Select an event type above to get started with your booking.</p>
-          </div>
-        )}
-      </div>
+      {/* Selector Prompt */}
+      {!selectedEventType && (
+        <div className="text-center py-10 text-xs font-bold text-textMuted dark:text-neutral-500 uppercase tracking-widest">
+          👆 Select an occasion type above to get started with your reservation.
+        </div>
+      )}
 
       {/* Confirmation Modal */}
       <BookingConfirmationModal

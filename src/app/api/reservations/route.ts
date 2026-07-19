@@ -82,7 +82,6 @@ export async function POST(request: Request) {
         note: note || "",
         status: "PENDING",
         userId: user ? user.id : null,
-        type: type || "TABLE",
       },
     });
 
