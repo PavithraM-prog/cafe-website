@@ -62,16 +62,6 @@ interface FormErrors {
   eventType?: string;
 }
 
-function parseDateString(dateStr: string): Date | null {
-  if (!dateStr) return null;
-  const parts = dateStr.split("-");
-  if (parts.length !== 3) return null;
-  const year = parseInt(parts[0], 10);
-  const month = parseInt(parts[1], 10) - 1;
-  const day = parseInt(parts[2], 10);
-  const date = new Date(year, month, day);
-  return isNaN(date.getTime()) ? null : date;
-}
 
 export default function EventBookingPage() {
   // Selection state

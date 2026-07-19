@@ -47,21 +47,21 @@ model MenuCategory {
 }
 
 model MenuItem {
-  id           String       @id @default(uuid())
-  name         String
-  description  String
-  price        Float
-  image        String
-  rating       Float        @default(5.0)
-  availability Boolean      @default(true)
-  isVeg        Boolean      @default(true)
-  categoryId   String
-  availablePieces Int        @default(10)
-  deletedAt    DateTime?
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-  category     MenuCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  orderItems   OrderItem[]
+  id              String       @id @default(uuid())
+  name            String
+  description     String
+  price           Float
+  image           String
+  rating          Float        @default(5.0)
+  availability    Boolean      @default(true)
+  isVeg           Boolean      @default(true)
+  categoryId      String
+  availablePieces Int          @default(10)
+  deletedAt       DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  category        MenuCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  orderItems      OrderItem[]
 
   @@index([categoryId])
 }
@@ -115,7 +115,6 @@ model Reservation {
   time      String
   guests    Int
   status    String   @default("PENDING")
-  type      String   @default("TABLE")
   note      String?
   tableId   String?
   createdAt DateTime @default(now())
@@ -140,11 +139,10 @@ model Table {
 model Payment {
   id            String   @id @default(uuid())
   orderId       String
-  transactionId String?  @unique
-  paymentMethod String
   amount        Float
-  paymentStatus String
-  paymentTime   DateTime @default(now())
+  method        String
+  status        String
+  transactionId String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)

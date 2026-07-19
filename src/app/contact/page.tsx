@@ -1,11 +1,24 @@
 "use client";
 
 import React, { useState } from "react";
+import dynamic from "next/dynamic";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Toast, ToastType } from "@/components/ui/Toast";
 import { submitContactForm } from "@/services/bookingService";
+
+const InteractiveMap = dynamic(() => import("@/components/InteractiveMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full bg-[#F5EFE6] dark:bg-[#1B100E] flex flex-col items-center justify-center space-y-4">
+      <div className="w-10 h-10 rounded-full border-4 border-primary/25 border-t-accent animate-spin" />
+      <p className="font-serif text-sm font-bold text-primary dark:text-[#F6ECE2] tracking-wide animate-pulse">
+        Pouring Cozy Map...
+      </p>
+    </div>
+  ),
+});
 import {
   MapPin,
   Phone,
@@ -257,37 +270,11 @@ export default function ContactPage() {
             {/* Map & Additional Info */}
             <div className="lg:col-span-5 space-y-6">
               {/* Map */}
-              <div className="rounded-2xl overflow-hidden shadow-xl" style={{ background: "#111" }}>
-                {/* Iframe container — dark frame visible as padding */}
-                <div className="relative w-full rounded-xl overflow-hidden" style={{ height: "280px", margin: "10px", width: "calc(100% - 20px)" }}>
-                  <iframe
-                    src="https://maps.google.com/maps?q=13.0827,80.1748&z=15&output=embed"
-                    width="100%"
-                    height="100%"
-                    style={{ border: 0, borderRadius: "12px" }}
-                    allowFullScreen
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                    title="Cozy Beans Café Location"
-                    className="absolute inset-0 w-full h-full"
-                  />
-                  {/* Overlay "Open in Maps" button — top left */}
-                  <a
-                    href="https://www.google.com/maps/search/?api=1&query=AKC%2C+Mogappair%2C+Nerkundram%2C+Chennai%2C+Greater+Chennai%2C+Tamil+Nadu+600107"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="absolute top-2.5 left-2.5 z-10 inline-flex items-center space-x-1.5 rounded-full bg-white/90 backdrop-blur-sm text-[#333] px-3 py-1.5 text-[11px] font-semibold shadow-md hover:bg-white transition-all"
-                  >
-                    <MapPin className="h-3 w-3 text-primary" />
-                    <span>Open in Maps</span>
-                  </a>
-                </div>
-                {/* Bottom label strip */}
-                <div className="px-4 pb-3 pt-1">
-                  <p className="text-[11px] text-neutral-400 font-medium">
-                    AKC, Mogappair, Nerkundram, Chennai, Tamil Nadu 600107
-                  </p>
-                </div>
+              <div 
+                className="rounded-2xl overflow-hidden shadow-xl border border-borderColor bg-cardBg relative"
+                style={{ height: "380px" }}
+              >
+                <InteractiveMap />
               </div>
 
               {/* FAQ Quick Info */}

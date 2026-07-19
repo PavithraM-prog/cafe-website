@@ -34,7 +34,7 @@ export const menuItems: MenuItem[] = [
     name: "Espresso",
     description: "A bold and rich shot of pure espresso brewed from single-origin Arabica beans.",
     price: 120,
-    image: "https://images.unsplash.com/photo-1510707577719-ae7c14805e3a?auto=format&fit=crop&q=80&w=600",
+    image: "https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&q=80&w=600",
     rating: 4.8,
     availability: true,
     isVeg: true,

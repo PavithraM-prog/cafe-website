@@ -169,3 +169,292 @@ input, select, textarea {
 .page-enter {
   animation: slideUp 0.4s ease-out forwards;
 }
+
+/* ── Interactive Map Styles & Animations ── */
+
+@keyframes mapFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.map-fade-in {
+  animation: mapFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Custom Cafe Marker Wrapper */
+.custom-cafe-marker {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Glowing pulse ring beneath marker */
+@keyframes pulseGlow {
+  0% {
+    transform: scale(0.3);
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+.pulse-ring {
+  position: absolute;
+  bottom: 0px;
+  left: 50%;
+  margin-left: -16px;
+  width: 32px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent); /* Caramel gold */
+  box-shadow: 0 0 12px var(--accent);
+  animation: pulseGlow 2.5s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Marker Drop and Bounce Animation */
+@keyframes markerDropBounce {
+  0% {
+    transform: translateY(-160px) scaleY(1.2) scaleX(0.9);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(0) scaleY(0.85) scaleX(1.15);
+    opacity: 1;
+  }
+  75% {
+    transform: translateY(-12px) scaleY(1.05) scaleX(0.95);
+  }
+  90% {
+    transform: translateY(0) scaleY(0.95) scaleX(1.02);
+  }
+  100% {
+    transform: translateY(0) scaleY(1) scaleX(1);
+  }
+}
+
+.marker-drop-bounce {
+  transform-origin: bottom center;
+  animation: markerDropBounce 0.9s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+/* Subtle Marker Floating Animation (runs after drop bounce) */
+@keyframes markerFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.marker-floating {
+  transform-origin: bottom center;
+  animation: markerFloat 2.5s ease-in-out infinite;
+}
+
+/* Animated Route Line drawing */
+@keyframes drawRouteLine {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.route-line-animated {
+  stroke-dasharray: 2000;
+  stroke-dashoffset: 2000;
+  animation: drawRouteLine 2.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+/* Leaflet Custom Style Overrides */
+.leaflet-container {
+  background: var(--background) !important;
+  font-family: var(--font-outfit), sans-serif !important;
+}
+
+.leaflet-popup-content-wrapper {
+  background: var(--card-bg) !important;
+  color: var(--foreground) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 12px 24px -4px rgba(74, 44, 42, 0.12), 0 4px 12px -2px rgba(74, 44, 42, 0.06) !important;
+  font-family: var(--font-outfit), sans-serif !important;
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  width: 290px !important;
+}
+
+.leaflet-popup-tip {
+  background: var(--card-bg) !important;
+  border-left: 1px solid var(--border) !important;
+  border-bottom: 1px solid var(--border) !important;
+  box-shadow: none !important;
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+  color: var(--text-muted) !important;
+  top: 12px !important;
+  right: 12px !important;
+  font-size: 16px !important;
+  font-weight: bold;
+}
+
+.leaflet-container a.leaflet-popup-close-button:hover {
+  color: var(--primary) !important;
+  background: transparent !important;
+}
+
+/* Leaflet controls premium styling */
+.leaflet-bar {
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 4px 12px rgba(74, 44, 42, 0.06) !important;
+  border-radius: 10px !important;
+  overflow: hidden;
+}
+
+.leaflet-bar a {
+  background-color: var(--card-bg) !important;
+  color: var(--foreground) !important;
+  border-bottom: 1px solid var(--border) !important;
+  transition: all 0.2s ease;
+}
+
+.leaflet-bar a:hover {
+  background-color: var(--secondary) !important;
+  color: var(--accent) !important;
+}
+
+.leaflet-bar a:last-child {
+  border-bottom: none !important;
+}
+
+/* ── Premium Location Card Animations ── */
+
+/* Steam rising animation */
+@keyframes steamRise {
+  0% {
+    transform: translateY(0) scaleX(1) scaleY(1);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateY(-6px) scaleX(1.15) scaleY(0.95);
+    opacity: 0.3;
+  }
+  95% {
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(-14px) scaleX(1.3) scaleY(1.1);
+    opacity: 0;
+  }
+}
+
+.steam-line {
+  animation: steamRise 2s infinite ease-in-out;
+  transform-origin: bottom center;
+}
+
+.steam-delay-1 {
+  animation-delay: 0.4s;
+}
+
+.steam-delay-2 {
+  animation-delay: 0.8s;
+}
+
+/* Ripple pulse circles around pin */
+@keyframes ripplePulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+.ripple-pulse {
+  animation: ripplePulse 2.5s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+.ripple-delay-1 {
+  animation-delay: 0.8s;
+}
+
+/* Gentlest Pin Bounce */
+@keyframes pinBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.pin-bounce {
+  animation: pinBounce 2.5s ease-in-out infinite;
+}
+
+/* Floating SVG Coffee Beans */
+@keyframes particleFloatSlow {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  33% {
+    transform: translate(14px, -20px) rotate(20deg);
+  }
+  66% {
+    transform: translate(-12px, -10px) rotate(-15deg);
+  }
+}
+
+.particle-floating-1 {
+  animation: particleFloatSlow 12s ease-in-out infinite;
+}
+
+.particle-floating-2 {
+  animation: particleFloatSlow 9s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+.particle-floating-3 {
+  animation: particleFloatSlow 15s ease-in-out infinite;
+  animation-delay: 4s;
+}
+
+/* Speed up particles on hover */
+.group:hover .particle-floating-1 {
+  animation-duration: 4s;
+}
+
+.group:hover .particle-floating-2 {
+  animation-duration: 3s;
+}
+
+.group:hover .particle-floating-3 {
+  animation-duration: 5s;
+}
+

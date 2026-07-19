@@ -1,12 +1,16 @@
 import React from "react";
 import Link from "next/link";
 import { Coffee, Phone, Mail, MapPin, Clock } from "lucide-react";
+import FindUsSection from "@/components/FindUsSection";
 
 export const Footer: React.FC = () => {
   return (
     <footer className="bg-secondary text-foreground border-t border-borderColor pt-16 pb-8 transition-all">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+      {/* Premium Interactive Location Section */}
+      <FindUsSection />
+      
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           {/* Brand Info */}
           <div className="space-y-4">
             <Link href="/" className="flex items-center space-x-2 text-primary font-bold text-2xl">
@@ -88,26 +92,7 @@ export const Footer: React.FC = () => {
             </ul>
           </div>
 
-          {/* Map Location */}
-          <div className="flex flex-col">
-            <h3 className="font-serif text-lg font-bold text-primary mb-4">Find Us</h3>
-            <div className="w-full h-40 rounded-lg overflow-hidden border border-borderColor shadow-sm relative bg-background">
-              {/* Mock Google Map visual design */}
-              <div className="absolute inset-0 bg-neutral-200 flex flex-col items-center justify-center p-4 text-center">
-                <MapPin className="h-8 w-8 text-accent animate-bounce mb-2" />
-                <span className="font-semibold text-xs text-foreground">Cozy Beans Café Location</span>
-                <span className="text-[10px] text-textMuted">Click to open on Google Maps</span>
-              </div>
-              <a
-                href="https://maps.google.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="absolute inset-0 opacity-0 cursor-pointer"
-                title="Open Map"
-              ></a>
-            </div>
           </div>
-        </div>
 
         <hr className="border-borderColor my-8" />
 

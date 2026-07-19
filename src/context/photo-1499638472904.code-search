@@ -1,0 +1,9 @@
+# Query: photo-1499638472904
+# ContextLines: 1
+
+1 result - 1 file
+
+prisma\seed.ts:
+  190      price: 4.25,
+  191:     image:"https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=800&q=80",
+  192      rating: 4.5,

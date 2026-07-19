@@ -376,53 +376,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Interactive Contact & Location Map Section */}
-      <section className="py-32 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-stretch">
-          {/* Info Details */}
-          <div className="space-y-8 flex flex-col justify-between">
-            <div className="space-y-4">
-              <span className="text-xs font-extrabold text-accent uppercase tracking-widest bg-[#FFF8E7] px-3.5 py-1.5 rounded-full border border-borderColor">Connect</span>
-              <h2 className="font-serif text-4xl sm:text-5xl font-bold text-foreground mt-2 mb-4 leading-tight tracking-tight">
-                We'd Love to Hear From You
-              </h2>
-              <p className="text-sm text-[#7A635B] leading-relaxed font-light">
-                Have questions about our events, catering, or just want to tell us about your experience? Reach out to us through the form or stop by our cozy location!
-              </p>
-            </div>
-
-            {/* Simulated Map Visual Card */}
-            <div className="relative rounded-3xl border border-borderColor/40 overflow-hidden h-72 group shadow-xl hover:shadow-2xl transition-all duration-300">
-              <Image
-                src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=800"
-                alt="Simulated map background"
-                fill
-                sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-cover grayscale opacity-90 group-hover:scale-105 transition-transform duration-500"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-[#4A2C2A]/10 mix-blend-multiply" />
-              
-              {/* Floating Address Overlay */}
-              <div className="absolute bottom-5 left-5 right-5 p-5 rounded-2xl glass border border-borderColor/40 text-foreground space-y-1 shadow-lg">
-                <span className="text-[10px] font-extrabold text-[#4A2C2A] uppercase tracking-widest block">Find Us</span>
-                <span className="text-sm font-bold block">{settings.cafe_address || "AKC, Mogappair, Nerkundram, Chennai, Greater Chennai, Tamil Nadu 600107"}</span>
-                <span className="text-[10px] text-[#7A635B] block font-light">Tap maps icon on your mobile to navigate</span>
-              </div>
-
-              {/* Pin Indicator */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                <MapPin className="h-10 w-10 text-accent animate-bounce fill-amber-200 shadow-sm" />
-              </div>
-            </div>
-          </div>
-
-          {/* Interactive Form Component */}
-          <div className="bg-white border border-borderColor/40 p-8 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300">
-            <ContactForm />
-          </div>
-        </div>
-      </section>
 
       {/* Newsletter / Cozy Club Section */}
       <section className="py-32 mx-auto max-w-4xl px-4 animate-fade-in-up">
