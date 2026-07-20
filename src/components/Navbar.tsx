@@ -24,7 +24,9 @@ export const Navbar: React.FC = () => {
 
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
 
-  const navLinks = [
+  const isAdmin = user?.role === "ADMIN" || user?.role === "STAFF";
+
+  const allNavLinks = [
     { name: "Home", href: "/" },
     { name: "Menu", href: "/menu" },
     { name: "Table Booking", href: "/table-booking" },
@@ -32,6 +34,11 @@ export const Navbar: React.FC = () => {
     { name: "About", href: "/about" },
     { name: "Contact", href: "/contact" },
   ];
+
+  // Hide ordering-related links for admin/staff users
+  const navLinks = isAdmin
+    ? allNavLinks.filter((link) => !["Menu", "Table Booking", "Event Booking"].includes(link.name))
+    : allNavLinks;
 
   const handleLogout = async () => {
     await logout();
@@ -83,15 +90,17 @@ export const Navbar: React.FC = () => {
 
           {/* Actions */}
           <div className="hidden md:flex items-center space-x-6">
-            {/* Cart Icon */}
-            <Link href="/cart" className="relative p-2 text-textMuted hover:text-primary transition-colors">
-              <ShoppingCart className="h-6 w-6" />
-              {cartItemCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-white">
-                  {cartItemCount}
-                </span>
-              )}
-            </Link>
+            {/* Cart Icon - hidden for admin/staff */}
+            {!isAdmin && (
+              <Link href="/cart" className="relative p-2 text-textMuted hover:text-primary transition-colors">
+                <ShoppingCart className="h-6 w-6" />
+                {cartItemCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-white">
+                    {cartItemCount}
+                  </span>
+                )}
+              </Link>
+            )}
 
             {/* Auth Buttons / Profile Dropdown */}
             {user ? (
@@ -107,13 +116,15 @@ export const Navbar: React.FC = () => {
                   </Link>
                 )}
 
-                <Link
-                  href="/my-bookings"
-                  className="flex items-center space-x-1 text-sm font-medium text-textMuted hover:text-primary transition-colors"
-                >
-                  <CalendarCheck className="h-4 w-4" />
-                  <span>My Bookings</span>
-                </Link>
+                {!isAdmin && (
+                  <Link
+                    href="/my-bookings"
+                    className="flex items-center space-x-1 text-sm font-medium text-textMuted hover:text-primary transition-colors"
+                  >
+                    <CalendarCheck className="h-4 w-4" />
+                    <span>My Bookings</span>
+                  </Link>
+                )}
 
                 <Link
                   href="/profile"
@@ -151,14 +162,17 @@ export const Navbar: React.FC = () => {
 
           {/* Mobile menu button */}
           <div className="flex md:hidden items-center space-x-4">
-            <Link href="/cart" className="relative p-2 text-textMuted">
-              <ShoppingCart className="h-6 w-6" />
-              {cartItemCount > 0 && (
-                <span className="absolute top-0 right-0 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[9px] font-bold text-white">
-                  {cartItemCount}
-                </span>
-              )}
-            </Link>
+            {/* Cart - hidden for admin/staff */}
+            {!isAdmin && (
+              <Link href="/cart" className="relative p-2 text-textMuted">
+                <ShoppingCart className="h-6 w-6" />
+                {cartItemCount > 0 && (
+                  <span className="absolute top-0 right-0 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[9px] font-bold text-white">
+                    {cartItemCount}
+                  </span>
+                )}
+              </Link>
+            )}
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -207,14 +221,16 @@ export const Navbar: React.FC = () => {
                     <span>Admin Dashboard</span>
                   </Link>
                 )}
-                <Link
-                  href="/my-bookings"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center space-x-2 text-base font-medium text-textMuted px-2 py-1.5 rounded-md hover:bg-secondary"
-                >
-                  <CalendarCheck className="h-5 w-5" />
-                  <span>My Bookings</span>
-                </Link>
+                {!isAdmin && (
+                  <Link
+                    href="/my-bookings"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center space-x-2 text-base font-medium text-textMuted px-2 py-1.5 rounded-md hover:bg-secondary"
+                  >
+                    <CalendarCheck className="h-5 w-5" />
+                    <span>My Bookings</span>
+                  </Link>
+                )}
                 <Link
                   href="/profile"
                   onClick={() => setMobileMenuOpen(false)}

@@ -12,7 +12,7 @@ function LoginForm() {
   const { login, user, error, loading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get("redirect") || "/profile";
+  const redirect = searchParams.get("redirect") || "/menu";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,7 +21,7 @@ function LoginForm() {
   // If user is already logged in, redirect immediately
   useEffect(() => {
     if (user && !loading) {
-      if (user.role === "admin" || user.role === "ADMIN") {
+      if (user.role === "admin" || user.role === "ADMIN" || user.role === "STAFF") {
         router.push("/admin");
       } else {
         router.push(redirect);
@@ -37,12 +37,11 @@ function LoginForm() {
       setLocalLoading(true);
       const loggedInUser = await login(email, password);
       if (loggedInUser) {
-        if (loggedInUser.role === "admin" || loggedInUser.role === "ADMIN") {
-          router.push("/admin");
+        if (loggedInUser.role === "admin" || loggedInUser.role === "ADMIN" || loggedInUser.role === "STAFF") {
+          window.location.href = "/admin"; // Use hard navigation to avoid any delay or conflict
         } else {
-          router.push(redirect);
+          window.location.href = redirect;
         }
-        router.refresh();
       }
     } catch (err) {
       console.error(err);

@@ -270,14 +270,14 @@ export default function FindUsSection() {
               <div className="absolute top-[20%] left-[15%] text-accent/40 particle-floating-1">
                 <svg viewBox="0 0 100 100" fill="currentColor" className="w-5 h-5">
                   <ellipse cx="50" cy="50" rx="35" ry="20" transform="rotate(-30, 50, 50)" />
-                  <path d="M20,62 Q50,45 80,38" stroke="#FFF8E7" stroke-width="6" fill="none" stroke-linecap="round" />
+                  <path d="M20,62 Q50,45 80,38" stroke="#FFF8E7" strokeWidth="6" fill="none" strokeLinecap="round" />
                 </svg>
               </div>
               {/* Particle 2 */}
               <div className="absolute bottom-[30%] left-[80%] text-accent/30 particle-floating-2">
                 <svg viewBox="0 0 100 100" fill="currentColor" className="w-4.5 h-4.5">
                   <ellipse cx="50" cy="50" rx="35" ry="20" transform="rotate(45, 50, 50)" />
-                  <path d="M22,35 Q50,55 78,65" stroke="#FFF8E7" stroke-width="6" fill="none" stroke-linecap="round" />
+                  <path d="M22,35 Q50,55 78,65" stroke="#FFF8E7" strokeWidth="6" fill="none" strokeLinecap="round" />
                 </svg>
               </div>
               {/* Particle 3 */}

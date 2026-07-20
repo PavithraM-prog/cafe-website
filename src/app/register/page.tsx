@@ -36,7 +36,7 @@ function RegisterForm() {
       if (isSuccess) {
         setSuccess(true);
         setTimeout(() => {
-          router.push(`/login?redirect=${redirect === "/login" ? "/profile" : redirect}`);
+          router.push(`/login?redirect=${redirect === "/login" ? "/menu" : redirect}`);
         }, 2000);
       }
     } catch (err) {
@@ -152,7 +152,7 @@ function RegisterForm() {
       {!success && (
         <div className="text-center text-xs text-textMuted">
           Already have an account?{" "}
-          <Link href={`/login?redirect=${redirect === "/login" ? "/profile" : redirect}`} className="font-bold text-primary hover:underline">
+          <Link href={`/login?redirect=${redirect === "/login" ? "/menu" : redirect}`} className="font-bold text-primary hover:underline">
             Sign in here
           </Link>
         </div>

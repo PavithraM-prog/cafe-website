@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 import { ProductCard } from "@/components/ProductCard";
 import { NewsletterForm } from "@/components/NewsletterForm";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 interface HomeClientProps {
   settings: {
@@ -37,6 +39,16 @@ interface HomeClientProps {
 export default function HomeClient({ settings, products, reviews }: HomeClientProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   
+  // Auth and redirect for admin
+  const { user } = useAuth();
+  const router = useRouter();
+  
+  React.useEffect(() => {
+    if (user && (user.role === "ADMIN" || user.role === "admin" || user.role === "STAFF")) {
+      router.push("/admin");
+    }
+  }, [user, router]);
+
   // Parallax background scroll effect
   const { scrollY } = useScroll();
   const yBg = useTransform(scrollY, [0, 800], ["0%", "25%"]);
