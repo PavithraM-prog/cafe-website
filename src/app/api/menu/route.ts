@@ -72,7 +72,18 @@ export async function POST(request: Request) {
 
     const pieces = availablePieces !== undefined ? parseInt(availablePieces) : 10;
     const isAvailable = availability !== undefined ? availability : (pieces > 0);
-
+    console.log("REQUEST DATA:");
+    console.log({
+      name,
+      description,
+      price,
+      image,
+      rating,
+      availability,
+      isVeg,
+      categoryId,
+      availablePieces,
+    });
     const newProduct = await db.menuItem.create({
       data: {
         name,
@@ -94,7 +105,19 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ message: "Product created successfully", product: newProduct }, { status: 201 });
   } catch (error) {
+    console.log("========== PRODUCT CREATE ERROR ==========");
+    console.error(error);
+    console.log("=========================================");
+
     logger.error("Error creating product", error);
-    return NextResponse.json({ error: "Server error during product creation" }, { status: 500 });
+
+    return NextResponse.json(
+      {
+        error: "Server error during product creation",
+      },
+      {
+        status: 500,
+      }
+    );
   }
 }
