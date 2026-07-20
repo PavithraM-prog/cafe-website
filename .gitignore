@@ -41,6 +41,7 @@ next-env.d.ts
 
 # debug and logs
 *.log
+/logs/
 
 # build/distribution
 /dist
